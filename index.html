@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Digita TEA">
+    <title>Digita TEA - Modo Aprender</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="h-screen w-full flex flex-col bg-blue-50 relative">
+
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-[60]"></canvas>
+
+    <div id="screenSetup" class="absolute inset-0 z-[100] bg-white flex flex-col items-center justify-center p-6 animate__animated animate__fadeIn">
+        <h1 class="text-5xl font-bold text-blue-500 mb-2">Digita TEA</h1>
+        <p class="text-gray-400 mb-6 text-xl">Configurações do Jogo</p>
+
+        <div class="bg-blue-50 w-full max-w-sm rounded-3xl p-6 border-4 border-blue-100 shadow-sm">
+
+            <div class="flex items-center justify-between mb-6">
+                <span class="text-xl font-bold text-gray-600">💡 Dicas Visuais</span>
+                <div class="relative inline-block w-16 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggle" id="toggleHints" class="toggle-checkbox absolute block w-8 h-8 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-500 ease-in-out border-gray-300 left-0"/>
+                    <label for="toggleHints" class="toggle-label block overflow-hidden h-8 rounded-full bg-gray-300 cursor-pointer"></label>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mb-6 border-t border-blue-200 pt-4">
+                <div>
+                    <span class="text-xl font-bold text-gray-600">🎓 Modo Aprender</span>
+                    <span class="block text-xs text-gray-400 mt-1">Joga com dicas, depois sem.</span>
+                </div>
+                <div class="relative inline-block w-16 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggleProgressive" id="toggleProgressive" class="toggle-checkbox absolute block w-8 h-8 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-500 ease-in-out border-gray-300 left-0"/>
+                    <label for="toggleProgressive" class="toggle-label block overflow-hidden h-8 rounded-full bg-gray-300 cursor-pointer"></label>
+                </div>
+            </div>
+
+            <div class="mb-2 border-t border-blue-200 pt-4">
+                <span class="text-xl font-bold text-gray-600 block mb-2">🎯 Progressão</span>
+                <select id="difficultySelect" class="w-full p-3 text-lg rounded-xl border-4 border-blue-200 text-gray-600 font-bold bg-white focus:outline-none focus:border-blue-400 appearance-none text-center">
+                    <option value="0">Muito Fácil (Sempre Passa)</option>
+                    <option value="50">Fácil (Acima de 50%)</option>
+                    <option value="70" selected>Médio (Acima de 70%)</option>
+                    <option value="80">Difícil (Acima de 80%)</option>
+                </select>
+            </div>
+
+            <p class="text-xs text-gray-400 text-center mt-4">Configure a dificuldade para avançar de fase.</p>
+        </div>
+
+        <button onclick="finishSetup()" class="mt-8 w-full max-w-sm bg-green-500 hover:bg-green-400 text-white text-4xl font-bold py-6 rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:shadow-none active:translate-y-2 transition-all uppercase tracking-widest" disabled>
+            Carregando...
+        </button>
+    </div>
+
+
+    <div id="screenPresentation" class="hidden absolute inset-0 z-[50] bg-white flex flex-col items-center p-4">
+        <div class="w-full h-16 flex items-center justify-center border-b border-gray-100 shrink-0">
+            <span id="presentationTitle" class="text-gray-400 font-bold uppercase tracking-widest">APRENDENDO</span>
+        </div>
+        <div class="flex-1 flex flex-col items-center justify-center w-full max-w-3xl text-center overflow-y-auto" id="presentationContent"></div>
+        <div class="w-full shrink-0 py-6 flex justify-center bg-white border-t border-gray-100">
+            <button onclick="advanceLinearFlow()" class="w-full max-w-md bg-green-500 text-white text-3xl font-bold py-5 px-8 rounded-2xl shadow-[0_6px_0_rgb(21,128,61)] active:shadow-none active:translate-y-2 transition-all uppercase tracking-widest animate__animated animate__pulse animate__infinite">
+                PRÓXIMO ➔
+            </button>
+        </div>
+    </div>
+
+
+    <div id="screenGame" class="hidden flex-col w-full h-full z-[10]">
+        <div class="w-full h-14 bg-blue-50 border-b border-blue-100 flex items-center justify-between px-4 shrink-0 shadow-sm z-30">
+            <div class="text-sm text-blue-400 font-bold uppercase tracking-wider" id="gameLevelDisplay">Nível 0</div>
+            <div class="flex gap-3">
+                <div class="flex items-center gap-2 bg-white px-3 py-1 rounded-full border border-blue-200 shadow-sm">
+                    <span class="text-lg">⭐</span><span id="scoreDisplay" class="text-blue-600 font-bold">0</span>
+                </div>
+                <div class="flex items-center gap-2 bg-white px-3 py-1 rounded-full border border-green-200 shadow-sm">
+                    <span class="text-lg">🎯</span><span id="accuracyDisplay" class="text-green-600 font-bold">100%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full h-2 bg-gray-200 shrink-0">
+            <div id="progressBar" class="h-full bg-green-500 transition-all duration-500" style="width: 0%"></div>
+        </div>
+
+        <div class="flex-1 flex flex-col items-center justify-center p-2 relative overflow-hidden bg-white/50 w-full">
+
+            <div id="gameInstruction" class="text-xl font-bold text-blue-400 mt-2 mb-2 text-center shrink-0">Escreva:</div>
+
+            <div class="flex-1 w-full flex items-center justify-center min-h-0 mb-4 px-4">
+                <div class="image-monitor w-full h-full max-w-2xl bg-white border-4 border-blue-400 rounded-3xl relative cursor-pointer hover:scale-[1.01] transition-transform shadow-lg flex items-center justify-center" onclick="playCurrentAudio()">
+                    <div id="gameImageContainer" class="w-full h-full flex items-center justify-center p-4"></div>
+                    <div class="absolute bottom-2 right-2 bg-blue-100 p-2 rounded-full opacity-60">🔊</div>
+                </div>
+            </div>
+
+            <div id="inputContainer" class="flex flex-wrap justify-center gap-2 mb-4 shrink-0"></div>
+
+            <div id="successOverlay" class="hidden absolute inset-0 z-40 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center animate__animated animate__fadeIn">
+                <div id="feedbackMessage" class="text-5xl md:text-6xl font-black text-green-500 mb-8 drop-shadow-sm animate__animated animate__rubberBand">MUITO BEM! 🎉</div>
+                <button onclick="nextGameItem()" class="bg-green-500 hover:bg-green-400 text-white text-3xl font-bold py-6 px-12 rounded-3xl shadow-[0_10px_0_rgb(21,128,61)] active:shadow-none active:translate-y-2 transition-all uppercase tracking-widest animate__animated animate__pulse animate__infinite">
+                    PRÓXIMO ➔
+                </button>
+            </div>
+        </div>
+
+        <footer id="keyboardArea" class="shrink-0 bg-white border-t border-gray-200 pb-4 pt-2 px-1 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] z-20">
+            <div id="keyboardContainer" class="max-w-4xl mx-auto flex flex-col gap-2"></div>
+        </footer>
+    </div>
+
+    <audio id="sndCorrect" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
+    <audio id="sndWordWin" src="https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg"></audio>
+    <audio id="sndLevelWin" src="audios/fimfase.mp3"></audio>
+    <audio id="sndLose" src="https://actions.google.com/sounds/v1/cartoon/cartoon_whistle.ogg"></audio>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
