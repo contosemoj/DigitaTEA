@@ -1,0 +1,26 @@
+{
+    "levels": {
+        "0": { "letter": "Vogais", "unlock": ["A","E","I","O","U","Á","É","Í","Ó","Ú","Â","Ê","Ô","Ã","Õ"], "syllables": ["A","E","I","O","U"] },
+        "1": { "letter": "B", "unlock": ["B"], "syllables": ["BA","BE","BI","BO","BU"] },
+        "2": { "letter": "T", "unlock": ["T"], "syllables": ["TA","TE","TI","TO","TU"] },
+        "3": { "letter": "P", "unlock": ["P"], "syllables": ["PA","PE","PI","PO","PU"] },
+        "4": { "letter": "D", "unlock": ["D"], "syllables": ["DA","DE","DI","DO","DU"] },
+        "5": { "letter": "F", "unlock": ["F"], "syllables": ["FA","FE","FI","FO","FU"] },
+        "6": { "letter": "V", "unlock": ["V"], "syllables": ["VA","VE","VI","VO","VU"] },
+        "7": { "letter": "M", "unlock": ["M"], "syllables": ["MA","ME","MI","MO","MU"] },
+        "8": { "letter": "N", "unlock": ["N"], "syllables": ["NA","NE","NI","NO","NU"] },
+        "9": { "letter": "L", "unlock": ["L"], "syllables": ["LA","LE","LI","LO","LU"] }
+    },
+    "database": {
+        "0": { "items": [{ "word": "OI", "emoji": "👋" }, { "word": "AI", "emoji": "🤕🗣️" }, { "word": "EU", "image":"eu.png", "emoji": "🙋" }, { "word": "AU", "emoji": "🐶🔊" }] },
+        "1": { "items": [{ "word": "ABA", "image": "aba.png", "emoji": "🖼️" }, { "word": "BAÚ", "image": "bau.png", "emoji": "📦" }, { "word": "BABÁ", "image": "baba.png", "emoji": "👶" }, { "word": "BOI", "emoji": "🐂" }, { "word": "BEBÊ", "emoji": "👶" }, { "word": "OBA", "emoji": "🙌" }, { "word": "BÉ", "emoji": "🐐🔊" }] },
+        "2": { "items": [{ "word": "TATU", "image": "tatu.png", "emoji": "🦔" }, { "word": "TUBA", "image": "tuba.png", "emoji": "🎺" }, { "word": "TUTU", "image": "tutu.png", "emoji": "🩰" }, { "word": "BOTE", "image": "bote.png", "emoji": "🛶" }, { "word": "TÁBUA", "image": "tabua.png", "emoji": "🪵" }, { "word": "BOTA", "emoji": "👢" }, { "word": "OITO", "emoji": "8️⃣" }, { "word": "TEIA", "emoji": "🕸️" }] },
+        "3": { "items": [{ "word": "PATA", "image": "pata.png", "emoji": "🐾" }, { "word": "APITO", "image": "apito.png", "emoji": "🎺" }, { "word": "PIU", "emoji": "🐤🔊" }, { "word": "PIPA", "emoji": "🪁" }, { "word": "PATO", "emoji": "🦆" }, { "word": "PÉ", "emoji": "🦶" }] },
+        "4": { "items": [{ "word": "DADO", "emoji": "🎲" }, { "word": "DEDO", "emoji": "☝️" }, { "word": "DIA", "emoji": "📅☀️" }, { "word": "BODE", "emoji": "🐐" }] },
+        "5": { "items": [{ "word": "FADA", "emoji": "🧚" }, { "word": "BIFE", "emoji": "🔪🥩" }, { "word": "FITA", "emoji": "🎗️" }, { "word": "FOTO", "emoji": "📷" }, { "word": "FIO", "emoji": "🧵" }] },
+        "6": { "items": [{ "word": "VOVÓ", "emoji": "👵" }, { "word": "UVA", "emoji": "🍇" }, { "word": "AVE", "emoji": "🦅" }, { "word": "OVO", "emoji": "🥚" }, { "word": "VIVA", "emoji": "🎉" }] },
+        "7": { "items": [ { "word": "MIAU", "emoji": "🐈🔊" }, { "word": "MEIA", "emoji": "🧦" }, { "word": "MAPA", "emoji": "🗺️" }, { "word": "MU", "emoji": "🐮🔊" } ] },
+        "8": { "items": [{ "word": "MENINA", "emoji": "👧" }, { "word": "NOVE", "emoji": "9️⃣" }, { "word": "BONÉ", "emoji": "🧢" }, { "word": "BANANA", "emoji": "🍌" }, { "word": "MENINO", "emoji": "👦" }] },
+        "9": { "items": [{ "word": "LUA", "emoji": "🌙" }, { "word": "LOBO", "emoji": "🐺" }, { "word": "BOLA", "emoji": "⚽" }, { "word": "BALA", "emoji": "🍬" }, { "word": "LULA", "emoji": "🦑" }] }
+    }
+}
