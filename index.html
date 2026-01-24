@@ -1317,11 +1317,14 @@
                 const item = document.createElement('div');
                 item.className = 'flex items-center justify-between bg-blue-50 p-2 rounded-xl border border-blue-100 group hover:border-blue-200 transition-colors';
                 item.innerHTML = `
-                    <div class="flex items-center gap-2 overflow-hidden">
-                        <div class="w-8 h-6 bg-gray-200 rounded flex items-center justify-center shrink-0">
-                            <span class="text-[10px]">📺</span>
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-16 h-10 bg-gray-200 rounded-lg overflow-hidden shrink-0 shadow-sm border border-blue-100">
+                            <img src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" class="w-full h-full object-cover">
                         </div>
-                        <span class="text-xs font-mono text-blue-700 truncate">${vid}</span>
+                        <div class="flex flex-col overflow-hidden">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">ID do Vídeo</span>
+                            <span class="text-xs font-mono text-blue-700 truncate">${vid}</span>
+                        </div>
                     </div>
                     <button onclick="removeRewardVideo(${index})" class="text-gray-400 hover:text-red-500 font-bold px-2 transition-colors">✕</button>
                 `;
