@@ -278,6 +278,27 @@
                         </select>
                     </div>
                 </div>
+
+                <!-- Configuração de Vídeos de Prêmio -->
+                <div class="mt-6 border-t-2 border-blue-50 pt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-bold text-gray-500">Vídeos de Prêmio (YouTube):</span>
+                        <span id="videoCountLabel" class="text-xs font-bold text-blue-400">0/10</span>
+                    </div>
+                    <div id="rewardVideosList" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                        <!-- Lista de vídeos injetada aqui -->
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="newVideoInput" placeholder="Cole o link ou ID do YouTube aqui..."
+                            class="flex-1 p-2 rounded-xl border-2 border-blue-100 text-sm focus:border-blue-300 outline-none transition-colors">
+                        <button onclick="addRewardVideo()"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors shadow-sm">
+                            Adicionar
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-2">Dica: Um vídeo será escolhido aleatoriamente ao completar
+                        uma fase.</p>
+                </div>
             </div>
 
             <!-- Grid de Fases -->
@@ -1269,12 +1290,91 @@
         function fireConfetti() { for (let i = 0; i < 100; i++) particles.push({ x: window.innerWidth / 2, y: window.innerHeight / 2, vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15, size: Math.random() * 8 + 4, color: `hsl(${Math.random() * 360},100%,50%)`, life: 100 }); requestAnimationFrame(animateConfetti); }
         function animateConfetti() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles = particles.filter(p => p.life > 0); particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); }); if (particles.length > 0) requestAnimationFrame(animateConfetti); }
 
+        // --- SISTEMA DE PRÊMIOS (VÍDEOS) ---
+        function extractYouTubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : url;
+        }
+
+        function getRewardVideos() {
+            const videos = JSON.parse(localStorage.getItem('digita_reward_videos') || '["ZHKRxjwKnXM"]');
+            return videos;
+        }
+
+        function renderRewardVideosConfig() {
+            const container = document.getElementById('rewardVideosList');
+            const videos = getRewardVideos();
+            container.innerHTML = '';
+
+            document.getElementById('videoCountLabel').textContent = `${videos.length}/10`;
+
+            if (videos.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center text-gray-400 text-xs py-2 italic">Nenhum vídeo adicionado. O padrão será usado.</div>';
+            }
+
+            videos.forEach((vid, index) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between bg-blue-50 p-2 rounded-xl border border-blue-100 group hover:border-blue-200 transition-colors';
+                item.innerHTML = `
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <div class="w-8 h-6 bg-gray-200 rounded flex items-center justify-center shrink-0">
+                            <span class="text-[10px]">📺</span>
+                        </div>
+                        <span class="text-xs font-mono text-blue-700 truncate">${vid}</span>
+                    </div>
+                    <button onclick="removeRewardVideo(${index})" class="text-gray-400 hover:text-red-500 font-bold px-2 transition-colors">✕</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function addRewardVideo() {
+            const input = document.getElementById('newVideoInput');
+            let rawValue = input.value.trim();
+            if (!rawValue) return;
+
+            const videoId = extractYouTubeId(rawValue);
+            // Validar se o ID tem 11 caracteres (padrão YouTube)
+            if (videoId.length !== 11) {
+                alert("ID do vídeo inválido. Certifique-se de copiar o link correto do YouTube.");
+                return;
+            }
+
+            let videos = getRewardVideos();
+
+            if (videos.length >= 10) {
+                alert("Você já adicionou o limite de 10 vídeos.");
+                return;
+            }
+
+            if (!videos.includes(videoId)) {
+                videos.push(videoId);
+                localStorage.setItem('digita_reward_videos', JSON.stringify(videos));
+                renderRewardVideosConfig();
+            } else {
+                alert("Este vídeo já foi adicionado.");
+            }
+            input.value = '';
+        }
+
+        function removeRewardVideo(index) {
+            let videos = getRewardVideos();
+            videos.splice(index, 1);
+            localStorage.setItem('digita_reward_videos', JSON.stringify(videos));
+            renderRewardVideosConfig();
+        }
+
         function showVideoReward() {
-            // ID do vídeo: ZHKRxjwKnXM (Mundo Bita - Vento Ventania)
-            const videoId = "ZHKRxjwKnXM";
+            let videos = getRewardVideos();
+            if (videos.length === 0) videos = ["ZHKRxjwKnXM"];
+
+            const randomIndex = Math.floor(Math.random() * videos.length);
+            const videoId = videos[randomIndex];
+
             const iframe = document.getElementById('videoFrame');
             // autoplay=1 para tocar ao abrir
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
             showScreen('VIDEO');
         }
 
@@ -1289,6 +1389,9 @@
         window.onload = function () {
             console.log("Window loaded. Checking gameData...");
             const grid = document.getElementById('levelsGrid');
+
+            // Renderizar config de vídeos
+            renderRewardVideosConfig();
 
             if (window.gameData) {
                 console.log("gameData found.");
