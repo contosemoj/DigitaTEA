@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Digita TEA">
+    <title>Digita TEA - Seletor de Fases</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="icon" type="image/png" href="game_icon.png">
+
+    <style>
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #f0f9ff;
+            overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        /* --- TOGGLE SWITCH --- */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #22c55e;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #22c55e;
+        }
+
+        /* --- ESTILOS DO JOGO --- */
+        .letter-box {
+            transition: all 0.2s;
+            text-transform: uppercase;
+            cursor: default;
+        }
+
+        .correct {
+            background-color: #86efac !important;
+            border-color: #22c55e !important;
+            color: #14532d;
+            transform: scale(1.05);
+        }
+
+        .incorrect {
+            background-color: #fca5a5 !important;
+            border-color: #ef4444 !important;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        .active-box {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+            transform: scale(1.1);
+            background-color: #fff;
+            z-index: 10;
+        }
+
+        .filled-static {
+            background-color: #e5e7eb;
+            color: #9ca3af;
+            border-color: #d1d5db;
+        }
+
+        /* Teclado e Botões */
+        .key {
+            flex: 1;
+            max-width: 90px;
+            height: 60px;
+            border-radius: 12px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            color: #9ca3af;
+            border-bottom: 4px solid #d1d5db;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            touch-action: manipulation;
+        }
+
+        .key:active,
+        .key.active-press {
+            transform: translateY(4px);
+            border-bottom: 0 !important;
+            background-color: #e5e7eb;
+        }
+
+        .key-learned {
+            background-color: #eff6ff;
+            color: #1e40af;
+            border-bottom: 4px solid #3b82f6;
+        }
+
+        /* Dicas */
+        .hint-active {
+            background-color: #fef08a !important;
+            border-color: #eab308 !important;
+            transform: scale(1.05);
+            color: #854d0e !important;
+            opacity: 1 !important;
+        }
+
+        .hint-inactive {
+            opacity: 0.3 !important;
+            filter: grayscale(100%);
+            pointer-events: none;
+        }
+
+        /* Níveis */
+        .level-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .level-card:active {
+            transform: scale(0.95);
+        }
+
+        .level-locked {
+            filter: grayscale(100%);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        /* Scroll customizado para o grid de fases */
+        .level-grid-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .level-grid-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .level-grid-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .level-grid-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* --- CHAT DIALOGUE --- */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .chat-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .chat-row-left {
+            justify-content: flex-start;
+        }
+
+        .chat-row-right {
+            justify-content: flex-end;
+        }
+
+        .chat-bubble {
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            position: relative;
+            animation: bounceIn 0.5s;
+        }
+
+        .chat-bubble-left {
+            background-color: #fff;
+            border: 3px solid #bfdbfe;
+            color: #1e40af;
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .chat-bubble-right {
+            background-color: #dcfce7;
+            border: 3px solid #86efac;
+            color: #166534;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .chat-avatar {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background-color: #fff;
+            border: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+            z-index: 1;
+        }
+    </style>
+</head>
+
+<body class="h-screen w-full flex flex-col bg-blue-50 relative">
+
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-[60]"></canvas>
+
+    <!-- TELA DE SETUP / SELEÇÃO DE FASES -->
+    <div id="screenSetup" class="absolute inset-0 z-[100] bg-white flex flex-col animate__animated animate__fadeIn">
+        <!-- Cabeçalho -->
+        <div class="bg-blue-500 p-4 shadow-md z-10 shrink-0 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white">Digita TEA 🚀</h1>
+                <p class="text-blue-100 text-sm">Selecione uma fase</p>
+            </div>
+            <button onclick="resetProgress()"
+                class="text-xs text-blue-200 bg-blue-600 px-2 py-1 rounded hover:bg-blue-700">
+                Limpar Dados
+            </button>
+        </div>
+
+        <!-- Conteúdo Principal com Scroll -->
+        <div class="flex-1 overflow-y-auto level-grid-scroll p-4 pb-24 bg-blue-50">
+
+            <!-- Painel de Configurações -->
+            <div class="bg-white rounded-2xl p-4 mb-6 border-2 border-blue-100 shadow-sm mx-auto max-w-2xl">
+                <div class="flex flex-wrap gap-4 justify-center md:justify-between items-center">
+
+                    <!-- Dificuldade -->
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-gray-500 mb-1">Dificuldade para passar:</span>
+                        <select id="difficultySelect"
+                            class="p-2 rounded-lg border-2 border-blue-200 text-gray-600 font-bold bg-blue-50 text-sm">
+                            <option value="0">Muito Fácil (Passa Sempre)</option>
+                            <option value="50">Fácil (> 50%)</option>
+                            <option value="70" selected>Médio (> 70%)</option>
+                            <option value="80">Difícil (> 80%)</option>
+                        </select>
+                    </div>
+
+                    <!-- Modo de Ajuda -->
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-gray-500 mb-1">Modo de Ajuda:</span>
+                        <select id="helpModeSelect"
+                            class="p-2 rounded-lg border-2 border-green-200 text-green-700 font-bold bg-green-50 text-sm">
+                            <option value="NORMAL">Normal (Sem Dicas)</option>
+                            <option value="HINTS">Dicas Visuais</option>
+                            <option value="LEARN" selected>Modo Aprender (Progressivo)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid de Fases -->
+            <div id="levelsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <!-- As fases serão geradas aqui via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA DE APRESENTAÇÃO / TRANSIÇÃO -->
+    <div id="screenPresentation" class="hidden absolute inset-0 z-[50] bg-white flex flex-col items-center p-4">
+        <div class="w-full h-16 flex items-center justify-between border-b border-gray-100 shrink-0 px-4">
+            <button onclick="goToMenu()"
+                class="text-gray-400 hover:text-gray-600 font-bold text-sm bg-gray-100 px-3 py-1 rounded-lg">
+                ⬅ MENU
+            </button>
+            <span id="presentationTitle" class="text-gray-400 font-bold uppercase tracking-widest">APRENDENDO</span>
+            <div class="w-16"></div> <!-- Espaçador para centralizar título -->
+        </div>
+        <div class="flex-1 flex flex-col items-center justify-center w-full max-w-3xl text-center overflow-y-auto"
+            id="presentationContent"></div>
+        <div class="w-full shrink-0 py-6 flex flex-col gap-3 items-center bg-white border-t border-gray-100">
+            <button id="btnPresentationNext" onclick="advanceLinearFlow()"
+                class="w-full max-w-md bg-green-500 text-white text-3xl font-bold py-5 px-8 rounded-2xl shadow-[0_6px_0_rgb(21,128,61)] active:shadow-none active:translate-y-2 transition-all uppercase tracking-widest animate__animated animate__pulse animate__infinite">
+                PRÓXIMO ➔
+            </button>
+        </div>
+    </div>
+
+    <!-- TELA DO JOGO -->
+    <div id="screenGame" class="hidden flex-col w-full h-full z-[10]">
+        <div
+            class="w-full h-14 bg-blue-50 border-b border-blue-100 flex items-center justify-between px-4 shrink-0 shadow-sm z-30">
+            <button onclick="goToMenu()"
+                class="text-blue-400 font-bold hover:bg-blue-100 p-2 rounded-lg transition-colors">
+                ⬅ Voltar
+            </button>
+            <div class="text-sm text-blue-400 font-bold uppercase tracking-wider hidden md:block" id="gameLevelDisplay">
+                Nível 0</div>
+            <div class="flex gap-3">
+                <div class="flex items-center gap-2 bg-white px-3 py-1 rounded-full border border-blue-200 shadow-sm">
+                    <span class="text-lg">⭐</span><span id="scoreDisplay" class="text-blue-600 font-bold">0</span>
+                </div>
+                <div class="flex items-center gap-2 bg-white px-3 py-1 rounded-full border border-green-200 shadow-sm">
+                    <span class="text-lg">🎯</span><span id="accuracyDisplay"
+                        class="text-green-600 font-bold">100%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full h-2 bg-gray-200 shrink-0">
+            <div id="progressBar" class="h-full bg-green-500 transition-all duration-500" style="width: 0%"></div>
+        </div>
+
+        <div class="flex-1 flex flex-col items-center justify-center p-2 relative overflow-hidden bg-white/50 w-full">
+
+            <div id="gameInstruction" class="text-xl font-bold text-blue-400 mt-2 mb-2 text-center shrink-0">Escreva:
+            </div>
+
+            <!-- MODO QUIZ (NOVO) -->
+            <div id="quizContainer" class="hidden w-full flex-col items-center justify-center flex-1">
+                <div class="mb-6 bg-white p-4 rounded-3xl border-4 border-purple-200 shadow-sm">
+                    <div id="quizImage" class="h-48 flex items-center justify-center text-8xl"></div>
+                </div>
+                <div id="quizOptions" class="grid grid-cols-2 gap-4 w-full max-w-2xl px-4">
+                    <!-- Options injected here -->
+                </div>
+            </div>
+
+            <!-- MODO DIALOGUE (NOVO) -->
+            <div id="chatGameContainer"
+                class="hidden w-full flex-col flex-1 overflow-y-auto p-4 mb-4 gap-4 max-w-2xl mx-auto custom-scroll">
+                <!-- Chat messages injected here -->
+            </div>
+
+            <!-- MODO NORMAL (PADRÃO) -->
+            <div id="standardGameContainer" class="w-full flex-1 flex flex-col items-center justify-center min-h-0">
+                <div class="flex-1 w-full flex items-center justify-center min-h-0 mb-4 px-4">
+                    <div class="image-monitor w-full flex-1 max-w-lg max-h-64 bg-white border-4 border-blue-400 rounded-3xl relative cursor-pointer hover:scale-[1.01] transition-transform shadow-lg flex items-center justify-center"
+                        onclick="playCurrentAudio()">
+                        <div id="gameImageContainer" class="w-full h-full flex items-center justify-center p-4"></div>
+                        <div class="absolute bottom-2 right-2 bg-blue-100 p-2 rounded-full opacity-60">🔊</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ÁREA DE INPUT COMPARTILHADA (SÍLABAS E DIÁLOGO) -->
+            <div id="inputContainer" class="flex flex-wrap justify-center gap-2 mb-4 shrink-0 transition-all"></div>
+
+            <div id="successOverlay"
+                class="hidden absolute inset-0 z-40 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center animate__animated animate__fadeIn">
+                <div id="feedbackMessage"
+                    class="text-5xl md:text-6xl font-black text-green-500 mb-8 drop-shadow-sm animate__animated animate__rubberBand">
+                    MUITO BEM! 🎉</div>
+                <button onclick="nextGameItem()"
+                    class="bg-green-500 hover:bg-green-400 text-white text-3xl font-bold py-6 px-12 rounded-3xl shadow-[0_10px_0_rgb(21,128,61)] active:shadow-none active:translate-y-2 transition-all uppercase tracking-widest animate__animated animate__pulse animate__infinite">
+                    PRÓXIMO ➔
+                </button>
+            </div>
+        </div>
+
+        <footer id="keyboardArea"
+            class="shrink-0 bg-white border-t border-gray-200 pb-4 pt-2 px-1 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] z-20">
+            <div id="keyboardContainer" class="max-w-4xl mx-auto flex flex-col gap-2"></div>
+        </footer>
+    </div>
+
+    <!-- TELA DE VÍDEO (PRÊMIO) -->
+    <div id="screenVideo"
+        class="hidden absolute inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center p-4 animate__animated animate__fadeIn">
+        <div
+            class="w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl relative border-4 border-white/20">
+            <iframe id="videoFrame" class="w-full h-full" src="" title="YouTube video player" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+        </div>
+        <button onclick="closeVideoReward()"
+            class="mt-8 bg-red-500 hover:bg-red-600 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transition-transform active:scale-95 hover:scale-105 uppercase tracking-widest flex items-center gap-3 animate__animated animate__bounceIn delay-1000">
+            <span>❌</span> FECHAR E CONTINUAR
+        </button>
+    </div>
+
+    <!-- Áudios -->
+    <audio id="sndCorrect" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
+    <audio id="sndWordWin" src="https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg"></audio>
+    <audio id="sndLevelWin" src="audios/fimfase.mp3"></audio>
+    <audio id="sndLose" src="https://actions.google.com/sounds/v1/cartoon/cartoon_whistle.ogg"></audio>
+
+    <script>
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        const pathAudio = "audios/";
+        const pathImg = "img/";
+
+        // --- DADOS DAS FASES ---
+        let levels = {};
+        let database = {};
+
+        // --- VARIÁVEIS DE ESTADO ---
+        let gameMode = 'SYLLABLES'; // 'SYLLABLES', 'DIALOGUE', 'QUIZ'
+        let configHints = false;
+        let isProgressiveMode = false;
+        let isSecondPass = false;
+        let difficultyThreshold = 70;
+        let currentLevel = 0;
+        let score = 0;
+        let flowState = 'SETUP';
+        let gameQueue = [];
+        let currentItem = null;
+        let currentBoxIndex = 0;
+        let presentationQueue = [];
+        let presentationIndex = 0;
+        let targetIndices = [];
+        let learnedLetters = new Set();
+        let phaseCorrectAttempts = 0;
+        let phaseTotalAttempts = 0;
+
+        // --- SISTEMA DE PERSISTÊNCIA (SALVAR) ---
+        function getSavedProgress() {
+            const unlocked = localStorage.getItem('digita_max_level') || 0;
+            const records = JSON.parse(localStorage.getItem('digita_records') || '{}');
+            return { maxLevel: parseInt(unlocked), records: records };
+        }
+
+        function saveProgress(level, accuracy) {
+            // Prevent saving if in "Dicas Visuais" mode (Only Normal and Learn modes save records)
+            if (configHints && !isProgressiveMode) {
+                console.log("Progress (record) not saved: Visual Hints mode active.");
+                // We still might want to unlock next level? 
+                // User said "não pode deixar record". Usually hints mode allows proceeding but not rank.
+                // Let's allow unlocking but NOT updating the score record.
+
+                const progress = getSavedProgress();
+                if (level + 1 > progress.maxLevel) {
+                    progress.maxLevel = level + 1;
+                    localStorage.setItem('digita_max_level', progress.maxLevel);
+                }
+                return;
+            }
+
+            const progress = getSavedProgress();
+            if (level + 1 > progress.maxLevel) {
+                progress.maxLevel = level + 1;
+                localStorage.setItem('digita_max_level', progress.maxLevel);
+            }
+            const currentRecord = progress.records[level] || 0;
+            if (accuracy > currentRecord) {
+                progress.records[level] = Math.round(accuracy);
+                localStorage.setItem('digita_records', JSON.stringify(progress.records));
+            }
+        }
+
+        function resetProgress() {
+            if (confirm('Tem certeza que deseja apagar todo o progresso?')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // --- INICIALIZAÇÃO E MENU ---
+        window.onload = function () {
+            renderLevelGrid();
+        };
+
+        function goToMenu() {
+            showScreen('SETUP');
+            renderLevelGrid();
+        }
+
+        function renderLevelGrid() {
+            const grid = document.getElementById('levelsGrid');
+            grid.innerHTML = '';
+            const progress = getSavedProgress();
+            const totalLevels = Object.keys(levels).length;
+
+            for (let i = 0; i < totalLevels; i++) {
+                const isLocked = i > progress.maxLevel;
+                const record = progress.records[i] !== undefined ? progress.records[i] + '%' : null;
+                const levelData = levels[i];
+
+                const card = document.createElement('div');
+                card.className = `level-card bg-white border-b-4 rounded-2xl p-4 flex flex-col items-center justify-between min-h-[140px] shadow-sm cursor-pointer select-none ${isLocked ? 'level-locked bg-gray-100 border-gray-300' : levelData.color.replace('bg-', 'hover:bg-opacity-80 border-')}`;
+
+                let titleDisplay = levelData.title;
+                if (titleDisplay.startsWith("Letra ")) titleDisplay = titleDisplay.replace('Letra ', '');
+
+                if (isLocked) {
+                    card.innerHTML = `
+                        <div class="text-gray-400 text-4xl mb-2">🔒</div>
+                        <div class="text-gray-400 font-bold text-lg">Fase ${i}</div>
+                        <div class="text-xs text-gray-400 font-bold uppercase mt-2">Bloqueada</div>
+                    `;
+                } else {
+                    card.onclick = () => startGameFromMenu(i);
+                    const recordHtml = record ? `<div class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full font-bold shadow-sm">🏆 ${record}</div>` : `<div class="text-gray-300 text-xs font-bold">--%</div>`;
+
+                    card.innerHTML = `
+                        <div class="w-full flex justify-between items-start">
+                            <span class="text-gray-400 text-xs font-bold">Fase ${i}</span>
+                            ${recordHtml}
+                        </div>
+                        <div class="text-3xl md:text-4xl font-black mb-1 mt-2 text-center break-words leading-tight">${titleDisplay}</div>
+                        <div class="mt-auto w-full bg-black/5 h-1 rounded-full overflow-hidden">
+                            <div class="h-full bg-current opacity-30" style="width: ${progress.records[i] || 0}%"></div>
+                        </div>
+                    `;
+                    card.classList.add(levelData.color.split(' ')[1]);
+                }
+                grid.appendChild(card);
+            }
+        }
+
+        function startGameFromMenu(lvl) {
+            const helpMode = document.getElementById('helpModeSelect').value;
+
+            // Reset vars
+            configHints = false;
+            isProgressiveMode = false;
+
+            if (helpMode === 'HINTS') {
+                configHints = true;
+            } else if (helpMode === 'LEARN') {
+                configHints = true; // Typically implies hints are allowed or handled by logic
+                isProgressiveMode = true;
+            }
+            // IF NORMAL: both false
+
+            difficultyThreshold = parseInt(document.getElementById('difficultySelect').value);
+            // gameMode derived in initLevel
+            initLevel(lvl);
+        }
+
+        function showScreen(screenName) {
+            document.getElementById('screenSetup').classList.add('hidden');
+            document.getElementById('screenPresentation').classList.add('hidden');
+            document.getElementById('screenGame').classList.add('hidden');
+            document.getElementById('screenVideo').classList.add('hidden');
+
+            if (screenName === 'SETUP') document.getElementById('screenSetup').classList.remove('hidden');
+            else if (screenName === 'PRESENTATION') document.getElementById('screenPresentation').classList.remove('hidden');
+            else if (screenName === 'GAME') {
+                document.getElementById('screenGame').classList.remove('hidden');
+                document.getElementById('screenGame').classList.add('flex');
+            }
+            else if (screenName === 'VIDEO') document.getElementById('screenVideo').classList.remove('hidden');
+        }
+
+        function initLevel(lvl) {
+            // Reset configuration from user selection (persists across levels)
+            const helpModeSelect = document.getElementById('helpModeSelect');
+            const helpMode = helpModeSelect ? helpModeSelect.value.trim() : 'NORMAL';
+
+            // Strict boolean logic
+            isProgressiveMode = (helpMode === 'LEARN');
+            configHints = (helpMode === 'HINTS' || helpMode === 'LEARN');
+
+            console.log(`initLevel ${lvl}: SelectedMode=${helpMode}, Hints=${configHints}, Progressive=${isProgressiveMode}`);
+
+            currentLevel = lvl;
+            isSecondPass = false;
+            if (!database[currentLevel]) {
+                alert("Parabéns! Fim do Jogo.");
+                goToMenu();
+                return;
+            }
+            learnedLetters = new Set();
+            for (let i = 0; i <= currentLevel; i++) {
+                if (levels[i] && levels[i].unlock) levels[i].unlock.forEach(l => learnedLetters.add(l));
+            }
+
+            // DETERMINE GAME MODE FROM LEVEL TYPE
+            const lvlData = levels[currentLevel];
+            const typeLower = (lvlData.type || '').toLowerCase();
+
+            if (typeLower === 'quiz') {
+                gameMode = 'QUIZ';
+                // Quiz forces specific settings overrides
+                configHints = false;
+                isProgressiveMode = false;
+            } else if (typeLower === 'dialogue' || typeLower === 'context') {
+                gameMode = 'DIALOGUE';
+            } else {
+                gameMode = 'SYLLABLES';
+            }
+
+            // BRANCH BY MODE
+            if (gameMode === 'QUIZ') {
+                startQuizGame();
+            } else if (gameMode === 'DIALOGUE') {
+                startDialogueGame();
+            } else {
+                startIntroSyllables();
+            }
+        }
+
+        function startIntroSyllables() {
+            flowState = 'INTRO';
+            const data = levels[currentLevel];
+
+            document.getElementById('presentationTitle').textContent = "INTRODUÇÃO";
+            resetPresentationButton();
+
+            // Lógica para MODO CONTEXTO (Diálogo) - Used in Syllable Mode only for specific levels
+            if (data.type === 'context') {
+                const introTitle = data.introTitle || data.title;
+                const items = data.syllables || [];
+
+                let html = `
+                    <div class="chat-container">
+                        <!-- Pergunta do Professor -->
+                        <div class="chat-row chat-row-left animate__animated animate__fadeInLeft">
+                            <div class="chat-avatar">🦉</div>
+                            <div class="chat-bubble chat-bubble-left">
+                                ${introTitle}
+                            </div>
+                        </div>
+                `;
+
+                // Respostas (Aluno)
+                // Vamos agrupar as respostas num único balão ou vários?
+                // Vários balões ficam mais dinâmicos.
+                items.forEach((item, idx) => {
+                    const delay = (idx + 1) * 600; // Delay progressivo
+                    html += `
+                        <div class="chat-row chat-row-right animate__animated animate__fadeInRight" style="animation-delay: ${delay}ms">
+                            <div class="chat-bubble chat-bubble-right">
+                                ${item}
+                            </div>
+                            <div class="chat-avatar">👤</div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+                document.getElementById('presentationContent').innerHTML = html;
+            }
+            // Lógica PADRÃO (Sílabas)
+            else {
+                let title = currentLevel === 0 ? "As Vogais" : `Família do ${data.title.replace('Letra ', '')}`;
+                const syllables = data.syllables || [];
+                const fontSize = syllables.length > 5 ? 'text-4xl md:text-6xl' : 'text-5xl md:text-7xl';
+
+                let html = `<h2 class="text-5xl font-bold text-blue-500 mb-8 animate__animated animate__fadeInDown text-center">${title}</h2><div class="flex justify-center gap-4 flex-wrap mb-6">`;
+                syllables.forEach((syl, idx) => {
+                    html += `<div class="${fontSize} font-bold bg-white text-blue-500 border-4 border-blue-200 rounded-3xl px-6 py-4 shadow-lg animate__animated animate__zoomIn" style="animation-delay: ${idx * 100}ms">${syl}</div>`;
+                });
+                html += `</div>`;
+                document.getElementById('presentationContent').innerHTML = html;
+            }
+
+            showScreen('PRESENTATION');
+        }
+
+        function startPresentationWords() {
+            flowState = 'PRES';
+            presentationQueue = [...database[currentLevel].items];
+            presentationIndex = 0;
+            showNextPresentationWord();
+        }
+
+        function showNextPresentationWord() {
+            if (presentationIndex >= presentationQueue.length) {
+                // Modified: Now ALL levels skip the syllable game and go straight to words
+                startWordGame();
+                return;
+            }
+            const item = presentationQueue[presentationIndex];
+            let mediaHtml = item.image ?
+                `<img src="${pathImg + item.image}" class="max-h-60 mx-auto drop-shadow-md animate__animated animate__jackInTheBox" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"> <span style="display:none" class="text-9xl animate__animated animate__jackInTheBox">${item.emoji}</span>` :
+                `<span class="text-9xl animate__animated animate__jackInTheBox">${item.emoji}</span>`;
+            let html = `<div class="bg-white border-4 border-purple-200 rounded-3xl p-8 mb-6 shadow-sm w-full max-w-lg mx-auto">${mediaHtml}</div><div class="text-7xl font-bold text-gray-600 tracking-widest uppercase mb-4 animate__animated animate__fadeInUp">${item.word}</div>`;
+            document.getElementById('presentationTitle').textContent = "PALAVRAS NOVAS";
+            document.getElementById('presentationContent').innerHTML = html;
+            showScreen('PRESENTATION');
+            playAudio(item.word);
+        }
+
+        function advanceLinearFlow() {
+            if (flowState === 'INTRO') startPresentationWords();
+            else if (flowState === 'PRES') { presentationIndex++; showNextPresentationWord(); }
+            else if (flowState === 'TRANSITION_TO_SYL') {
+                startWordGame();
+            }
+            else if (flowState === 'TRANSITION_TO_WORD') startWordGame();
+            else if (flowState === 'END_PHASE') initLevel(currentLevel + 1);
+            else if (flowState === 'RETRY') {
+                if (gameMode === 'QUIZ') startQuizGame();
+                else if (gameMode === 'DIALOGUE') startDialogueGame();
+                else startWordGame();
+            }
+        }
+
+        function prepareGameQueue() {
+            gameQueue = [...database[currentLevel].items].sort(() => Math.random() - 0.5);
+            if (isProgressiveMode && !isSecondPass) configHints = true;
+            if (!isSecondPass) { phaseTotalAttempts = 0; phaseCorrectAttempts = 0; }
+            updateStatsUI();
+        }
+
+        function startSyllableGame() {
+            flowState = 'GAME_SYL';
+            const letter = levels[currentLevel].title.replace("Letra ", "");
+            document.getElementById('gameLevelDisplay').textContent = `Fase ${currentLevel} - ${letter} (Sílabas)`;
+            prepareGameQueue();
+            showScreen('GAME');
+            setupGameUI();
+            renderKeyboard();
+            nextGameItem();
+        }
+
+        function startWordGame() {
+            flowState = 'GAME_WORD';
+            const lvlData = levels[currentLevel];
+            let titleText = "";
+            if (lvlData.type === 'context') {
+                titleText = `Fase ${currentLevel} - ${lvlData.title}`;
+            } else {
+                const letter = lvlData.title.replace("Letra ", "");
+                titleText = `Fase ${currentLevel} - ${letter} (Palavras)`;
+            }
+
+            document.getElementById('gameLevelDisplay').textContent = titleText;
+            prepareGameQueue();
+            showScreen('GAME');
+            setupGameUI();
+            renderKeyboard();
+            nextGameItem();
+        }
+
+        function updateStatsUI() {
+            document.getElementById('scoreDisplay').textContent = score;
+            let acc = 100;
+            if (phaseTotalAttempts > 0) acc = Math.round((phaseCorrectAttempts / phaseTotalAttempts) * 100);
+            document.getElementById('accuracyDisplay').textContent = acc + "%";
+
+            const accEl = document.getElementById('accuracyDisplay');
+            if (acc < difficultyThreshold && difficultyThreshold > 0) {
+                accEl.classList.remove('text-green-600'); accEl.classList.add('text-orange-500');
+            } else {
+                accEl.classList.remove('text-orange-500'); accEl.classList.add('text-green-600');
+            }
+        }
+
+        function nextGameItem() {
+            if (gameQueue.length === 0) {
+                if (isProgressiveMode && !isSecondPass) {
+                    isSecondPass = true;
+                    configHints = false;
+                    showIntermission();
+                    return;
+                }
+                checkEndPhase();
+                isSecondPass = false;
+                return;
+            }
+
+            currentItem = gameQueue.pop();
+            const total = database[currentLevel].items.length;
+            const progress = ((total - gameQueue.length) / total) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+
+            const levelLetter = levels[currentLevel].title.replace("Letra ", "").trim();
+
+            if (currentItem.question) {
+                document.getElementById('gameInstruction').textContent = currentItem.question;
+                targetIndices = Array.from({ length: currentItem.word.length }, (_, i) => i);
+            } else if (flowState === 'GAME_SYL') {
+                document.getElementById('gameInstruction').textContent = "Complete a sílaba:";
+                targetIndices = findSyllableIndices(currentItem.word, levelLetter);
+                if (targetIndices.length === 0) targetIndices = Array.from({ length: currentItem.word.length }, (_, i) => i);
+            } else {
+                document.getElementById('gameInstruction').textContent = "Escreva a palavra:";
+                targetIndices = Array.from({ length: currentItem.word.length }, (_, i) => i);
+            }
+            renderGameRound();
+        }
+
+        function showIntermission() {
+            const html = `
+                <div class="bg-blue-100 border-4 border-blue-300 rounded-full p-8 mb-6 shadow-sm inline-block animate__animated animate__bounceIn">
+                    <span class="text-8xl">🙈</span>
+                </div>
+                <h2 class="text-4xl font-bold text-blue-600 mb-4 animate__animated animate__fadeIn">Agora sem ajuda!</h2>
+                <p class="text-xl text-gray-500 max-w-md mx-auto mb-8">Você consegue fazer de novo sem as cores?</p>
+                <button onclick="startSecondPass()" class="bg-blue-500 hover:bg-blue-400 text-white text-2xl font-bold py-4 px-10 rounded-2xl shadow-[0_6px_0_rgb(37,99,235)] active:shadow-none active:translate-y-2 transition-all uppercase tracking-widest">
+                    VAMOS LÁ!
+                </button>
+            `;
+            document.getElementById('presentationTitle').textContent = "DESAFIO";
+            document.getElementById('presentationContent').innerHTML = html;
+            resetPresentationButton(); // Should not matter as the button is inline? Wait, showIntermission uses presentationContent innerHTML which CONTANS a button.
+            showScreen('PRESENTATION');
+        }
+
+        function startSecondPass() {
+            gameQueue = [...database[currentLevel].items].sort(() => Math.random() - 0.5);
+            phaseTotalAttempts = 0;
+            phaseCorrectAttempts = 0;
+            updateStatsUI();
+            showScreen('GAME');
+            renderKeyboard();
+            nextGameItem();
+        }
+
+        function renderGameRound() {
+            document.getElementById('successOverlay').classList.add('hidden');
+
+            if (gameMode === 'QUIZ') {
+                renderQuiz();
+                return;
+            } else if (gameMode === 'DIALOGUE') {
+                renderDialogue();
+                return;
+            }
+
+            const imgContainer = document.getElementById('gameImageContainer');
+            if (currentItem.image) {
+                imgContainer.innerHTML = `<img src="${pathImg + currentItem.image}" class="max-h-full max-w-full object-contain animate__animated animate__fadeIn" onerror="this.outerHTML='<span class=\\'text-8xl\\'>${currentItem.emoji}</span>'">`;
+            } else {
+                imgContainer.innerHTML = `<span class="text-8xl animate__animated animate__fadeIn">${currentItem.emoji}</span>`;
+            }
+
+            if (currentItem.questionAudio) {
+                playFile(currentItem.questionAudio);
+            } else {
+                playAudio(currentItem.word);
+            }
+
+            const container = document.getElementById('inputContainer');
+            container.innerHTML = '';
+            currentBoxIndex = targetIndices[0];
+
+            for (let i = 0; i < currentItem.word.length; i++) {
+                const div = document.createElement('div');
+                div.className = 'letter-box w-12 h-14 md:w-16 md:h-20 border-4 rounded-xl flex items-center justify-center text-3xl md:text-5xl font-bold shadow-sm bg-white m-1';
+                div.id = `box-${i}`;
+                if (!targetIndices.includes(i)) {
+                    div.classList.add('filled-static');
+                    div.textContent = currentItem.word[i];
+                } else {
+                    div.classList.add('text-gray-700', 'border-gray-300');
+                }
+                container.appendChild(div);
+            }
+            updateActiveBox();
+            setTimeout(updateKeyboardHints, 50);
+        }
+
+        function handleInput(char) {
+            if (gameMode === 'QUIZ') return;
+            if (!document.getElementById('successOverlay').classList.contains('hidden')) return;
+            if (currentBoxIndex >= currentItem.word.length) return;
+
+            while (currentBoxIndex < currentItem.word.length && !targetIndices.includes(currentBoxIndex)) currentBoxIndex++;
+            if (currentBoxIndex >= currentItem.word.length) return;
+
+            phaseTotalAttempts++;
+            const targetChar = currentItem.word[currentBoxIndex];
+            const normInput = char.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const normTarget = targetChar.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+            if (normInput === normTarget) {
+                phaseCorrectAttempts++;
+                const box = document.getElementById(`box-${currentBoxIndex}`);
+                if (box) {
+                    box.textContent = targetChar;
+                    box.classList.remove('active-box');
+                    box.classList.add('correct', 'animate__animated', 'animate__bounceIn');
+                }
+
+                document.getElementById('sndCorrect').currentTime = 0;
+                document.getElementById('sndCorrect').play();
+
+                currentBoxIndex++;
+                while (currentBoxIndex < currentItem.word.length && !targetIndices.includes(currentBoxIndex)) currentBoxIndex++;
+
+                if (currentBoxIndex >= currentItem.word.length) {
+                    roundWon();
+                } else {
+                    updateActiveBox();
+                    updateKeyboardHints();
+                }
+            } else {
+                const box = document.getElementById(`box-${currentBoxIndex}`);
+                if (box) {
+                    box.classList.add('incorrect');
+                    setTimeout(() => box.classList.remove('incorrect'), 400);
+                }
+            }
+            updateStatsUI();
+        }
+
+        function roundWon() {
+            const overlay = document.getElementById('successOverlay');
+            overlay.classList.remove('hidden');
+
+            // Logic for Dialogue Mode
+            if (gameMode === 'DIALOGUE') {
+                const chat = document.getElementById('chatGameContainer');
+                const userDiv = document.createElement('div');
+                userDiv.className = "chat-row chat-row-right animate__animated animate__fadeInRight";
+                const displayContent = (currentItem.emoji ? currentItem.emoji + " " : "") + currentItem.word;
+                userDiv.innerHTML = `
+                    <div class="chat-bubble chat-bubble-right">
+                        ${displayContent}
+                    </div>
+                    <div class="chat-avatar">👤</div>
+                `;
+                chat.appendChild(userDiv);
+                chat.scrollTop = chat.scrollHeight;
+            }
+
+            if (levels[currentLevel].title === "Sons Animais" && gameMode !== 'QUIZ') {
+                playAudio(currentItem.word);
+            } else {
+                document.getElementById('sndWordWin').currentTime = 0;
+                document.getElementById('sndWordWin').play();
+            }
+            score += 10;
+            updateStatsUI();
+            fireConfetti();
+            document.querySelectorAll('.key').forEach(k => k.classList.remove('hint-active', 'hint-inactive'));
+        }
+
+        function checkEndPhase() {
+            const acc = phaseTotalAttempts === 0 ? 0 : (phaseCorrectAttempts / phaseTotalAttempts) * 100;
+            let title, msg, nextState, buttonText = "PRÓXIMO ➔";
+
+            if (acc < difficultyThreshold) {
+                document.getElementById('sndLose').play();
+                title = "Vamos tentar de novo?";
+                msg = `Você fez ${Math.round(acc)}%. Precisa de ${difficultyThreshold}% para passar.`;
+                nextState = 'RETRY';
+                buttonText = "TENTAR DE NOVO ↺";
+                document.getElementById('presentationTitle').textContent = "REVISÃO";
+            } else {
+                document.getElementById('sndLevelWin').play();
+                if (flowState === 'GAME_SYL') {
+                    title = "Sílabas Completas!";
+                    msg = "Agora vamos escrever as palavras inteiras.";
+                    nextState = 'TRANSITION_TO_WORD';
+                } else {
+                    title = "Nível Concluído!";
+                    const nextLvl = levels[currentLevel + 1];
+                    msg = nextLvl ? `Você desbloqueou: ${nextLvl.title}` : "Você terminou o jogo!";
+                    nextState = 'END_PHASE';
+                    saveProgress(currentLevel, acc);
+                }
+                document.getElementById('presentationTitle').textContent = "PARABÉNS";
+            }
+
+            flowState = nextState;
+            const isFail = nextState === 'RETRY';
+            const colorClass = isFail ? 'text-orange-500' : 'text-green-500';
+            const borderClass = isFail ? 'border-orange-200' : 'border-green-200';
+            const emoji = isFail ? '💪' : '⭐';
+
+            if (isFail) {
+                const actionBtn = document.getElementById('btnPresentationNext');
+                actionBtn.textContent = "TENTAR DE NOVO ↺";
+                actionBtn.classList.replace('bg-green-500', 'bg-orange-500');
+                actionBtn.classList.replace('shadow-[0_6px_0_rgb(21,128,61)]', 'shadow-[0_6px_0_rgb(249,115,22)]');
+            } else {
+                const actionBtn = document.getElementById('btnPresentationNext');
+                if (nextState === 'END_PHASE') {
+                    // Adicionar botão de prêmio apenas no final da fase
+                    actionBtn.textContent = "🎁 VER PRÊMIO";
+                    actionBtn.onclick = showVideoReward;
+                } else {
+                    resetPresentationButton();
+                }
+            }
+
+            let html = `<div class="bg-white border-4 ${borderClass} rounded-full p-10 mb-6 shadow-sm inline-block"><span class="text-8xl">${emoji}</span></div><h2 class="text-4xl font-bold ${colorClass} mb-4">${title}</h2><p class="text-xl text-gray-500 max-w-md mx-auto">${msg}</p>`;
+            document.getElementById('presentationContent').innerHTML = html;
+            showScreen('PRESENTATION');
+        }
+
+        function resetPresentationButton() {
+            const btn = document.getElementById('btnPresentationNext');
+            if (btn) {
+                btn.textContent = "PRÓXIMO ➔";
+                btn.onclick = advanceLinearFlow;
+                btn.classList.remove('bg-orange-500', 'shadow-[0_6px_0_rgb(249,115,22)]');
+                btn.classList.add('bg-green-500', 'shadow-[0_6px_0_rgb(21,128,61)]');
+            }
+        }
+
+
+        function renderKeyboard() {
+            const layout = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+            const container = document.getElementById('keyboardContainer');
+            container.innerHTML = '';
+            layout.forEach(row => {
+                const rowDiv = document.createElement('div'); rowDiv.className = "flex justify-center gap-1";
+                row.split('').forEach(char => {
+                    const btn = document.createElement('button'); btn.textContent = char; btn.id = `key-${char}`;
+                    let btnClass = "key"; if (learnedLetters.has(char)) btnClass += " key-learned";
+                    btn.className = btnClass;
+                    btn.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(char); btn.classList.add('active-press'); });
+                    btn.addEventListener('touchend', (e) => { e.preventDefault(); btn.classList.remove('active-press'); });
+                    btn.addEventListener('click', (e) => { handleInput(char); });
+                    rowDiv.appendChild(btn);
+                });
+                container.appendChild(rowDiv);
+            });
+        }
+
+        function updateKeyboardHints() {
+            document.querySelectorAll('.key').forEach(k => k.classList.remove('hint-active', 'hint-inactive'));
+
+            if (!configHints || !currentItem || !document.getElementById('successOverlay').classList.contains('hidden')) return;
+
+            let tempIndex = currentBoxIndex;
+            while (tempIndex < currentItem.word.length && !targetIndices.includes(tempIndex)) tempIndex++;
+
+            if (tempIndex < currentItem.word.length) {
+                const targetChar = currentItem.word[tempIndex].normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                document.querySelectorAll('.key').forEach(k => {
+                    const keyChar = k.textContent.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    if (keyChar === targetChar) k.classList.add('hint-active');
+                    else k.classList.add('hint-inactive');
+                });
+            }
+        }
+
+        function updateActiveBox() {
+            document.querySelectorAll('.letter-box').forEach(b => b.classList.remove('active-box'));
+            let tempIndex = currentBoxIndex;
+            while (tempIndex < currentItem.word.length && !targetIndices.includes(tempIndex)) tempIndex++;
+            if (tempIndex < currentItem.word.length) {
+                const current = document.getElementById(`box-${tempIndex}`);
+                if (current) current.classList.add('active-box');
+            }
+        }
+
+        function findSyllableIndices(word, levelLetter) {
+            const indices = [];
+            const regex = new RegExp(`(${levelLetter})[AEOIUÁÉÍÓÚÃÕÂÊÔ]`, 'i');
+            const match = word.match(regex);
+
+            if (match && match.index !== undefined) {
+                indices.push(match.index, match.index + 1);
+            }
+            else if (word.toUpperCase().startsWith(levelLetter)) {
+                indices.push(0, 1);
+                if (word.length < 2) indices.push(0);
+            }
+            return indices;
+        }
+
+        function playAudio(text) {
+            const fn = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") + ".mp3";
+            playFile(fn.replace('.mp3', ''));
+        }
+
+        function playFile(filename) {
+            new Audio(pathAudio + filename + ".mp3").play().catch(() => { });
+        }
+
+        window.playCurrentAudio = () => {
+            if (currentItem) {
+                if (currentItem.questionAudio) playFile(currentItem.questionAudio);
+                else playAudio(currentItem.word);
+            }
+        };
+
+        // --- GAME MODES HELPERS ---
+
+        function setupGameUI() {
+            // Reset containers
+            document.getElementById('standardGameContainer').classList.add('hidden');
+            document.getElementById('chatGameContainer').classList.add('hidden');
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('inputContainer').classList.remove('hidden'); // Default show
+            document.getElementById('keyboardArea').classList.remove('hidden');
+
+            if (gameMode === 'QUIZ') {
+                document.getElementById('quizContainer').classList.remove('hidden');
+                document.getElementById('quizContainer').classList.add('flex');
+                document.getElementById('inputContainer').classList.add('hidden');
+                document.getElementById('keyboardArea').classList.add('hidden');
+            } else if (gameMode === 'DIALOGUE') {
+                document.getElementById('chatGameContainer').classList.remove('hidden');
+                document.getElementById('chatGameContainer').classList.add('flex');
+                // Clear chat
+                document.getElementById('chatGameContainer').innerHTML = `
+                     <div class="chat-row chat-row-left animate__animated animate__fadeInLeft">
+                        <div class="chat-avatar">🦉</div>
+                        <div class="chat-bubble chat-bubble-left">
+                            Vamos começar a conversa!<br>Fase: ${levels[currentLevel].title}
+                        </div>
+                    </div>
+                `;
+            } else {
+                document.getElementById('standardGameContainer').classList.remove('hidden');
+                document.getElementById('standardGameContainer').classList.add('flex'); // Ensure flex
+            }
+        }
+
+        function startDialogueGame() {
+            flowState = 'GAME_DIALOGUE';
+            document.getElementById('gameLevelDisplay').textContent = `Fase ${currentLevel} - Diálogo`;
+            prepareGameQueue();
+            showScreen('GAME');
+            setupGameUI();
+            renderKeyboard();
+            nextGameItem();
+        }
+
+        function startQuizGame() {
+            flowState = 'GAME_QUIZ';
+            document.getElementById('gameLevelDisplay').textContent = `Fase ${currentLevel} - Quiz`;
+            prepareGameQueue();
+            showScreen('GAME');
+            setupGameUI();
+            nextGameItem();
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quizOptions');
+            container.innerHTML = '';
+
+            // Image/Text Display
+            const imgDiv = document.getElementById('quizImage');
+            if (currentItem.image) {
+                imgDiv.innerHTML = `<img src="${pathImg + currentItem.image}" class="h-full object-contain">`;
+            } else {
+                imgDiv.textContent = currentItem.emoji;
+            }
+
+            // Distractors
+            let options = [currentItem.word];
+            // Get random words from other levels
+            let tries = 0;
+            const allWords = [];
+            // Gather all possible words once to safeguard
+            Object.values(database).forEach(lvl => {
+                if (lvl.items) lvl.items.forEach(i => allWords.push(i.word));
+            });
+
+            while (options.length < 4 && tries < 100) {
+                tries++;
+                if (allWords.length > 0) {
+                    const randWord = allWords[Math.floor(Math.random() * allWords.length)];
+                    if (!options.includes(randWord)) options.push(randWord);
+                } else {
+                    break; // No words to pull from
+                }
+            }
+
+            // Fallback if we still don't have 4 options (e.g. nearly empty database)
+            while (options.length < 4) {
+                options.push("Opção " + (options.length + 1));
+            }
+            options = options.sort(() => Math.random() - 0.5);
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-white border-4 border-blue-200 text-blue-600 text-2xl font-bold py-6 rounded-2xl shadow-sm hover:bg-blue-50 active:scale-95 transition-all";
+                btn.textContent = opt;
+                btn.onclick = () => handleQuizSelection(btn, opt === currentItem.word);
+                container.appendChild(btn);
+            });
+
+            if (currentItem.question) document.getElementById('gameInstruction').textContent = currentItem.question;
+            else document.getElementById('gameInstruction').textContent = "Qual é o nome correto?";
+
+            // Play audio immediately for association (before answer)
+            setTimeout(() => {
+                playCurrentAudio();
+            }, 300);
+        }
+
+        function handleQuizSelection(btn, isCorrect) {
+            if (document.getElementById('successOverlay').classList.contains('hidden') === false) return;
+
+            phaseTotalAttempts++;
+            if (isCorrect) {
+                phaseCorrectAttempts++;
+                btn.classList.remove('border-blue-200', 'text-blue-600');
+                btn.classList.add('bg-green-100', 'border-green-500', 'text-green-700', 'animate__animated', 'animate__pulse');
+                document.getElementById('sndCorrect').play();
+                setTimeout(roundWon, 500);
+            } else {
+                btn.classList.remove('border-blue-200', 'text-blue-600');
+                btn.classList.add('bg-red-100', 'border-red-500', 'text-red-700', 'animate__animated', 'animate__shakeX');
+                document.getElementById('sndLose').play();
+            }
+            updateStatsUI();
+        }
+
+        function renderDialogue() {
+            // Append new Question bubble to chat
+            const chat = document.getElementById('chatGameContainer');
+
+            const qDiv = document.createElement('div');
+            qDiv.className = "chat-row chat-row-left animate__animated animate__fadeInLeft";
+
+            let content = "";
+            if (currentItem.question) content = currentItem.question;
+            else content = "Como se escreve?";
+
+            // Should we show image in chat?
+            let media = "";
+            if (currentItem.image) media = `<img src="${pathImg + currentItem.image}" class="max-w-[150px] rounded-lg mb-2 block">`;
+            else media = `<span class="text-4xl mr-2">${currentItem.emoji}</span>`;
+
+            qDiv.innerHTML = `
+                <div class="chat-avatar">🦉</div>
+                <div class="chat-bubble chat-bubble-left flex flex-col">
+                    ${media}
+                    <span>${content}</span>
+                </div>
+            `;
+            chat.appendChild(qDiv);
+            chat.scrollTop = chat.scrollHeight;
+
+            // Play question audio if available
+            if (currentItem.questionAudio) {
+                playFile(currentItem.questionAudio);
+            } else {
+                playAudio(currentItem.word);
+            }
+
+            // Prepare Input
+            const container = document.getElementById('inputContainer');
+            container.innerHTML = '';
+            currentBoxIndex = targetIndices[0];
+
+            for (let i = 0; i < currentItem.word.length; i++) {
+                const div = document.createElement('div');
+                div.className = 'letter-box w-12 h-14 md:w-16 md:h-20 border-4 rounded-xl flex items-center justify-center text-3xl md:text-5xl font-bold shadow-sm bg-white m-1';
+                div.id = `box-${i}`;
+                if (!targetIndices.includes(i)) {
+                    div.classList.add('filled-static');
+                    div.textContent = currentItem.word[i];
+                } else {
+                    div.classList.add('text-gray-700', 'border-gray-300');
+                }
+                container.appendChild(div);
+            }
+            updateActiveBox();
+            setTimeout(updateKeyboardHints, 50);
+        }
+
+        const canvas = document.getElementById('confetti-canvas'); const ctx = canvas.getContext('2d'); let particles = [];
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+        function fireConfetti() { for (let i = 0; i < 100; i++) particles.push({ x: window.innerWidth / 2, y: window.innerHeight / 2, vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15, size: Math.random() * 8 + 4, color: `hsl(${Math.random() * 360},100%,50%)`, life: 100 }); requestAnimationFrame(animateConfetti); }
+        function animateConfetti() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles = particles.filter(p => p.life > 0); particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); }); if (particles.length > 0) requestAnimationFrame(animateConfetti); }
+
+        function showVideoReward() {
+            // ID do vídeo: ZHKRxjwKnXM (Mundo Bita - Vento Ventania)
+            const videoId = "ZHKRxjwKnXM";
+            const iframe = document.getElementById('videoFrame');
+            // autoplay=1 para tocar ao abrir
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            showScreen('VIDEO');
+        }
+
+        function closeVideoReward() {
+            const iframe = document.getElementById('videoFrame');
+            iframe.src = ""; // Parar o vídeo
+            advanceLinearFlow(); // Continuar o fluxo
+        }
+
+        // Initial load via script tag (avoids CORS issues on local)
+        // Initial load via script tag (avoids CORS issues on local)
+        window.onload = function () {
+            console.log("Window loaded. Checking gameData...");
+            const grid = document.getElementById('levelsGrid');
+
+            if (window.gameData) {
+                console.log("gameData found.");
+                levels = window.gameData.levels;
+                database = window.gameData.database;
+
+                try {
+                    // loadProgress removido pois não existe, o progresso é lido dentro de renderLevelGrid
+                    renderLevelGrid();
+                    console.log("Grid rendered with " + Object.keys(levels).length + " levels.");
+
+                    if (Object.keys(levels).length === 0) {
+                        grid.innerHTML = `<div class="col-span-full text-center text-orange-500 font-bold p-10">Aviso: O objeto 'levels' está vazio. Verifique o arquivo gameData.js.</div>`;
+                    }
+                } catch (e) {
+                    console.error("Error during init:", e);
+                    grid.innerHTML = `<div class="col-span-full text-center text-red-500 font-bold p-10">Erro ao iniciar: ${e.message}</div>`;
+                }
+            } else {
+                console.error("gameData not found in window.");
+                grid.innerHTML = `<div class="col-span-full text-center text-red-500 font-bold p-10">Erro Crítico:<br>O arquivo de dados (gameData.js) não foi carregado.<br>Verifique se ele está na mesma pasta que o digita.html.</div>`;
+            }
+        };
+    </script>
+    <script src="gameData.js"></script>
+</body>
+
+</html>
