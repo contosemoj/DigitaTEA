@@ -484,8 +484,7 @@
             </div>
         </div>
 
-        <footer id="keyboardArea"
-            class="shrink-0 bg-white border-t border-gray-200 pb-4 pt-2 px-1 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] z-20">
+        <footer id="keyboardArea" class="shrink-0 bg-white border-t border-gray-200 pb-4 pt-2 px-1 shadow-lg z-20">
             <div id="keyboardContainer" class="max-w-4xl mx-auto flex flex-col gap-2"></div>
         </footer>
     </div>
@@ -1222,8 +1221,11 @@
             playFile(fn.replace('.mp3', ''));
         }
 
+        const voicePlayer = new Audio();
+
         function playFile(filename) {
-            new Audio(pathAudio + filename + ".mp3").play().catch(() => { });
+            voicePlayer.src = pathAudio + filename + ".mp3";
+            voicePlayer.play().catch(() => { });
         }
 
         window.playCurrentAudio = () => {
