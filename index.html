@@ -211,7 +211,7 @@
         .chat-bubble {
             padding: 1.25rem 1.75rem;
             border-radius: 1.75rem;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: bold;
             position: relative;
             animation: bounceIn 0.5s;
@@ -1071,6 +1071,8 @@
                 setTimeout(() => {
                     playAudio(currentItem.word);
                 }, 200);
+
+                // Add professor's reaction (postText)
             }
 
             // Play appropriate sound effect
@@ -1383,7 +1385,6 @@
         }
 
         function renderDialogue() {
-            // Append new Question bubble to chat
             const chat = document.getElementById('chatGameContainer');
 
             // Special handling for OI - it's a greeting, not a Q&A

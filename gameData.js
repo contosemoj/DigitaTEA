@@ -251,7 +251,6 @@ window.gameData = {
             "introTitle": "Quem faz esse som?",
             "unlock": [],
             "syllables": [
-                "OI",
                 "MIAU",
                 "AU",
                 "MUU",
@@ -1500,7 +1499,7 @@ window.gameData = {
                 {
                     "word": "AU",
                     "emoji": "🔊🐶",
-                    "question": "Que som  o cachorro faz? 🤷‍♂️ 🔊 🐶❓",
+                    "question": "Que som  o cachorro faz? 🤷‍♂️ 🔊 �❓",
                     "questionAudio": "qsomfazocachorro"
                 },
                 {
@@ -1531,27 +1530,28 @@ window.gameData = {
                 },
                 {
                     "word": "PAI",
-                    "emoji": "🧔🏽👨🏽‍🍼"
-                    "question": "Quem é o Homen da familia? 🤷‍♂️👤 👨 👨‍👩‍👧‍👦❓"
-                    "questionAudio": "quemehomenfamilia"
+                    "emoji": "🧔🏽👨🏽‍🍼",
+                    "question": "Quem é o Homem da familia? 🤷‍♂️👤 👨 👨‍👩‍👧‍👦❓",
+                    "questionAudio": "quemehomemfamilia"
                 },
                 {
                     "word": "MÃE",
-                    "emoji": "👩🏽👩🏽‍🍼"
-                    "question": "Quem é a mulher da familia? 🤷‍♀️👤 👩 👨‍👩‍👧‍👦❓"
+                    "emoji": "👩🏽👩🏽‍🍼",
+                    "question": "Quem é a mulher da familia? 🤷‍♀️👤 👩 👨‍👩‍👧‍👦❓",
                     "questionAudio": "quememulherfamilia"
                 },
                 {
                     "word": "BEBÊ",
-                    "emoji": "👶"
-                    "question": "Quem é o bebê da familia? 🤷‍♂️👤 👶 👨‍👩‍👧‍👦❓"
+                    "emoji": "👶",
+                    "question": "Quem é o bebê da familia? 🤷‍♂️👤 👶 👨‍👩‍👧‍👦❓",
                     "questionAudio": "quemebebefamilia"
                 },
                 {
                     "word": "VOVÓ",
-                    "emoji": "👵🏻"
-                    "question": "Quem é a vovó da familia? 🤷‍♀️👤 👵 👨‍👩‍👧‍👦❓"
-                    "questionAudio": "quemevovofamilia"
+                    "emoji": "👵🏻",
+                    "preText": "Por último, vamos ver quem faz os melhores doces de todos! 🍪",
+                    "question": "Ela dá os melhores abraços. Como se escreve VOVÓ? 👵❓",
+                    "postText": "A vovó é um amor! Sempre tem uma história legal para contar. ❤️👵"
                 }
             ]
         },
