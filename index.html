@@ -9,13 +9,13 @@
     <title>Digita TEA - Seletor de Fases</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link rel="icon" type="image/png" href="game_icon.png">
 
     <style>
         body {
-            font-family: 'Fredoka', sans-serif;
+            font-family: 'Noto Color Emoji', sans-serif;
             background-color: #f0f9ff;
             overflow: hidden;
             -webkit-user-select: none;
@@ -165,6 +165,24 @@
             background: #94a3b8;
         }
 
+        /* Scroll customizado para chat */
+        #chatGameContainer::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chatGameContainer::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #chatGameContainer::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        #chatGameContainer::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
         /* --- CHAT DIALOGUE --- */
         .chat-container {
             display: flex;
@@ -191,24 +209,31 @@
         }
 
         .chat-bubble {
-            padding: 1rem 1.5rem;
-            border-radius: 1.5rem;
+            padding: 1.25rem 1.75rem;
+            border-radius: 1.75rem;
             font-size: 1.5rem;
             font-weight: bold;
             position: relative;
             animation: bounceIn 0.5s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .chat-bubble:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
         }
 
         .chat-bubble-left {
-            background-color: #fff;
-            border: 3px solid #bfdbfe;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+            border: 3px solid #93c5fd;
             color: #1e40af;
             border-bottom-left-radius: 0.25rem;
         }
 
         .chat-bubble-right {
-            background-color: #dcfce7;
-            border: 3px solid #86efac;
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border: 3px solid #4ade80;
             color: #166534;
             border-bottom-right-radius: 0.25rem;
         }
@@ -217,20 +242,79 @@
             width: 3.5rem;
             height: 3.5rem;
             border-radius: 50%;
-            background-color: #fff;
-            border: 2px solid #e5e7eb;
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            border: 3px solid #e5e7eb;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             flex-shrink: 0;
             z-index: 1;
+        }
+
+        /* Typing indicator animation */
+        .typing-indicator {
+            display: inline-flex;
+            gap: 0.25rem;
+            align-items: center;
+        }
+
+        .typing-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: #93c5fd;
+            animation: typingDot 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingDot {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+
+            30% {
+                transform: translateY(-8px);
+                opacity: 1;
+            }
+        }
+
+        /* Message sent animation */
+        @keyframes messageSent {
+            0% {
+                transform: scale(0.8) translateY(20px);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .message-sent {
+            animation: messageSent 0.6s ease-out;
         }
     </style>
 </head>
 
-<body class="h-screen w-full flex flex-col bg-blue-50 relative">
+<body class="h-screen h-[100dvh] w-full flex flex-col bg-blue-50 relative">
 
     <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-[60]"></canvas>
 
@@ -277,6 +361,27 @@
                             <option value="LEARN" selected>Modo Aprender (Progressivo)</option>
                         </select>
                     </div>
+                </div>
+
+                <!-- Configuração de Vídeos de Prêmio -->
+                <div class="mt-6 border-t-2 border-blue-50 pt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-bold text-gray-500">Vídeos de Prêmio (YouTube):</span>
+                        <span id="videoCountLabel" class="text-xs font-bold text-blue-400">0/10</span>
+                    </div>
+                    <div id="rewardVideosList" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                        <!-- Lista de vídeos injetada aqui -->
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="newVideoInput" placeholder="Cole o link ou ID do YouTube aqui..."
+                            class="flex-1 p-2 rounded-xl border-2 border-blue-100 text-sm focus:border-blue-300 outline-none transition-colors">
+                        <button onclick="addRewardVideo()"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors shadow-sm">
+                            Adicionar
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-2">Dica: Um vídeo será escolhido aleatoriamente ao completar
+                        uma fase.</p>
                 </div>
             </div>
 
@@ -340,7 +445,7 @@
             <!-- MODO QUIZ (NOVO) -->
             <div id="quizContainer" class="hidden w-full flex-col items-center justify-center flex-1">
                 <div class="mb-6 bg-white p-4 rounded-3xl border-4 border-purple-200 shadow-sm">
-                    <div id="quizImage" class="h-48 flex items-center justify-center text-8xl"></div>
+                    <div id="quizImage" class="h-40 flex items-center justify-center text-8xl"></div>
                 </div>
                 <div id="quizOptions" class="grid grid-cols-2 gap-4 w-full max-w-2xl px-4">
                     <!-- Options injected here -->
@@ -685,7 +790,7 @@
             }
             const item = presentationQueue[presentationIndex];
             let mediaHtml = item.image ?
-                `<img src="${pathImg + item.image}" class="max-h-60 mx-auto drop-shadow-md animate__animated animate__jackInTheBox" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"> <span style="display:none" class="text-9xl animate__animated animate__jackInTheBox">${item.emoji}</span>` :
+                `<img src="${pathImg + item.image}" class="max-h-48 mx-auto drop-shadow-md animate__animated animate__jackInTheBox" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"> <span style="display:none" class="text-9xl animate__animated animate__jackInTheBox">${item.emoji}</span>` :
                 `<span class="text-9xl animate__animated animate__jackInTheBox">${item.emoji}</span>`;
             let html = `<div class="bg-white border-4 border-purple-200 rounded-3xl p-8 mb-6 shadow-sm w-full max-w-lg mx-auto">${mediaHtml}</div><div class="text-7xl font-bold text-gray-600 tracking-widest uppercase mb-4 animate__animated animate__fadeInUp">${item.word}</div>`;
             document.getElementById('presentationTitle').textContent = "PALAVRAS NOVAS";
@@ -710,7 +815,28 @@
         }
 
         function prepareGameQueue() {
-            gameQueue = [...database[currentLevel].items].sort(() => Math.random() - 0.5);
+            // Separate "OI" from the rest to ensure it comes first (last in stack)
+            let allItems = [...database[currentLevel].items];
+            let greetingItem = null;
+
+            // Remove "OI" from the shuffle pool
+            allItems = allItems.filter(item => {
+                if (item.word === "OI") {
+                    greetingItem = item;
+                    return false;
+                }
+                return true;
+            });
+
+            // Shuffle the rest
+            gameQueue = allItems.sort(() => Math.random() - 0.5);
+
+            // Add "OI" back at the END of the array (so it is popped first)
+            // Ensure this only happens in relevant modes if needed, but if the item exists, it's likely intended.
+            if (greetingItem) {
+                gameQueue.push(greetingItem);
+            }
+
             if (isProgressiveMode && !isSecondPass) configHints = true;
             if (!isSecondPass) { phaseTotalAttempts = 0; phaseCorrectAttempts = 0; }
             updateStatsUI();
@@ -780,6 +906,11 @@
 
             const levelLetter = levels[currentLevel].title.replace("Letra ", "").trim();
 
+            // Auto-configure OI greeting if not explicitly set
+            if (currentItem.word === "OI" && (gameMode === 'DIALOGUE' || flowState === 'GAME_DIALOGUE')) {
+                if (!currentItem.question) currentItem.question = "OI 👋";
+            }
+
             if (currentItem.question) {
                 document.getElementById('gameInstruction').textContent = currentItem.question;
                 targetIndices = Array.from({ length: currentItem.word.length }, (_, i) => i);
@@ -787,6 +918,14 @@
                 document.getElementById('gameInstruction').textContent = "Complete a sílaba:";
                 targetIndices = findSyllableIndices(currentItem.word, levelLetter);
                 if (targetIndices.length === 0) targetIndices = Array.from({ length: currentItem.word.length }, (_, i) => i);
+            } else if (gameMode === 'DIALOGUE') {
+                // Better instruction for dialogue mode
+                if (currentItem.word === "OI") {
+                    document.getElementById('gameInstruction').textContent = "Responda ao professor:";
+                } else {
+                    document.getElementById('gameInstruction').textContent = "Digite sua resposta:";
+                }
+                targetIndices = Array.from({ length: currentItem.word.length }, (_, i) => i);
             } else {
                 document.getElementById('gameInstruction').textContent = "Escreva a palavra:";
                 targetIndices = Array.from({ length: currentItem.word.length }, (_, i) => i);
@@ -834,7 +973,7 @@
 
             const imgContainer = document.getElementById('gameImageContainer');
             if (currentItem.image) {
-                imgContainer.innerHTML = `<img src="${pathImg + currentItem.image}" class="max-h-full max-w-full object-contain animate__animated animate__fadeIn" onerror="this.outerHTML='<span class=\\'text-8xl\\'>${currentItem.emoji}</span>'">`;
+                imgContainer.innerHTML = `<img src="${pathImg + currentItem.image}" class="max-h-48 max-w-full object-contain animate__animated animate__fadeIn" onerror="this.outerHTML='<span class=\\'text-8xl\\'>${currentItem.emoji}</span>'">`;
             } else {
                 imgContainer.innerHTML = `<span class="text-8xl animate__animated animate__fadeIn">${currentItem.emoji}</span>`;
             }
@@ -917,7 +1056,7 @@
             if (gameMode === 'DIALOGUE') {
                 const chat = document.getElementById('chatGameContainer');
                 const userDiv = document.createElement('div');
-                userDiv.className = "chat-row chat-row-right animate__animated animate__fadeInRight";
+                userDiv.className = "chat-row chat-row-right message-sent";
                 const displayContent = (currentItem.emoji ? currentItem.emoji + " " : "") + currentItem.word;
                 userDiv.innerHTML = `
                     <div class="chat-bubble chat-bubble-right">
@@ -927,14 +1066,22 @@
                 `;
                 chat.appendChild(userDiv);
                 chat.scrollTop = chat.scrollHeight;
+
+                // Play the audio of the response word
+                setTimeout(() => {
+                    playAudio(currentItem.word);
+                }, 200);
             }
 
+            // Play appropriate sound effect
             if (levels[currentLevel].title === "Sons Animais" && gameMode !== 'QUIZ') {
                 playAudio(currentItem.word);
-            } else {
+            } else if (gameMode !== 'DIALOGUE') {
+                // Only play word win sound if not in dialogue mode (dialogue plays word audio)
                 document.getElementById('sndWordWin').currentTime = 0;
                 document.getElementById('sndWordWin').play();
             }
+
             score += 10;
             updateStatsUI();
             fireConfetti();
@@ -1102,12 +1249,38 @@
             } else if (gameMode === 'DIALOGUE') {
                 document.getElementById('chatGameContainer').classList.remove('hidden');
                 document.getElementById('chatGameContainer').classList.add('flex');
-                // Clear chat
-                document.getElementById('chatGameContainer').innerHTML = `
+
+                // Get contextual welcome message based on level
+                const lvlData = levels[currentLevel];
+                let welcomeMsg = "Vamos começar a conversa!";
+
+                if (lvlData.introTitle) {
+                    // Use introTitle to create contextual message
+                    const title = lvlData.introTitle;
+                    if (title.includes("som")) {
+                        welcomeMsg = "Vamos descobrir os sons! 🔊";
+                    } else if (title.includes("família")) {
+                        welcomeMsg = "Vamos falar sobre família! 👨‍👩‍👧‍👦";
+                    } else if (title.includes("Apresentação")) {
+                        welcomeMsg = "Vamos nos apresentar! 👋";
+                    } else if (title.includes("Transporte")) {
+                        welcomeMsg = "Vamos falar sobre transportes! 🚗";
+                    } else if (title.includes("Escola")) {
+                        welcomeMsg = "Vamos falar sobre a escola! 📚";
+                    } else if (title.includes("Corpo")) {
+                        welcomeMsg = "Vamos aprender sobre o corpo! 🙋";
+                    } else {
+                        welcomeMsg = `${title} 🎯`;
+                    }
+                }
+
+                // Clear chat and add welcome message with typing indicator
+                const chatContainer = document.getElementById('chatGameContainer');
+                chatContainer.innerHTML = `
                      <div class="chat-row chat-row-left animate__animated animate__fadeInLeft">
                         <div class="chat-avatar">🦉</div>
                         <div class="chat-bubble chat-bubble-left">
-                            Vamos começar a conversa!<br>Fase: ${levels[currentLevel].title}
+                            ${welcomeMsg}
                         </div>
                     </div>
                 `;
@@ -1213,33 +1386,61 @@
             // Append new Question bubble to chat
             const chat = document.getElementById('chatGameContainer');
 
-            const qDiv = document.createElement('div');
-            qDiv.className = "chat-row chat-row-left animate__animated animate__fadeInLeft";
+            // Special handling for OI - it's a greeting, not a Q&A
+            if (currentItem.word === "OI") {
+                const qDiv = document.createElement('div');
+                qDiv.className = "chat-row chat-row-left animate__animated animate__fadeInLeft";
 
-            let content = "";
-            if (currentItem.question) content = currentItem.question;
-            else content = "Como se escreve?";
+                qDiv.innerHTML = `
+                    <div class="chat-avatar">🦉</div>
+                    <div class="chat-bubble chat-bubble-left flex flex-col">
+                        <span>OI! 👋</span>
+                    </div>
+                `;
+                chat.appendChild(qDiv);
+                chat.scrollTop = chat.scrollHeight;
 
-            // Should we show image in chat?
-            let media = "";
-            if (currentItem.image) media = `<img src="${pathImg + currentItem.image}" class="max-w-[150px] rounded-lg mb-2 block">`;
-            else media = `<span class="text-4xl mr-2">${currentItem.emoji}</span>`;
-
-            qDiv.innerHTML = `
-                <div class="chat-avatar">🦉</div>
-                <div class="chat-bubble chat-bubble-left flex flex-col">
-                    ${media}
-                    <span>${content}</span>
-                </div>
-            `;
-            chat.appendChild(qDiv);
-            chat.scrollTop = chat.scrollHeight;
-
-            // Play question audio if available
-            if (currentItem.questionAudio) {
-                playFile(currentItem.questionAudio);
+                // Play OI audio after a short delay
+                setTimeout(() => playAudio("OI"), 300);
             } else {
-                playAudio(currentItem.word);
+                // Regular Q&A flow for other words
+                const qDiv = document.createElement('div');
+                qDiv.className = "chat-row chat-row-left animate__animated animate__fadeInLeft";
+
+                let content = "";
+                let media = "";
+
+                if (currentItem.question) {
+                    content = currentItem.question;
+                } else {
+                    content = "Como se escreve?";
+                }
+
+                // Enhanced media display with larger emojis
+                if (currentItem.image) {
+                    media = `<img src="${pathImg + currentItem.image}" class="max-w-[140px] rounded-xl mb-2 block shadow-md border-2 border-blue-100">`;
+                } else if (currentItem.emoji) {
+                    media = `<span class="text-6xl mb-2 block">${currentItem.emoji}</span>`;
+                }
+
+                qDiv.innerHTML = `
+                    <div class="chat-avatar">🦉</div>
+                    <div class="chat-bubble chat-bubble-left flex flex-col">
+                        ${media}
+                        <span>${content}</span>
+                    </div>
+                `;
+                chat.appendChild(qDiv);
+                chat.scrollTop = chat.scrollHeight;
+
+                // Play question audio after a delay
+                setTimeout(() => {
+                    if (currentItem.questionAudio) {
+                        playFile(currentItem.questionAudio);
+                    } else {
+                        playAudio(currentItem.word);
+                    }
+                }, 400);
             }
 
             // Prepare Input
@@ -1269,12 +1470,94 @@
         function fireConfetti() { for (let i = 0; i < 100; i++) particles.push({ x: window.innerWidth / 2, y: window.innerHeight / 2, vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15, size: Math.random() * 8 + 4, color: `hsl(${Math.random() * 360},100%,50%)`, life: 100 }); requestAnimationFrame(animateConfetti); }
         function animateConfetti() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles = particles.filter(p => p.life > 0); particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); }); if (particles.length > 0) requestAnimationFrame(animateConfetti); }
 
+        // --- SISTEMA DE PRÊMIOS (VÍDEOS) ---
+        function extractYouTubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : url;
+        }
+
+        function getRewardVideos() {
+            const videos = JSON.parse(localStorage.getItem('digita_reward_videos') || '["ZHKRxjwKnXM"]');
+            return videos;
+        }
+
+        function renderRewardVideosConfig() {
+            const container = document.getElementById('rewardVideosList');
+            const videos = getRewardVideos();
+            container.innerHTML = '';
+
+            document.getElementById('videoCountLabel').textContent = `${videos.length}/10`;
+
+            if (videos.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center text-gray-400 text-xs py-2 italic">Nenhum vídeo adicionado. O padrão será usado.</div>';
+            }
+
+            videos.forEach((vid, index) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between bg-blue-50 p-2 rounded-xl border border-blue-100 group hover:border-blue-200 transition-colors';
+                item.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-16 h-10 bg-gray-200 rounded-lg overflow-hidden shrink-0 shadow-sm border border-blue-100">
+                            <img src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex flex-col overflow-hidden">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">ID do Vídeo</span>
+                            <span class="text-xs font-mono text-blue-700 truncate">${vid}</span>
+                        </div>
+                    </div>
+                    <button onclick="removeRewardVideo(${index})" class="text-gray-400 hover:text-red-500 font-bold px-2 transition-colors">✕</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function addRewardVideo() {
+            const input = document.getElementById('newVideoInput');
+            let rawValue = input.value.trim();
+            if (!rawValue) return;
+
+            const videoId = extractYouTubeId(rawValue);
+            // Validar se o ID tem 11 caracteres (padrão YouTube)
+            if (videoId.length !== 11) {
+                alert("ID do vídeo inválido. Certifique-se de copiar o link correto do YouTube.");
+                return;
+            }
+
+            let videos = getRewardVideos();
+
+            if (videos.length >= 10) {
+                alert("Você já adicionou o limite de 10 vídeos.");
+                return;
+            }
+
+            if (!videos.includes(videoId)) {
+                videos.push(videoId);
+                localStorage.setItem('digita_reward_videos', JSON.stringify(videos));
+                renderRewardVideosConfig();
+            } else {
+                alert("Este vídeo já foi adicionado.");
+            }
+            input.value = '';
+        }
+
+        function removeRewardVideo(index) {
+            let videos = getRewardVideos();
+            videos.splice(index, 1);
+            localStorage.setItem('digita_reward_videos', JSON.stringify(videos));
+            renderRewardVideosConfig();
+        }
+
         function showVideoReward() {
-            // ID do vídeo: ZHKRxjwKnXM (Mundo Bita - Vento Ventania)
-            const videoId = "ZHKRxjwKnXM";
+            let videos = getRewardVideos();
+            if (videos.length === 0) videos = ["ZHKRxjwKnXM"];
+
+            const randomIndex = Math.floor(Math.random() * videos.length);
+            const videoId = videos[randomIndex];
+
             const iframe = document.getElementById('videoFrame');
             // autoplay=1 para tocar ao abrir
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
             showScreen('VIDEO');
         }
 
@@ -1289,6 +1572,9 @@
         window.onload = function () {
             console.log("Window loaded. Checking gameData...");
             const grid = document.getElementById('levelsGrid');
+
+            // Renderizar config de vídeos
+            renderRewardVideosConfig();
 
             if (window.gameData) {
                 console.log("gameData found.");

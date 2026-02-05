@@ -2,7 +2,7 @@ console.log('gameData.js executed');
 window.gameData = {
     "levels": {
         "0": {
-            "title": "Quiz: Vogais",
+            "title": "🤷❓ A E I O U",
             "unlock": [],
             "syllables": [
                 "A",
@@ -15,7 +15,7 @@ window.gameData = {
             "type": "quiz"
         },
         "1": {
-            "title": "Vogais",
+            "title": "A E I O U",
             "unlock": [
                 "A",
                 "E",
@@ -43,7 +43,7 @@ window.gameData = {
             "color": "bg-pink-100 border-pink-300 text-pink-600"
         },
         "2": {
-            "title": "Quiz: Letra B",
+            "title": "🤷❓ Letra B",
             "unlock": [],
             "syllables": [
                 "BA",
@@ -70,7 +70,7 @@ window.gameData = {
             "color": "bg-blue-100 border-blue-300 text-blue-600"
         },
         "4": {
-            "title": "Quiz: Letra T",
+            "title": "🤷❓ Letra T",
             "unlock": [],
             "syllables": [
                 "TA",
@@ -97,7 +97,7 @@ window.gameData = {
             "color": "bg-green-100 border-green-300 text-green-600"
         },
         "6": {
-            "title": "Quiz: Letra P",
+            "title": "🤷❓ Letra P",
             "unlock": [],
             "syllables": [
                 "PA",
@@ -124,7 +124,7 @@ window.gameData = {
             "color": "bg-yellow-100 border-yellow-300 text-yellow-600"
         },
         "8": {
-            "title": "Quiz: Letra D",
+            "title": "🤷❓ Letra D",
             "unlock": [],
             "syllables": [
                 "DA",
@@ -151,7 +151,7 @@ window.gameData = {
             "color": "bg-purple-100 border-purple-300 text-purple-600"
         },
         "10": {
-            "title": "Quiz: Letra F",
+            "title": "🤷‍♀️❓ Letra F",
             "unlock": [],
             "syllables": [
                 "FA",
@@ -178,7 +178,7 @@ window.gameData = {
             "color": "bg-red-100 border-red-300 text-red-600"
         },
         "12": {
-            "title": "Quiz: Letra V",
+            "title": "🤷‍♀️❓ Letra V",
             "unlock": [],
             "syllables": [
                 "VA",
@@ -205,7 +205,7 @@ window.gameData = {
             "color": "bg-teal-100 border-teal-300 text-teal-600"
         },
         "14": {
-            "title": "Quiz: Letra M",
+            "title": "🤷‍♀️❓ Letra M",
             "unlock": [],
             "syllables": [
                 "MA",
@@ -232,7 +232,7 @@ window.gameData = {
             "color": "bg-orange-100 border-orange-300 text-orange-600"
         },
         "16": {
-            "title": "Quiz: Sons Animais",
+            "title": "🤷‍♀️❓ 🔊 🐈🐶🐮",
             "type": "quiz",
             "introTitle": "Quem faz esse som?",
             "unlock": [],
@@ -246,11 +246,12 @@ window.gameData = {
             "color": "bg-amber-100 border-amber-300 text-amber-800"
         },
         "17": {
-            "title": "Sons Animais",
+            "title": "🔊 🐈🐶🐮",
             "type": "dialogue",
             "introTitle": "Quem faz esse som?",
             "unlock": [],
             "syllables": [
+                "OI",
                 "MIAU",
                 "AU",
                 "MUU",
@@ -265,15 +266,16 @@ window.gameData = {
             "introTitle": "Quem é da família?",
             "unlock": [],
             "syllables": [
-                "PAPAI",
-                "MAMÃE",
+                "OI",
+                "PAI",
+                "MÃE",
                 "BEBÊ",
                 "VOVÓ"
             ],
             "color": "bg-blue-50 border-blue-300 text-blue-800"
         },
         "19": {
-            "title": "Quiz: Letra N",
+            "title": "🤷‍♀️❓ Letra N",
             "unlock": [],
             "syllables": [
                 "NA",
@@ -300,7 +302,7 @@ window.gameData = {
             "color": "bg-indigo-100 border-indigo-300 text-indigo-600"
         },
         "21": {
-            "title": "Quiz: Letra L",
+            "title": "🤷‍♀️❓ Letra L",
             "unlock": [],
             "syllables": [
                 "LA",
@@ -327,7 +329,7 @@ window.gameData = {
             "color": "bg-lime-100 border-lime-300 text-lime-600"
         },
         "23": {
-            "title": "Quiz: Letra J",
+            "title": "🤷‍♀️❓ Letra J",
             "unlock": [],
             "syllables": [
                 "JA",
@@ -354,7 +356,7 @@ window.gameData = {
             "color": "bg-cyan-100 border-cyan-300 text-cyan-600"
         },
         "25": {
-            "title": "Quiz: Letra C",
+            "title": "🤷‍♀️❓ Letra C",
             "unlock": [],
             "syllables": [
                 "CA",
@@ -377,7 +379,7 @@ window.gameData = {
             "color": "bg-rose-100 border-rose-300 text-rose-600"
         },
         "27": {
-            "title": "Quiz: Letra S",
+            "title": "🤷‍♀️❓ Letra S",
             "unlock": [],
             "syllables": [
                 "SA",
@@ -404,7 +406,7 @@ window.gameData = {
             "color": "bg-sky-100 border-sky-300 text-sky-600"
         },
         "29": {
-            "title": "Quiz: Apresentação",
+            "title": "🤷‍♀️❓ Apresentação",
             "type": "quiz",
             "introTitle": "Apresentação",
             "unlock": [],
@@ -428,7 +430,7 @@ window.gameData = {
             "color": "bg-amber-100 border-amber-300 text-amber-800"
         },
         "31": {
-            "title": "Quiz: Letra R",
+            "title": "🤷‍♀️❓ Letra R",
             "unlock": [],
             "syllables": [
                 "RA",
@@ -455,7 +457,7 @@ window.gameData = {
             "color": "bg-fuchsia-100 border-fuchsia-300 text-fuchsia-600"
         },
         "33": {
-            "title": "Quiz: Letra G",
+            "title": "🤷‍♀️❓ Letra G",
             "unlock": [],
             "syllables": [
                 "GA",
@@ -478,7 +480,7 @@ window.gameData = {
             "color": "bg-emerald-100 border-emerald-300 text-emerald-600"
         },
         "35": {
-            "title": "Quiz: Letra Z",
+            "title": "🤷‍♀️❓ Letra Z",
             "unlock": [],
             "syllables": [
                 "ZA",
@@ -505,7 +507,7 @@ window.gameData = {
             "color": "bg-slate-100 border-slate-300 text-slate-600"
         },
         "37": {
-            "title": "Quiz: Letra X",
+            "title": "🤷‍♀️❓ Letra X",
             "unlock": [],
             "syllables": [
                 "XA",
@@ -532,7 +534,7 @@ window.gameData = {
             "color": "bg-zinc-100 border-zinc-300 text-zinc-600"
         },
         "39": {
-            "title": "Quiz: Letra H",
+            "title": "🤷‍♀️❓ Letra H",
             "unlock": [],
             "syllables": [
                 "HA",
@@ -559,7 +561,7 @@ window.gameData = {
             "color": "bg-amber-100 border-amber-300 text-amber-600"
         },
         "41": {
-            "title": "Quiz: Letra Q",
+            "title": "🤷‍♀️❓ Letra Q",
             "unlock": [],
             "syllables": [
                 "QUA",
@@ -594,7 +596,7 @@ window.gameData = {
             "color": "bg-green-100 border-green-300 text-green-700"
         },
         "44": {
-            "title": "Quiz: Corpo",
+            "title": "🤷‍♀️❓ Corpo",
             "type": "quiz",
             "introTitle": "Corpo Humano",
             "unlock": [],
@@ -611,6 +613,7 @@ window.gameData = {
             "introTitle": "Corpo Humano",
             "unlock": [],
             "syllables": [
+                "OI",
                 "MÃO",
                 "PÉ",
                 "BOCA"
@@ -618,7 +621,7 @@ window.gameData = {
             "color": "bg-orange-100 border-orange-300 text-orange-700"
         },
         "46": {
-            "title": "Quiz: CH",
+            "title": "🤷‍♀️❓ CH",
             "unlock": [],
             "syllables": [
                 "CHA",
@@ -646,7 +649,7 @@ window.gameData = {
             "color": "bg-teal-100 border-teal-300 text-teal-700"
         },
         "48": {
-            "title": "Quiz: LH",
+            "title": "🤷‍♀️❓ LH",
             "unlock": [],
             "syllables": [
                 "LHA",
@@ -674,7 +677,7 @@ window.gameData = {
             "color": "bg-lime-100 border-lime-300 text-lime-700"
         },
         "50": {
-            "title": "Quiz: NH",
+            "title": "🤷‍♀️❓ NH",
             "unlock": [],
             "syllables": [
                 "NHA",
@@ -702,7 +705,7 @@ window.gameData = {
             "color": "bg-indigo-100 border-indigo-300 text-indigo-700"
         },
         "52": {
-            "title": "Quiz: Transportes",
+            "title": "🤷‍♀️❓ Transportes",
             "type": "quiz",
             "introTitle": "Meios de Transporte",
             "unlock": [],
@@ -719,6 +722,7 @@ window.gameData = {
             "introTitle": "Meios de Transporte",
             "unlock": [],
             "syllables": [
+                "OI",
                 "CARRO",
                 "TREM",
                 "MOTO"
@@ -726,7 +730,7 @@ window.gameData = {
             "color": "bg-blue-100 border-blue-300 text-blue-700"
         },
         "54": {
-            "title": "Quiz: Escola",
+            "title": "🤷‍♀️❓ Escola",
             "type": "quiz",
             "introTitle": "Material Escolar",
             "unlock": [],
@@ -743,6 +747,7 @@ window.gameData = {
             "introTitle": "Material Escolar",
             "unlock": [],
             "syllables": [
+                "OI",
                 "LÁPIS",
                 "MESA",
                 "LIVRO"
@@ -750,7 +755,7 @@ window.gameData = {
             "color": "bg-yellow-100 border-yellow-300 text-yellow-700"
         },
         "56": {
-            "title": "Quiz: RR",
+            "title": "🤷‍♀️❓ RR",
             "unlock": [],
             "syllables": [
                 "RRA",
@@ -777,7 +782,7 @@ window.gameData = {
             "color": "bg-rose-200 border-rose-400 text-rose-800"
         },
         "58": {
-            "title": "Quiz: SS",
+            "title": "🤷‍♀️❓ SS",
             "unlock": [],
             "syllables": [
                 "SSA",
@@ -809,6 +814,7 @@ window.gameData = {
             "introTitle": "Vamos brincar?",
             "unlock": [],
             "syllables": [
+                "OI",
                 "BOLA",
                 "BONECA",
                 "DADO",
@@ -817,7 +823,7 @@ window.gameData = {
             "color": "bg-yellow-50 border-yellow-300 text-yellow-800"
         },
         "61": {
-            "title": "Quiz: Cedilha Ç",
+            "title": "🤷‍♀️❓ Cedilha Ç",
             "unlock": [],
             "syllables": [
                 "ÇA",
@@ -840,7 +846,7 @@ window.gameData = {
             "color": "bg-fuchsia-200 border-fuchsia-400 text-fuchsia-800"
         },
         "63": {
-            "title": "Quiz: Casa",
+            "title": "🤷‍♀️❓ Casa",
             "type": "quiz",
             "introTitle": "Objetos de Casa",
             "unlock": [],
@@ -864,7 +870,7 @@ window.gameData = {
             "color": "bg-orange-50 border-orange-300 text-orange-800"
         },
         "65": {
-            "title": "Quiz: Sentimentos",
+            "title": "🤷‍♀️❓ Sentimentos",
             "type": "quiz",
             "introTitle": "Como você está?",
             "unlock": [],
@@ -888,7 +894,7 @@ window.gameData = {
             "color": "bg-yellow-200 border-yellow-400 text-yellow-800"
         },
         "67": {
-            "title": "Quiz: AR ER IR",
+            "title": "🤷‍♀️❓ AR ER IR",
             "unlock": [],
             "syllables": [
                 "AR",
@@ -915,7 +921,7 @@ window.gameData = {
             "color": "bg-orange-200 border-orange-400 text-orange-800"
         },
         "69": {
-            "title": "Quiz: AL EL IL",
+            "title": "🤷‍♀️❓ AL EL IL",
             "unlock": [],
             "syllables": [
                 "AL",
@@ -947,6 +953,7 @@ window.gameData = {
             "introTitle": "Hora de comer!",
             "unlock": [],
             "syllables": [
+                "OI",
                 "BOLO",
                 "BATATA",
                 "BIFE",
@@ -955,7 +962,7 @@ window.gameData = {
             "color": "bg-green-50 border-green-300 text-green-800"
         },
         "72": {
-            "title": "Quiz: AN EN IN",
+            "title": "🤷‍♀️❓ AN EN IN",
             "unlock": [],
             "syllables": [
                 "AN",
@@ -982,7 +989,7 @@ window.gameData = {
             "color": "bg-purple-200 border-purple-400 text-purple-800"
         },
         "74": {
-            "title": "Quiz: Natureza",
+            "title": "🤷‍♀️❓ Natureza",
             "type": "quiz",
             "introTitle": "Natureza",
             "unlock": [],
@@ -999,6 +1006,7 @@ window.gameData = {
             "introTitle": "Natureza",
             "unlock": [],
             "syllables": [
+                "OI",
                 "SOL",
                 "MAR",
                 "FLOR"
@@ -1006,7 +1014,7 @@ window.gameData = {
             "color": "bg-green-200 border-green-400 text-green-800"
         },
         "76": {
-            "title": "Quiz: Ações",
+            "title": "🤷‍♀️❓ Ações",
             "type": "quiz",
             "introTitle": "O que estão fazendo?",
             "unlock": [],
@@ -1030,7 +1038,7 @@ window.gameData = {
             "color": "bg-pink-200 border-pink-400 text-pink-800"
         },
         "78": {
-            "title": "Quiz: Letra K",
+            "title": "🤷‍♀️❓ Letra K",
             "unlock": [],
             "syllables": [
                 "KA",
@@ -1057,7 +1065,7 @@ window.gameData = {
             "color": "bg-red-200 border-red-400 text-red-800"
         },
         "80": {
-            "title": "Quiz: Letra W",
+            "title": "🤷‍♀️❓ Letra W",
             "unlock": [],
             "syllables": [
                 "WA",
@@ -1084,7 +1092,7 @@ window.gameData = {
             "color": "bg-blue-200 border-blue-400 text-blue-800"
         },
         "82": {
-            "title": "Quiz: Letra Y",
+            "title": "🤷‍♀️❓ Letra Y",
             "unlock": [],
             "syllables": [
                 "YA",
@@ -1480,6 +1488,10 @@ window.gameData = {
         "17": {
             "items": [
                 {
+                    "word": "OI",
+                    "emoji": "👋​"
+                },
+                {
                     "word": "MIAU",
                     "emoji": "🐈🔊",
                     "question": "Que som o gato faz? 🤷‍♀️ 🔊 🐈❓",
@@ -1514,20 +1526,32 @@ window.gameData = {
         "18": {
             "items": [
                 {
-                    "word": "PAPAI",
-                    "emoji": "🧔🏽👨🏽‍🍼"
+                    "word": "OI",
+                    "emoji": "👋​"
                 },
                 {
-                    "word": "MAMÃE",
+                    "word": "PAI",
+                    "emoji": "🧔🏽👨🏽‍🍼"
+                    "question": "Quem é o Homen da familia? 🤷‍♂️👤 👨 👨‍👩‍👧‍👦❓"
+                    "questionAudio": "quemehomenfamilia"
+                },
+                {
+                    "word": "MÃE",
                     "emoji": "👩🏽👩🏽‍🍼"
+                    "question": "Quem é a mulher da familia? 🤷‍♀️👤 👩 👨‍👩‍👧‍👦❓"
+                    "questionAudio": "quememulherfamilia"
                 },
                 {
                     "word": "BEBÊ",
                     "emoji": "👶"
+                    "question": "Quem é o bebê da familia? 🤷‍♂️👤 👶 👨‍👩‍👧‍👦❓"
+                    "questionAudio": "quemebebefamilia"
                 },
                 {
                     "word": "VOVÓ",
                     "emoji": "👵🏻"
+                    "question": "Quem é a vovó da familia? 🤷‍♀️👤 👵 👨‍👩‍👧‍👦❓"
+                    "questionAudio": "quemevovofamilia"
                 }
             ]
         },
@@ -1737,9 +1761,7 @@ window.gameData = {
             "items": [
                 {
                     "word": "OI",
-                    "emoji": "👋​",
-                    "question": "OI 👋​",
-                    "questionAudio": "OI"
+                    "emoji": "👋​"
                 },
                 {
                     "word": "DIANA",
@@ -1759,9 +1781,7 @@ window.gameData = {
             "items": [
                 {
                     "word": "OI",
-                    "emoji": "👋​",
-                    "question": "OI 👋​",
-                    "questionAudio": "OI"
+                    "emoji": "👋​"
                 },
                 {
                     "word": "DIANA",
@@ -2068,6 +2088,10 @@ window.gameData = {
         "45": {
             "items": [
                 {
+                    "word": "OI",
+                    "emoji": "👋​"
+                },
+                {
                     "word": "MÃO",
                     "emoji": "✋"
                 },
@@ -2308,6 +2332,10 @@ window.gameData = {
         "53": {
             "items": [
                 {
+                    "word": "OI",
+                    "emoji": "👋​"
+                },
+                {
                     "word": "CARRO",
                     "emoji": "🚗"
                 },
@@ -2355,6 +2383,10 @@ window.gameData = {
         },
         "55": {
             "items": [
+                {
+                    "word": "OI",
+                    "emoji": "👋​"
+                },
                 {
                     "word": "LÁPIS",
                     "emoji": "✏️"
@@ -2433,6 +2465,10 @@ window.gameData = {
         },
         "60": {
             "items": [
+                {
+                    "word": "OI",
+                    "emoji": "👋"
+                },
                 {
                     "word": "BOLA",
                     "emoji": "⚽"
@@ -2526,6 +2562,10 @@ window.gameData = {
         "64": {
             "items": [
                 {
+                    "word": "OI",
+                    "emoji": "👋"
+                },
+                {
                     "word": "LAÇO",
                     "emoji": "🎀"
                 },
@@ -2573,6 +2613,10 @@ window.gameData = {
         },
         "66": {
             "items": [
+                {
+                    "word": "OI",
+                    "emoji": "👋"
+                },
                 {
                     "word": "SOFÁ",
                     "emoji": "🛋️"
@@ -2694,6 +2738,10 @@ window.gameData = {
         "71": {
             "items": [
                 {
+                    "word": "OI",
+                    "emoji": "👋"
+                },
+                {
                     "word": "BOLO",
                     "emoji": "🎂"
                 },
@@ -2786,6 +2834,10 @@ window.gameData = {
         "75": {
             "items": [
                 {
+                    "word": "OI",
+                    "emoji": "👋"
+                },
+                {
                     "word": "ANJO",
                     "emoji": "👼"
                 },
@@ -2833,6 +2885,10 @@ window.gameData = {
         },
         "77": {
             "items": [
+                {
+                    "word": "OI",
+                    "emoji": "👋"
+                },
                 {
                     "word": "FLOR",
                     "emoji": "🌸"
