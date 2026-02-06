@@ -319,7 +319,7 @@
     <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-[60]"></canvas>
 
     <!-- TELA DE SETUP / SELEÇÃO DE FASES -->
-    <div id="screenSetup" class="absolute inset-0 z-[100] bg-white flex flex-col animate__animated animate__fadeIn">
+    <div id="screenSetup" class="absolute inset-0 z-[100] bg-white flex flex-col">
         <!-- Cabeçalho -->
         <div class="bg-blue-500 p-4 shadow-md z-10 shrink-0 flex justify-between items-center">
             <div>
@@ -336,17 +336,17 @@
         <div class="flex-1 overflow-y-auto level-grid-scroll p-4 pb-24 bg-blue-50">
 
             <!-- Painel de Configurações -->
-            <div class="bg-white rounded-2xl p-4 mb-6 border-2 border-blue-100 shadow-sm mx-auto max-w-2xl">
+            <div class="bg-white rounded-xl p-4 mb-6 border border-blue-100 mx-auto max-w-2xl">
                 <div class="flex flex-wrap gap-4 justify-center md:justify-between items-center">
 
                     <!-- Dificuldade -->
                     <div class="flex flex-col">
                         <span class="text-sm font-bold text-gray-500 mb-1">Dificuldade para passar:</span>
                         <select id="difficultySelect"
-                            class="p-2 rounded-lg border-2 border-blue-200 text-gray-600 font-bold bg-blue-50 text-sm">
-                            <option value="0">Muito Fácil (Passa Sempre)</option>
+                            class="p-2 rounded-lg border border-blue-200 text-gray-600 font-bold bg-white text-sm">
+                            <option value="0" selected>Muito Fácil (Passa Sempre)</option>
                             <option value="50">Fácil (> 50%)</option>
-                            <option value="70" selected>Médio (> 70%)</option>
+                            <option value="70">Médio (> 70%)</option>
                             <option value="80">Difícil (> 80%)</option>
                         </select>
                     </div>
@@ -355,7 +355,7 @@
                     <div class="flex flex-col">
                         <span class="text-sm font-bold text-gray-500 mb-1">Modo de Ajuda:</span>
                         <select id="helpModeSelect"
-                            class="p-2 rounded-lg border-2 border-green-200 text-green-700 font-bold bg-green-50 text-sm">
+                            class="p-2 rounded-lg border border-green-200 text-green-700 font-bold bg-white text-sm">
                             <option value="NORMAL">Normal (Sem Dicas)</option>
                             <option value="HINTS">Dicas Visuais</option>
                             <option value="LEARN" selected>Modo Aprender (Progressivo)</option>
@@ -475,7 +475,7 @@
             <div id="successOverlay"
                 class="hidden absolute inset-0 z-40 bg-white/95 flex flex-col items-center justify-center animate__animated animate__fadeIn">
                 <div id="feedbackMessage"
-                    class="text-5xl md:text-6xl font-black text-green-500 mb-8 drop-shadow-sm animate__animated animate__rubberBand">
+                    class="text-5xl md:text-6xl font-black text-green-500 mb-8 drop-shadow-sm animate__animated animate__pulse">
                     MUITO BEM! 🎉</div>
                 <button onclick="nextGameItem()"
                     class="bg-green-500 hover:bg-green-400 text-white text-3xl font-bold py-6 px-12 rounded-3xl shadow-[0_10px_0_rgb(21,128,61)] active:shadow-none active:translate-y-2 transition-all uppercase tracking-widest animate__animated animate__pulse animate__infinite">
@@ -602,7 +602,7 @@
                 const levelData = levels[i];
 
                 const card = document.createElement('div');
-                card.className = `level-card bg-white border-b-4 rounded-2xl p-4 flex flex-col items-center justify-between min-h-[140px] shadow-sm cursor-pointer select-none ${isLocked ? 'level-locked bg-gray-100 border-gray-300' : levelData.color.replace('bg-', 'hover:bg-opacity-80 border-')}`;
+                card.className = `level-card bg-white border-b-4 rounded-xl p-4 flex flex-col items-center justify-between min-h-[140px] cursor-pointer select-none ${isLocked ? 'level-locked bg-gray-100 border-gray-300' : levelData.color.replace('bg-', 'hover:bg-opacity-80 border-')}`;
 
                 let titleDisplay = levelData.title;
                 if (titleDisplay.startsWith("Letra ")) titleDisplay = titleDisplay.replace('Letra ', '');
@@ -1022,7 +1022,7 @@
                 if (box) {
                     box.textContent = targetChar;
                     box.classList.remove('active-box');
-                    box.classList.add('correct', 'animate__animated', 'animate__bounceIn');
+                    box.classList.add('correct');
                 }
 
                 document.getElementById('sndCorrect').currentTime = 0;
@@ -1473,7 +1473,7 @@
         window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
         function fireConfetti() {
-            for (let i = 0; i < 100; i++) particles.push({ x: window.innerWidth / 2, y: window.innerHeight / 2, vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15, size: Math.random() * 8 + 4, color: `hsl(${Math.random() * 360},100%,50%)`, life: 100 });
+            for (let i = 0; i < 30; i++) particles.push({ x: window.innerWidth / 2, y: window.innerHeight / 2, vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15, size: Math.random() * 8 + 4, color: `hsl(${Math.random() * 360},100%,50%)`, life: 100 });
             if (!isAnimatingConfetti) {
                 isAnimatingConfetti = true;
                 requestAnimationFrame(animateConfetti);
@@ -1522,7 +1522,7 @@
                 item.innerHTML = `
                     <div class="flex items-center gap-3 overflow-hidden">
                         <div class="w-16 h-10 bg-gray-200 rounded-lg overflow-hidden shrink-0 shadow-sm border border-blue-100">
-                            <img src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" class="w-full h-full object-cover">
+                            <img src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" class="w-full h-full object-cover" loading="lazy">
                         </div>
                         <div class="flex flex-col overflow-hidden">
                             <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">ID do Vídeo</span>
