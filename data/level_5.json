@@ -1,0 +1,22 @@
+{
+    "items": [
+        {
+            "word": "TATU",
+            "image": "tatu.png",
+            "emoji": "🦔"
+        },
+        {
+            "word": "TUTU",
+            "image": "tutu.png",
+            "emoji": "🩰"
+        },
+        {
+            "word": "BOTA",
+            "emoji": "👢"
+        },
+        {
+            "word": "TEIA",
+            "emoji": "🕸️"
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "items": [
+        {
+            "word": "SOFÁ",
+            "emoji": "🛋️"
+        },
+        {
+            "word": "PORTA",
+            "emoji": "🚪"
+        },
+        {
+            "word": "JANELA",
+            "emoji": "🪟"
+        },
+        {
+            "word": "TETO",
+            "emoji": "🏠"
+        },
+        {
+            "word": "PAREDE",
+            "emoji": "🧱"
+        }
+    ]
+}

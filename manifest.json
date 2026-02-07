@@ -1,0 +1,21 @@
+{
+    "name": "Digita TEA",
+    "short_name": "Digita TEA",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#f0f9ff",
+    "theme_color": "#3b82f6",
+    "orientation": "landscape",
+    "icons": [
+        {
+            "src": "game_icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "game_icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

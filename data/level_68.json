@@ -1,0 +1,24 @@
+{
+    "items": [
+        {
+            "word": "FELIZ",
+            "emoji": "😊"
+        },
+        {
+            "word": "TRISTE",
+            "emoji": "😢"
+        },
+        {
+            "word": "BRAVO",
+            "emoji": "😠"
+        },
+        {
+            "word": "MEDO",
+            "emoji": "😨"
+        },
+        {
+            "word": "AMOR",
+            "emoji": "❤️"
+        }
+    ]
+}

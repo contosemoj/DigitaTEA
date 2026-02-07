@@ -1,0 +1,24 @@
+{
+    "items": [
+        {
+            "word": "CARRO",
+            "emoji": "🚗"
+        },
+        {
+            "word": "AVIÃO",
+            "emoji": "✈️"
+        },
+        {
+            "word": "TREM",
+            "emoji": "🚂"
+        },
+        {
+            "word": "MOTO",
+            "emoji": "🏍️"
+        },
+        {
+            "word": "ÔNIBUS",
+            "emoji": "🚌"
+        }
+    ]
+}

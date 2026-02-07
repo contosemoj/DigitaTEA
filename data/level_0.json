@@ -1,0 +1,21 @@
+{
+    "items": [
+        {
+            "word": "OI",
+            "emoji": "👋"
+        },
+        {
+            "word": "AI",
+            "emoji": "🤕🗣️"
+        },
+        {
+            "word": "EU",
+            "image": "eu.jpg",
+            "emoji": "🙋"
+        },
+        {
+            "word": "AU",
+            "emoji": "🐶🔊"
+        }
+    ]
+}

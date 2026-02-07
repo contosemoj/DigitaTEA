@@ -1,0 +1,48 @@
+{
+    "items": [
+        {
+            "word": "AMARELA",
+            "emoji": "🟡​",
+            "question": "QUAL É A COR DO BANANA? 🤷‍♂️ 🎨 ​🍌​​​❓",
+            "questionAudio": "qualcorbanana"
+        },
+        {
+            "word": "ROSA",
+            "emoji": "🌸",
+            "question": "QUAL É A COR DO ROSA? 🤷‍♂️ 🎨 🌸❓",
+            "questionAudio": "qualcorrosa"
+        },
+        {
+            "word": "VERDE",
+            "emoji": "🟢",
+            "question": "QUAL É A COR DO PEPINO? 🤷‍♂️ 🎨 ​🥒❓",
+            "questionAudio": "qualcorpepino"
+        },
+        {
+            "word": "VERMELHO",
+            "emoji": "🔴",
+            "question": "QUAL É A COR DO MORANGO? 🤷‍♂️ 🎨 ​🍓❓",
+            "questionAudio": "qualcormorango"
+        },
+        {
+            "word": "NINHO",
+            "emoji": "🪺"
+        },
+        {
+            "word": "UNHA",
+            "emoji": "💅"
+        },
+        {
+            "word": "SONHO",
+            "emoji": "😴"
+        },
+        {
+            "word": "BANHO",
+            "emoji": "🛁"
+        },
+        {
+            "word": "ARANHA",
+            "emoji": "🕷️"
+        }
+    ]
+}

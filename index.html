@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link rel="icon" type="image/png" href="game_icon.png">
+    <link rel="manifest" href="manifest.json">
+    <script src="sw-register.js"></script>
 
     <style>
         body {
@@ -517,7 +519,7 @@
 
         // --- DADOS DAS FASES ---
         let levels = {};
-        let database = {};
+        let currentLevelData = []; // Only load current level data
 
         // --- VARIÁVEIS DE ESTADO ---
         let gameMode = 'SYLLABLES'; // 'SYLLABLES', 'DIALOGUE', 'QUIZ'
@@ -581,8 +583,19 @@
         }
 
         // --- INICIALIZAÇÃO E MENU ---
-        window.onload = function () {
-            renderLevelGrid();
+        window.onload = async function () {
+            try {
+                const response = await fetch('data/levels.json');
+                if (!response.ok) throw new Error("Erro ao carregar levels.json");
+                levels = await response.json();
+                renderLevelGrid();
+
+                // Renderizar config de vídeos (movemos para cá para garantir carga)
+                renderRewardVideosConfig();
+            } catch (e) {
+                console.error("Critical Error loading levels:", e);
+                document.getElementById('levelsGrid').innerHTML = `<div class="col-span-full text-center text-red-500 font-bold p-10">Erro ao carregar fases. Tente recarregar a página.<br>${e.message}</div>`;
+            }
         };
 
         function goToMenu() {
@@ -636,21 +649,14 @@
         function startGameFromMenu(lvl) {
             const helpMode = document.getElementById('helpModeSelect').value;
 
-            // Reset vars
-            configHints = false;
             isProgressiveMode = false;
 
-            if (helpMode === 'HINTS') {
-                configHints = true;
-            } else if (helpMode === 'LEARN') {
-                configHints = true; // Typically implies hints are allowed or handled by logic
-                isProgressiveMode = true;
-            }
-            // IF NORMAL: both false
+            // Show loading state if needed, but fetch is fast enough usually.
+            document.body.style.cursor = 'wait';
 
-            difficultyThreshold = parseInt(document.getElementById('difficultySelect').value);
-            // gameMode derived in initLevel
-            initLevel(lvl);
+            initLevel(lvl).finally(() => {
+                document.body.style.cursor = 'default';
+            });
         }
 
         function showScreen(screenName) {
@@ -668,7 +674,24 @@
             else if (screenName === 'VIDEO') document.getElementById('screenVideo').classList.remove('hidden');
         }
 
-        function initLevel(lvl) {
+        async function initLevel(lvl) {
+            try {
+                // Clear previous level data to free memory
+                currentLevelData = [];
+                if (window.gc) window.gc(); // Hint to browser if available (usually not in standard JS but good intent)
+
+                // Fetch new level data
+                const response = await fetch(`data/level_${lvl}.json`);
+                if (!response.ok) throw new Error(`Fase ${lvl} não encontrada.`);
+                currentLevelData = await response.json(); // Data loaded from level_X.json
+            } catch (e) {
+                console.error("Error loading level:", e);
+                alert("Erro ao carregar a fase. Verifique sua conexão.");
+                goToMenu();
+                return;
+            }
+
+            // Continue with setup
             // Reset configuration from user selection (persists across levels)
             const helpModeSelect = document.getElementById('helpModeSelect');
             const helpMode = helpModeSelect ? helpModeSelect.value.trim() : 'NORMAL';
@@ -681,11 +704,14 @@
 
             currentLevel = lvl;
             isSecondPass = false;
-            if (!database[currentLevel]) {
-                alert("Parabéns! Fim do Jogo.");
+
+            // Validation already done via fetch catch block somewhat, but let's check items
+            if (!currentLevelData || !currentLevelData.items) {
+                alert("Dados da fase corrompidos.");
                 goToMenu();
                 return;
             }
+
             learnedLetters = new Set();
             for (let i = 0; i <= currentLevel; i++) {
                 if (levels[i] && levels[i].unlock) levels[i].unlock.forEach(l => learnedLetters.add(l));
@@ -776,7 +802,7 @@
 
         function startPresentationWords() {
             flowState = 'PRES';
-            presentationQueue = [...database[currentLevel].items];
+            presentationQueue = [...currentLevelData.items];
             presentationIndex = 0;
             showNextPresentationWord();
         }
@@ -814,8 +840,8 @@
         }
 
         function prepareGameQueue() {
-            // Separate "OI" from the rest to ensure it comes first (last in stack)
-            let allItems = [...database[currentLevel].items];
+            // Updated to use currentLevelItems instead of database global
+            let allItems = [...currentLevelData.items];
             let greetingItem = null;
 
             // Remove "OI" from the shuffle pool
@@ -899,7 +925,7 @@
             }
 
             currentItem = gameQueue.pop();
-            const total = database[currentLevel].items.length;
+            const total = currentLevelData.items.length;
             const progress = ((total - gameQueue.length) / total) * 100;
             document.getElementById('progressBar').style.width = `${progress}%`;
 
@@ -950,7 +976,7 @@
         }
 
         function startSecondPass() {
-            gameQueue = [...database[currentLevel].items].sort(() => Math.random() - 0.5);
+            gameQueue = [...currentLevelData.items].sort(() => Math.random() - 0.5);
             phaseTotalAttempts = 0;
             phaseCorrectAttempts = 0;
             updateStatsUI();
@@ -1235,6 +1261,42 @@
             }
         };
 
+        // --- MEMORY AND CRASH PROTECTION ---
+
+        // Helper to force clear DOM elements
+        function clearElement(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                while (el.firstChild) {
+                    el.removeChild(el.firstChild);
+                }
+            }
+        }
+
+        function safeGameLoopWrapper(fn) {
+            return function (...args) {
+                try {
+                    return fn(...args);
+                } catch (e) {
+                    console.error("Game Loop Error:", e);
+                    // Minimal recovery: Go to menu
+                    alert("Ocorreu um erro inesperado. O jogo será reiniciado.");
+                    // Set crash flag for next reload to clear SW
+                    localStorage.setItem('digita_crash_detected', 'true');
+                    location.reload();
+                }
+            };
+        }
+
+        // Apply wrapper to critical entry points?
+        // It's hard to wrap everything, but we can wrap the event handlers or the main render.
+        // renderGameRound = safeGameLoopWrapper(renderGameRound);
+        // nextGameItem = safeGameLoopWrapper(nextGameItem);
+        // handleInput = safeGameLoopWrapper(handleInput);
+
+        // Let's implement this wrapping at the end of the script or just modify the functions directly if easier. -> Modifying directly is cleaner logic.
+
+
         // --- GAME MODES HELPERS ---
 
         function setupGameUI() {
@@ -1330,10 +1392,19 @@
             // Get random words from other levels
             let tries = 0;
             const allWords = [];
-            // Gather all possible words once to safeguard
-            Object.values(database).forEach(lvl => {
-                if (lvl.items) lvl.items.forEach(i => allWords.push(i.word));
-            });
+            // Gather all possible words from current level AND maybe we need a fallback for distractors?
+            // Since we don't have global 'database', we can only use 'currentLevelItems.items' easily.
+            // If we want cross-level distractors, we might need to fetch them or just stick to current level words + generic terms?
+            // Or maybe 'levels.json' could contain a small list of common words for distractors?
+            // For now, let's use only words from current level. If too few, we might fallback to generic "Opção".
+
+            // FIX: database is not available globally. 
+            // We can only use items from current level.
+            if (currentLevelData && currentLevelData.items) {
+                currentLevelData.items.forEach(i => allWords.push(i.word));
+            }
+            // If we really need more words, we'd need to architecture differently. 
+            // Limitation accepted for memory optimization.
 
             while (options.length < 4 && tries < 100) {
                 tries++;
@@ -1592,37 +1663,17 @@
 
         // Initial load via script tag (avoids CORS issues on local)
         // Initial load via script tag (avoids CORS issues on local)
-        window.onload = function () {
-            console.log("Window loaded. Checking gameData...");
-            const grid = document.getElementById('levelsGrid');
-
-            // Renderizar config de vídeos
-            renderRewardVideosConfig();
-
-            if (window.gameData) {
-                console.log("gameData found.");
-                levels = window.gameData.levels;
-                database = window.gameData.database;
-
-                try {
-                    // loadProgress removido pois não existe, o progresso é lido dentro de renderLevelGrid
-                    renderLevelGrid();
-                    console.log("Grid rendered with " + Object.keys(levels).length + " levels.");
-
-                    if (Object.keys(levels).length === 0) {
-                        grid.innerHTML = `<div class="col-span-full text-center text-orange-500 font-bold p-10">Aviso: O objeto 'levels' está vazio. Verifique o arquivo gameData.js.</div>`;
-                    }
-                } catch (e) {
-                    console.error("Error during init:", e);
-                    grid.innerHTML = `<div class="col-span-full text-center text-red-500 font-bold p-10">Erro ao iniciar: ${e.message}</div>`;
-                }
-            } else {
-                console.error("gameData not found in window.");
-                grid.innerHTML = `<div class="col-span-full text-center text-red-500 font-bold p-10">Erro Crítico:<br>O arquivo de dados (gameData.js) não foi carregado.<br>Verifique se ele está na mesma pasta que o digita.html.</div>`;
+        // Initialize wrappers for crash protection
+        try {
+            if (typeof safeGameLoopWrapper === 'function') {
+                renderGameRound = safeGameLoopWrapper(renderGameRound);
+                nextGameItem = safeGameLoopWrapper(nextGameItem);
+                handleInput = safeGameLoopWrapper(handleInput);
             }
-        };
+        } catch (e) { console.error("Wrapper init failed", e); }
+
     </script>
-    <script src="gameData.js"></script>
+    <!-- <script src="gameData.js"></script> REMOVED: Loaded via fetch now -->
 </body>
 
 </html>

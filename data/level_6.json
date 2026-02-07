@@ -1,0 +1,21 @@
+{
+    "items": [
+        {
+            "word": "PATA",
+            "image": "pata.png",
+            "emoji": "🐾"
+        },
+        {
+            "word": "PIU",
+            "emoji": "🐤🔊"
+        },
+        {
+            "word": "PATO",
+            "emoji": "🦆"
+        },
+        {
+            "word": "PÉ",
+            "emoji": "🦶"
+        }
+    ]
+}

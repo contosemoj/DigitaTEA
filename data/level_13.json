@@ -1,0 +1,21 @@
+{
+    "items": [
+        {
+            "word": "VOVÓ",
+            "emoji": "👵"
+        },
+        {
+            "word": "UVA",
+            "emoji": "🍇"
+        },
+        {
+            "word": "AVE",
+            "image": "ave.png",
+            "emoji": "🦆🦉🐧"
+        },
+        {
+            "word": "OVO",
+            "emoji": "🥚"
+        }
+    ]
+}

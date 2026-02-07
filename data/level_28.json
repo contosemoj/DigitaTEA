@@ -1,0 +1,21 @@
+{
+    "items": [
+        {
+            "word": "SAPO",
+            "emoji": "🐸"
+        },
+        {
+            "word": "SOPA",
+            "emoji": "🍲"
+        },
+        {
+            "word": "SAIA",
+            "image": "saia.png",
+            "emoji": "👗"
+        },
+        {
+            "word": "SUCO",
+            "emoji": "🧃"
+        }
+    ]
+}

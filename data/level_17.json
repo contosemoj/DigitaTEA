@@ -1,0 +1,38 @@
+{
+    "items": [
+        {
+            "word": "OI",
+            "emoji": "👋​"
+        },
+        {
+            "word": "MIAU",
+            "emoji": "🐈🔊",
+            "question": "Que som o gato faz? 🤷‍♀️ 🔊 🐈❓",
+            "questionAudio": "qsomfazogato"
+        },
+        {
+            "word": "AU",
+            "emoji": "🔊🐶",
+            "question": "Que som  o cachorro faz? 🤷‍♂️ 🔊 �❓",
+            "questionAudio": "qsomfazocachorro"
+        },
+        {
+            "word": "MUU",
+            "emoji": "🐮🔊",
+            "question": "Que som a vaca faz? 🤷‍♂️ 🔊 🐄❓",
+            "questionAudio": "qsomfazovaca"
+        },
+        {
+            "word": "PIU",
+            "emoji": "🐥🔊",
+            "question": "Que som o pintinho faz? 🤷‍♂️ 🔊 🐔❓",
+            "questionAudio": "qsomfazopintinho"
+        },
+        {
+            "word": "BÉ",
+            "emoji": "🐐🔊",
+            "question": "Que som o bode faz? 🤷‍♂️ 🔊 🐐❓",
+            "questionAudio": "qsomfazobode"
+        }
+    ]
+}

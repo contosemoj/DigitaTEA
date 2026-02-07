@@ -1,0 +1,20 @@
+{
+    "items": [
+        {
+            "word": "OI",
+            "emoji": "👋​"
+        },
+        {
+            "word": "DIANA",
+            "emoji": "DIANA",
+            "question": "QUAL É O SEU NOME? 🤷‍♂️ ​🫵​🚩 🔠​🪪​❓",
+            "questionAudio": "qualnome"
+        },
+        {
+            "word": "SETE",
+            "emoji": "7",
+            "question": "QUANTOS ANOS VOCÊ TEM? 🤷‍♂️​🔢 🎂 🫵❓",
+            "questionAudio": "quantanos"
+        }
+    ]
+}
