@@ -1481,7 +1481,8 @@
 
             options.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = "bg-white border-4 border-blue-200 text-blue-600 text-2xl font-bold py-6 rounded-2xl shadow-sm hover:bg-blue-50 active:scale-95 transition-all";
+                // Removed hover:bg-blue-50 to prevent sticky hover on touch devices (iPad) selecting wrong answers
+                btn.className = "bg-white border-4 border-blue-200 text-blue-600 text-2xl font-bold py-6 rounded-2xl shadow-sm active:scale-95 transition-all";
                 btn.textContent = opt;
                 btn.dataset.opt = opt;
                 btn.dataset.correct = (opt === currentItem.word).toString();
