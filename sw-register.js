@@ -1,38 +1,50 @@
-// sw-register.js
+//// --- CRASH DETECTION & RECOVERY (HEARTBEAT) ---
+// If the app was closed without 'beforeunload' or 'pagehide', it might have crashed (OOM).
 
-// Crash Detection Logic
-(function checkCrashLoop() {
-    const crashFlag = localStorage.getItem('digita_crash_detected');
-    if (crashFlag === 'true') {
-        console.warn('Crash detected from previous session. Clearing Service Worker and Caches.');
-        
-        // Unregister all SWs
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                for(let registration of registrations) {
-                    registration.unregister();
-                }
-            });
-        }
-        
-        // Clear Caches
-        if ('caches' in window) {
-            caches.keys().then(function(names) {
-                for (let name of names) {
-                    caches.delete(name);
-                }
-            });
-        }
+const CRASH_FLAG = 'digita_crash_detected';
+const SESSION_FLAG = 'digita_session_active';
 
-        // Reset flag
-        localStorage.removeItem('digita_crash_detected');
-        
-        // Optional: Show message to user
-        alert("O aplicativo foi recuperado de um erro anterior.");
+function clearAppCache() {
+    console.warn("CRASH RECOVERY: Unregistering SW and clearing caches.");
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            for (let registration of registrations) {
+                registration.unregister();
+            }
+        });
     }
-})();
+    if ('caches' in window) {
+        caches.keys().then(names => {
+            for (let name of names) {
+                caches.delete(name);
+            }
+        });
+    }
+}
 
-// Register SW
+// Check if we crashed last time
+if (localStorage.getItem(CRASH_FLAG) === 'true' || localStorage.getItem(SESSION_FLAG) === 'true') {
+    clearAppCache();
+    // Reset flags
+    localStorage.removeItem(CRASH_FLAG);
+    localStorage.removeItem(SESSION_FLAG);
+    console.log("System recovered from crash. Cache cleared.");
+    // Optional: Show message to user
+    alert("O aplicativo foi recuperado de um erro anterior.");
+}
+
+// Set session flag
+localStorage.setItem(SESSION_FLAG, 'true');
+
+// Clear session flag on clean exit
+window.addEventListener('pagehide', () => {
+    localStorage.removeItem(SESSION_FLAG);
+});
+window.addEventListener('beforeunload', () => {
+    localStorage.removeItem(SESSION_FLAG);
+});
+
+// --- SW REGISTRATION ---
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')

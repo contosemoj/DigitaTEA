@@ -5,7 +5,6 @@ const ASSETS_TO_CACHE = [
     './game_icon.png',
     './manifest.json',
     'https://cdn.tailwindcss.com',
-    'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css'
 ];
 
@@ -44,17 +43,21 @@ self.addEventListener('fetch', event => {
     // For JSON data (levels), maybe Network First is better?
     // Let's use Stale-While-Revalidate for JSON to ensure speed but get updates.
     
+    // Strategy: Network First for JSON (always try to get fresh data)
+    // Fallback to cache if offline.
     if (event.request.url.includes('.json')) {
         event.respondWith(
-            caches.open(CACHE_NAME).then(cache => {
-                return cache.match(event.request).then(response => {
-                    const fetchPromise = fetch(event.request).then(networkResponse => {
-                        cache.put(event.request, networkResponse.clone());
-                        return networkResponse;
+            fetch(event.request)
+                .then(networkResponse => {
+                    const clonedResponse = networkResponse.clone();
+                    caches.open(CACHE_NAME).then(cache => {
+                        cache.put(event.request, clonedResponse);
                     });
-                    return response || fetchPromise;
-                });
-            })
+                    return networkResponse;
+                })
+                .catch(() => {
+                    return caches.match(event.request);
+                })
         );
         return;
     }

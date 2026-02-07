@@ -9,7 +9,6 @@
     <title>Digita TEA - Seletor de Fases</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link rel="icon" type="image/png" href="game_icon.png">
     <link rel="manifest" href="manifest.json">
@@ -17,7 +16,7 @@
 
     <style>
         body {
-            font-family: 'Noto Color Emoji', sans-serif;
+            font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
             background-color: #f0f9ff;
             overflow: hidden;
             -webkit-user-select: none;
@@ -672,6 +671,11 @@
                 document.getElementById('screenGame').classList.add('flex');
             }
             else if (screenName === 'VIDEO') document.getElementById('screenVideo').classList.remove('hidden');
+
+            // Optimization: Stop confetti if leaving game screen (although confetti overlays everything, good practice)
+            if (screenName !== 'GAME') {
+                if (window.stopConfetti) window.stopConfetti();
+            }
         }
 
         async function initLevel(lvl) {
@@ -688,7 +692,12 @@
                 console.error("Error loading level:", e);
                 alert("Erro ao carregar a fase. Verifique sua conexão.");
                 goToMenu();
-                return;
+            }
+
+            // Cleanup Audio before level start
+            if (window.voicePlayer) {
+                window.voicePlayer.pause();
+                window.voicePlayer.src = "";
             }
 
             // Continue with setup
@@ -1184,19 +1193,51 @@
             const layout = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
             const container = document.getElementById('keyboardContainer');
             container.innerHTML = '';
-            layout.forEach(row => {
-                const rowDiv = document.createElement('div'); rowDiv.className = "flex justify-center gap-1";
-                row.split('').forEach(char => {
-                    const btn = document.createElement('button'); btn.textContent = char; btn.id = `key-${char}`;
-                    let btnClass = "key"; if (learnedLetters.has(char)) btnClass += " key-learned";
+            const rows = layout.map(r => r.split('')); // Convert layout to array of arrays
+
+            rows.forEach(r => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = "flex justify-center gap-1 mb-1";
+                r.forEach(char => {
+                    const btn = document.createElement('button');
+                    btn.textContent = char;
+                    btn.id = `key-${char}`;
+                    btn.dataset.char = char; // Store char in dataset to avoid closure capture issues
+
+                    let btnClass = "key";
+                    if (learnedLetters.has(char)) btnClass += " key-learned";
                     btn.className = btnClass;
-                    btn.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(char); btn.classList.add('active-press'); });
-                    btn.addEventListener('touchend', (e) => { e.preventDefault(); btn.classList.remove('active-press'); });
-                    btn.addEventListener('click', (e) => { handleInput(char); });
+
+                    // Use named function or generic handler to avoid circular closure over 'btn'
+                    btn.addEventListener('touchstart', handleKeyboardTouchStart, { passive: false });
+                    btn.addEventListener('touchend', handleKeyboardTouchEnd, { passive: false });
+                    btn.addEventListener('click', handleKeyboardClick);
+
                     rowDiv.appendChild(btn);
                 });
                 container.appendChild(rowDiv);
             });
+        }
+
+        // Optimized handlers to prevent memory leaks
+        function handleKeyboardTouchStart(e) {
+            e.preventDefault();
+            const btn = e.currentTarget;
+            btn.classList.add('active-press');
+            const char = btn.dataset.char;
+            if (char) handleInput(char);
+        }
+
+        function handleKeyboardTouchEnd(e) {
+            e.preventDefault();
+            const btn = e.currentTarget;
+            btn.classList.remove('active-press');
+        }
+
+        function handleKeyboardClick(e) {
+            const btn = e.currentTarget;
+            const char = btn.dataset.char;
+            if (char) handleInput(char);
         }
 
         function updateKeyboardHints() {
@@ -1381,8 +1422,20 @@
 
             // Image/Text Display
             const imgDiv = document.getElementById('quizImage');
+
+            // Explicit Image Cleanup
+            const oldImg = imgDiv.querySelector('img');
+            if (oldImg) {
+                oldImg.src = '';
+                oldImg.remove();
+            }
+            imgDiv.innerHTML = ''; // Double ensure
+
             if (currentItem.image) {
-                imgDiv.innerHTML = `<img src="${pathImg + currentItem.image}" class="h-full object-contain">`;
+                const newImg = document.createElement('img');
+                newImg.src = pathImg + currentItem.image;
+                newImg.className = "h-full object-contain";
+                imgDiv.appendChild(newImg);
             } else {
                 imgDiv.textContent = currentItem.emoji;
             }
@@ -1426,7 +1479,11 @@
                 const btn = document.createElement('button');
                 btn.className = "bg-white border-4 border-blue-200 text-blue-600 text-2xl font-bold py-6 rounded-2xl shadow-sm hover:bg-blue-50 active:scale-95 transition-all";
                 btn.textContent = opt;
-                btn.onclick = () => handleQuizSelection(btn, opt === currentItem.word);
+                btn.dataset.opt = opt;
+                btn.dataset.correct = (opt === currentItem.word).toString();
+
+                // Avoid closure capturing 'btn'
+                btn.onclick = handleQuizBtnClick;
                 container.appendChild(btn);
             });
 
@@ -1439,6 +1496,14 @@
             }, 300);
         }
 
+
+
+        function handleQuizBtnClick(e) {
+            const btn = e.currentTarget;
+            const isCorrect = btn.dataset.correct === 'true';
+            handleQuizSelection(btn, isCorrect);
+        }
+
         function handleQuizSelection(btn, isCorrect) {
             if (document.getElementById('successOverlay').classList.contains('hidden') === false) return;
 
@@ -1447,12 +1512,12 @@
                 phaseCorrectAttempts++;
                 btn.classList.remove('border-blue-200', 'text-blue-600');
                 btn.classList.add('bg-green-100', 'border-green-500', 'text-green-700', 'animate__animated', 'animate__pulse');
-                document.getElementById('sndCorrect').play();
+                document.getElementById('sndCorrect').play().catch(() => { });
                 setTimeout(roundWon, 500);
             } else {
                 btn.classList.remove('border-blue-200', 'text-blue-600');
                 btn.classList.add('bg-red-100', 'border-red-500', 'text-red-700', 'animate__animated', 'animate__shakeX');
-                document.getElementById('sndLose').play();
+                document.getElementById('sndLose').play().catch(() => { });
             }
             updateStatsUI();
         }
@@ -1552,6 +1617,12 @@
         }
 
         function animateConfetti() {
+            // Safety check: if canvas is hidden or offscreen, stop animation
+            if (document.hidden || !document.getElementById('confetti-canvas')) {
+                isAnimatingConfetti = false;
+                return;
+            }
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles = particles.filter(p => p.life > 0);
             particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); });
@@ -1562,6 +1633,12 @@
                 isAnimatingConfetti = false;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
+        }
+
+        function stopConfetti() {
+            particles = [];
+            isAnimatingConfetti = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
         // --- SISTEMA DE PRÊMIOS (VÍDEOS) ---
