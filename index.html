@@ -709,7 +709,11 @@
             isProgressiveMode = (helpMode === 'LEARN');
             configHints = (helpMode === 'HINTS' || helpMode === 'LEARN');
 
-            console.log(`initLevel ${lvl}: SelectedMode=${helpMode}, Hints=${configHints}, Progressive=${isProgressiveMode}`);
+            // Restore Difficulty Setting
+            const diffSelect = document.getElementById('difficultySelect');
+            difficultyThreshold = diffSelect ? parseInt(diffSelect.value) : 70;
+
+            console.log(`initLevel ${lvl}: SelectedMode=${helpMode}, Hints=${configHints}, Progressive=${isProgressiveMode}, Diff=${difficultyThreshold}`);
 
             currentLevel = lvl;
             isSecondPass = false;
