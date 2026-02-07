@@ -474,7 +474,7 @@
             <div id="inputContainer" class="flex flex-wrap justify-center gap-2 mb-4 shrink-0 transition-all"></div>
 
             <div id="successOverlay"
-                class="hidden absolute inset-0 z-40 bg-white/95 flex flex-col items-center justify-center animate__animated animate__fadeIn">
+                class="hidden absolute inset-0 z-40 bg-white/95 flex flex-col items-center justify-start pt-32 animate__animated animate__fadeIn">
                 <div id="feedbackMessage"
                     class="text-5xl md:text-6xl font-black text-green-500 mb-8 drop-shadow-sm animate__animated animate__pulse">
                     MUITO BEM! 🎉</div>
@@ -1489,12 +1489,6 @@
 
                 // Avoid closure capturing 'btn'
                 btn.onclick = handleQuizBtnClick;
-
-                // PRE-SELECTION LOGIC (Mobile/iPad Fix)
-                // Explicitly highlight the correct answer to guide the user and avoid random hover states
-                if (opt === currentItem.word) {
-                    btn.classList.add('bg-blue-50', 'border-blue-300'); // Light highlight
-                }
 
                 container.appendChild(btn);
             });
