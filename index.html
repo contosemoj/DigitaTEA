@@ -1488,6 +1488,13 @@
 
                 // Avoid closure capturing 'btn'
                 btn.onclick = handleQuizBtnClick;
+
+                // PRE-SELECTION LOGIC (Mobile/iPad Fix)
+                // Explicitly highlight the correct answer to guide the user and avoid random hover states
+                if (opt === currentItem.word) {
+                    btn.classList.add('bg-blue-50', 'border-blue-300'); // Light highlight
+                }
+
                 container.appendChild(btn);
             });
 
