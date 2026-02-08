@@ -41,7 +41,7 @@
         "color": "bg-pink-100 border-pink-300 text-pink-600"
     },
     "2": {
-        "title": "🤷❓ Letra B",
+        "title": "🤷❓ B",
         "unlock": [],
         "syllables": [
             "BA",
@@ -54,7 +54,7 @@
         "type": "quiz"
     },
     "3": {
-        "title": "Letra B",
+        "title": "B",
         "unlock": [
             "B"
         ],
@@ -68,7 +68,7 @@
         "color": "bg-blue-100 border-blue-300 text-blue-600"
     },
     "4": {
-        "title": "🤷❓ Letra T",
+        "title": "🤷❓ T",
         "unlock": [],
         "syllables": [
             "TA",
@@ -81,7 +81,7 @@
         "type": "quiz"
     },
     "5": {
-        "title": "Letra T",
+        "title": "T",
         "unlock": [
             "T"
         ],
@@ -95,7 +95,7 @@
         "color": "bg-green-100 border-green-300 text-green-600"
     },
     "6": {
-        "title": "🤷❓ Letra P",
+        "title": "🤷❓ P",
         "unlock": [],
         "syllables": [
             "PA",
@@ -108,7 +108,7 @@
         "type": "quiz"
     },
     "7": {
-        "title": "Letra P",
+        "title": "P",
         "unlock": [
             "P"
         ],
@@ -122,7 +122,7 @@
         "color": "bg-yellow-100 border-yellow-300 text-yellow-600"
     },
     "8": {
-        "title": "🤷❓ Letra D",
+        "title": "🤷❓ D",
         "unlock": [],
         "syllables": [
             "DA",
@@ -135,7 +135,7 @@
         "type": "quiz"
     },
     "9": {
-        "title": "Letra D",
+        "title": "D",
         "unlock": [
             "D"
         ],
@@ -149,7 +149,7 @@
         "color": "bg-purple-100 border-purple-300 text-purple-600"
     },
     "10": {
-        "title": "🤷‍♀️❓ Letra F",
+        "title": "🤷❓ F",
         "unlock": [],
         "syllables": [
             "FA",
@@ -162,7 +162,7 @@
         "type": "quiz"
     },
     "11": {
-        "title": "Letra F",
+        "title": "F",
         "unlock": [
             "F"
         ],
@@ -176,7 +176,7 @@
         "color": "bg-red-100 border-red-300 text-red-600"
     },
     "12": {
-        "title": "🤷‍♀️❓ Letra V",
+        "title": "🤷❓ V",
         "unlock": [],
         "syllables": [
             "VA",
@@ -189,7 +189,7 @@
         "type": "quiz"
     },
     "13": {
-        "title": "Letra V",
+        "title": "🤷❓ V",
         "unlock": [
             "V"
         ],
@@ -203,7 +203,7 @@
         "color": "bg-teal-100 border-teal-300 text-teal-600"
     },
     "14": {
-        "title": "🤷‍♀️❓ Letra M",
+        "title": "🤷❓ M",
         "unlock": [],
         "syllables": [
             "MA",
@@ -216,7 +216,7 @@
         "type": "quiz"
     },
     "15": {
-        "title": "Letra M",
+        "title": "M",
         "unlock": [
             "M"
         ],
@@ -258,7 +258,7 @@
         "color": "bg-amber-100 border-amber-300 text-amber-800"
     },
     "18": {
-        "title": "Família",
+        "title": "👨‍👩‍👧‍👦",
         "type": "dialogue",
         "introTitle": "Quem é da família?",
         "unlock": [],
@@ -326,7 +326,7 @@
         "color": "bg-lime-100 border-lime-300 text-lime-600"
     },
     "23": {
-        "title": "🤷‍♀️❓ Letra J",
+        "title": "🤷❓ J",
         "unlock": [],
         "syllables": [
             "JA",
@@ -339,7 +339,7 @@
         "type": "quiz"
     },
     "24": {
-        "title": "Letra J",
+        "title": "J",
         "unlock": [
             "J"
         ],
@@ -353,7 +353,7 @@
         "color": "bg-cyan-100 border-cyan-300 text-cyan-600"
     },
     "25": {
-        "title": "🤷‍♀️❓ Letra C",
+        "title": "🤷❓ C",
         "unlock": [],
         "syllables": [
             "CA",
@@ -364,7 +364,7 @@
         "type": "quiz"
     },
     "26": {
-        "title": "Letra C",
+        "title": "C",
         "unlock": [
             "C"
         ],
@@ -376,7 +376,7 @@
         "color": "bg-rose-100 border-rose-300 text-rose-600"
     },
     "27": {
-        "title": "🤷‍♀️❓ Letra S",
+        "title": "🤷❓ S",
         "unlock": [],
         "syllables": [
             "SA",
@@ -389,7 +389,7 @@
         "type": "quiz"
     },
     "28": {
-        "title": "Letra S",
+        "title": "S",
         "unlock": [
             "S"
         ],
@@ -454,7 +454,7 @@
         "color": "bg-fuchsia-100 border-fuchsia-300 text-fuchsia-600"
     },
     "33": {
-        "title": "🤷‍♀️❓ Letra G",
+        "title": "🤷‍♀️❓ G",
         "unlock": [],
         "syllables": [
             "GA",
@@ -465,7 +465,7 @@
         "type": "quiz"
     },
     "34": {
-        "title": "Letra G",
+        "title": "G",
         "unlock": [
             "G"
         ],
@@ -477,7 +477,7 @@
         "color": "bg-emerald-100 border-emerald-300 text-emerald-600"
     },
     "35": {
-        "title": "🤷‍♀️❓ Letra Z",
+        "title": "🤷❓ Z",
         "unlock": [],
         "syllables": [
             "ZA",
@@ -490,7 +490,7 @@
         "type": "quiz"
     },
     "36": {
-        "title": "Letra Z",
+        "title": "Z",
         "unlock": [
             "Z"
         ],
@@ -504,7 +504,7 @@
         "color": "bg-slate-100 border-slate-300 text-slate-600"
     },
     "37": {
-        "title": "🤷‍♀️❓ Letra X",
+        "title": "🤷❓ X",
         "unlock": [],
         "syllables": [
             "XA",
@@ -517,7 +517,7 @@
         "type": "quiz"
     },
     "38": {
-        "title": "Letra X",
+        "title": "X",
         "unlock": [
             "X"
         ],
@@ -531,7 +531,7 @@
         "color": "bg-zinc-100 border-zinc-300 text-zinc-600"
     },
     "39": {
-        "title": "🤷‍♀️❓ Letra H",
+        "title": "🤷❓ H",
         "unlock": [],
         "syllables": [
             "HA",
@@ -544,7 +544,7 @@
         "type": "quiz"
     },
     "40": {
-        "title": "Letra H",
+        "title": "H",
         "unlock": [
             "H"
         ],
@@ -558,7 +558,7 @@
         "color": "bg-amber-100 border-amber-300 text-amber-600"
     },
     "41": {
-        "title": "🤷‍♀️❓ Letra Q",
+        "title": "🤷❓ Q",
         "unlock": [],
         "syllables": [
             "QUA",
@@ -569,7 +569,7 @@
         "type": "quiz"
     },
     "42": {
-        "title": "Letra Q",
+        "title": "Q",
         "unlock": [
             "Q"
         ],
