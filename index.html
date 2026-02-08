@@ -545,9 +545,7 @@
         class="hidden absolute inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center p-4 animate__animated animate__fadeIn">
         <div
             class="w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl relative border-4 border-white/20">
-            <iframe id="videoFrame" class="w-full h-full" src="" title="YouTube video player" frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen></iframe>
+            <div id="videoFrame" class="w-full h-full"></div>
             <div id="videoSubtitleContainer" class="subtitle-container hidden">
                 <div id="videoSubtitleBox" class="subtitle-box"></div>
             </div>
@@ -1860,38 +1858,40 @@
                 console.warn(`Could not load specific data for video ${videoId}:`, e);
             }
 
-            const videoContainer = document.querySelector('#screenVideo .aspect-video');
-
-            // Garantir que o elemento de destino exista (o YT.Player substitui o elemento)
-            let frame = document.getElementById('videoFrame');
-            if (!frame) {
-                frame = document.createElement('div');
-                frame.id = 'videoFrame';
-                frame.className = 'w-full h-full';
-                videoContainer.prepend(frame);
+            // Limpar player anterior se existir
+            if (youtubePlayer) {
+                try {
+                    youtubePlayer.destroy();
+                } catch (e) {
+                    console.warn("Error destroying previous player:", e);
+                }
+                youtubePlayer = null;
             }
 
-            if (window.YT && YT.Player) {
-                // Se já existe um player, apenas carregar o novo vídeo
-                if (youtubePlayer && youtubePlayer.loadVideoById) {
-                    try {
-                        youtubePlayer.loadVideoById(videoId);
-                        showScreen('VIDEO');
-                        return;
-                    } catch (e) {
-                        console.warn("Error loading video via existing player, recreating...", e);
-                        try { youtubePlayer.destroy(); } catch (err) { }
-                        youtubePlayer = null;
-                        // Re-create frame div because destroy might have removed it
-                        if (!document.getElementById('videoFrame')) {
-                            const newFrame = document.createElement('div');
-                            newFrame.id = 'videoFrame';
-                            newFrame.className = 'w-full h-full';
-                            videoContainer.prepend(newFrame);
-                        }
-                    }
-                }
+            // Recriar o elemento videoFrame como div
+            const videoContainer = document.querySelector('#screenVideo .aspect-video');
+            let oldFrame = document.getElementById('videoFrame');
+            if (oldFrame) {
+                oldFrame.remove();
+            }
 
+            const newFrame = document.createElement('div');
+            newFrame.id = 'videoFrame';
+            newFrame.className = 'w-full h-full';
+            videoContainer.insertBefore(newFrame, videoContainer.firstChild);
+
+            // Mostrar a tela antes de criar o player
+            showScreen('VIDEO');
+
+            // Verificar se a API do YouTube está disponível
+            if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
+                console.warn("YouTube API not loaded, using fallback");
+                fallbackToSimpleIframe(videoId);
+                return;
+            }
+
+            // Criar o player do YouTube
+            try {
                 youtubePlayer = new YT.Player('videoFrame', {
                     height: '100%',
                     width: '100%',
@@ -1900,26 +1900,24 @@
                         'autoplay': 1,
                         'rel': 0,
                         'modestbranding': 1,
-                        'controls': 1,
-                        'origin': window.location.origin
+                        'controls': 1
                     },
                     events: {
                         'onReady': (event) => {
+                            console.log("YouTube player ready");
                             event.target.playVideo();
                         },
                         'onStateChange': onPlayerStateChange,
                         'onError': (e) => {
-                            console.error("YouTube Player Error:", e);
+                            console.error("YouTube Player Error:", e.data);
                             fallbackToSimpleIframe(videoId);
                         }
                     }
                 });
-            } else {
-                console.warn("YouTube API not ready, falling back to simple iframe");
+            } catch (error) {
+                console.error("Error creating YouTube player:", error);
                 fallbackToSimpleIframe(videoId);
             }
-
-            showScreen('VIDEO');
         }
 
         function fallbackToSimpleIframe(videoId) {
