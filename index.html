@@ -1854,42 +1854,99 @@
                 const response = await fetch(`data/${videoId}.json`);
                 if (response.ok) {
                     const extraData = await response.json();
-                    // Mesclar dados (prioridade para o arquivo JSON específico)
                     currentVideoData = { ...currentVideoData, ...extraData };
                 }
             } catch (e) {
                 console.warn(`Could not load specific data for video ${videoId}:`, e);
             }
 
-            // Limpar player antigo se existir
-            if (youtubePlayer) {
-                try { youtubePlayer.destroy(); } catch (e) { }
-                youtubePlayer = null;
+            const videoContainer = document.querySelector('#screenVideo .aspect-video');
+
+            // Garantir que o elemento de destino exista (o YT.Player substitui o elemento)
+            let frame = document.getElementById('videoFrame');
+            if (!frame) {
+                frame = document.createElement('div');
+                frame.id = 'videoFrame';
+                frame.className = 'w-full h-full';
+                videoContainer.prepend(frame);
             }
 
-            // Criar novo player
-            youtubePlayer = new YT.Player('videoFrame', {
-                height: '100%',
-                width: '100%',
-                videoId: videoId,
-                playerVars: {
-                    'autoplay': 1,
-                    'rel': 0,
-                    'modestbranding': 1,
-                    'controls': 1
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
+            if (window.YT && YT.Player) {
+                // Se já existe um player, apenas carregar o novo vídeo
+                if (youtubePlayer && youtubePlayer.loadVideoById) {
+                    try {
+                        youtubePlayer.loadVideoById(videoId);
+                        showScreen('VIDEO');
+                        return;
+                    } catch (e) {
+                        console.warn("Error loading video via existing player, recreating...", e);
+                        try { youtubePlayer.destroy(); } catch (err) { }
+                        youtubePlayer = null;
+                        // Re-create frame div because destroy might have removed it
+                        if (!document.getElementById('videoFrame')) {
+                            const newFrame = document.createElement('div');
+                            newFrame.id = 'videoFrame';
+                            newFrame.className = 'w-full h-full';
+                            videoContainer.prepend(newFrame);
+                        }
+                    }
                 }
-            });
+
+                youtubePlayer = new YT.Player('videoFrame', {
+                    height: '100%',
+                    width: '100%',
+                    videoId: videoId,
+                    playerVars: {
+                        'autoplay': 1,
+                        'rel': 0,
+                        'modestbranding': 1,
+                        'controls': 1,
+                        'origin': window.location.origin
+                    },
+                    events: {
+                        'onReady': (event) => {
+                            event.target.playVideo();
+                        },
+                        'onStateChange': onPlayerStateChange,
+                        'onError': (e) => {
+                            console.error("YouTube Player Error:", e);
+                            fallbackToSimpleIframe(videoId);
+                        }
+                    }
+                });
+            } else {
+                console.warn("YouTube API not ready, falling back to simple iframe");
+                fallbackToSimpleIframe(videoId);
+            }
 
             showScreen('VIDEO');
         }
 
-        function onPlayerReady(event) {
-            event.target.playVideo();
+        function fallbackToSimpleIframe(videoId) {
+            const videoContainer = document.querySelector('#screenVideo .aspect-video');
+            let frame = document.getElementById('videoFrame');
+
+            // Substituir por um iframe simples se falhar ou API não disponível
+            const simpleIframe = document.createElement('iframe');
+            simpleIframe.id = 'videoFrame';
+            simpleIframe.className = 'w-full h-full';
+            simpleIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+            simpleIframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            simpleIframe.allowFullscreen = true;
+
+            if (frame) {
+                frame.replaceWith(simpleIframe);
+            } else {
+                videoContainer.prepend(simpleIframe);
+            }
+
+            // No simple mode, render subtitle once statically if sync fails
+            if (currentVideoData && (currentVideoData.subtitle || currentVideoData.timedSubtitles)) {
+                const staticData = currentVideoData.timedSubtitles ? currentVideoData.timedSubtitles[0] : currentVideoData;
+                renderSubtitle(staticData);
+            }
         }
+
 
         function onPlayerStateChange(event) {
             if (event.data == YT.PlayerState.PLAYING) {
