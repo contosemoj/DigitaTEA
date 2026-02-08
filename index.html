@@ -13,6 +13,7 @@
     <link rel="icon" type="image/png" href="game_icon.png">
     <link rel="manifest" href="manifest.json">
     <script src="sw-register.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
 
     <style>
         body {
@@ -312,6 +313,55 @@
         .message-sent {
             animation: messageSent 0.6s ease-out;
         }
+
+        /* --- SUBTITLES --- */
+        .subtitle-container {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .subtitle-box {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 10px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .subtitle-word-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .subtitle-emoji {
+            font-size: 1.5rem;
+            line-height: 1;
+            height: 1.5rem;
+            margin-bottom: 2px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle-text {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 
@@ -498,6 +548,9 @@
             <iframe id="videoFrame" class="w-full h-full" src="" title="YouTube video player" frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen></iframe>
+            <div id="videoSubtitleContainer" class="subtitle-container hidden">
+                <div id="videoSubtitleBox" class="subtitle-box"></div>
+            </div>
         </div>
         <button onclick="closeVideoReward()"
             class="mt-8 bg-red-500 hover:bg-red-600 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transition-transform active:scale-95 hover:scale-105 uppercase tracking-widest flex items-center gap-3 animate__animated animate__bounceIn delay-1000">
@@ -519,6 +572,10 @@
         // --- DADOS DAS FASES ---
         let levels = {};
         let currentLevelData = []; // Only load current level data
+        let videoRewards = []; // External video rewards data
+        let youtubePlayer = null;
+        let subtitleSyncInterval = null;
+        let currentVideoData = null;
 
         // --- VARIÁVEIS DE ESTADO ---
         let gameMode = 'SYLLABLES'; // 'SYLLABLES', 'DIALOGUE', 'QUIZ'
@@ -587,6 +644,15 @@
                 const response = await fetch('data/levels.json');
                 if (!response.ok) throw new Error("Erro ao carregar levels.json");
                 levels = await response.json();
+
+                // Carregar vídeos de prêmio do arquivo externo
+                try {
+                    const vidResponse = await fetch('data/video_rewards.json');
+                    if (vidResponse.ok) videoRewards = await vidResponse.json();
+                } catch (vidErr) {
+                    console.warn("Could not load external video rewards:", vidErr);
+                }
+
                 renderLevelGrid();
 
                 // Renderizar config de vídeos (movemos para cá para garantir carga)
@@ -866,8 +932,14 @@
                 return true;
             });
 
-            // Shuffle the rest
-            gameQueue = allItems.sort(() => Math.random() - 0.5);
+            // Shuffle or fixed order
+            if (gameMode === 'DIALOGUE') {
+                // For dialogue, follow fixed order (reverse because we pop)
+                gameQueue = allItems.reverse();
+            } else {
+                // Shuffle the rest
+                gameQueue = allItems.sort(() => Math.random() - 0.5);
+            }
 
             // Add "OI" back at the END of the array (so it is popped first)
             // Ensure this only happens in relevant modes if needed, but if the item exists, it's likely intended.
@@ -989,7 +1061,11 @@
         }
 
         function startSecondPass() {
-            gameQueue = [...currentLevelData.items].sort(() => Math.random() - 0.5);
+            if (gameMode === 'DIALOGUE') {
+                gameQueue = [...currentLevelData.items].reverse();
+            } else {
+                gameQueue = [...currentLevelData.items].sort(() => Math.random() - 0.5);
+            }
             phaseTotalAttempts = 0;
             phaseCorrectAttempts = 0;
             updateStatsUI();
@@ -1655,8 +1731,22 @@
         }
 
         function getRewardVideos() {
-            const videos = JSON.parse(localStorage.getItem('digita_reward_videos') || '["ZHKRxjwKnXM"]');
-            return videos;
+            // Unir dados do arquivo JSON com dados do localStorage (preferência para o arquivo se houver conflito de ID)
+            const raw = localStorage.getItem('digita_reward_videos') || '[]';
+            let storedVideos = JSON.parse(raw).map(v => typeof v === 'string' ? { id: v } : v);
+
+            // Combinar: vídeos do JSON + vídeos do localStorage que não estão no JSON
+            const combined = [...videoRewards];
+            storedVideos.forEach(sv => {
+                if (!combined.find(cv => cv.id === sv.id)) {
+                    combined.push(sv);
+                }
+            });
+
+            // Fallback se não houver nada
+            if (combined.length === 0) return [{ id: "ZHKRxjwKnXM" }];
+
+            return combined;
         }
 
         function renderRewardVideosConfig() {
@@ -1670,20 +1760,30 @@
                 container.innerHTML = '<div class="col-span-full text-center text-gray-400 text-xs py-2 italic">Nenhum vídeo adicionado. O padrão será usado.</div>';
             }
 
-            videos.forEach((vid, index) => {
+            videos.forEach((vidObj, index) => {
+                const vid = vidObj.id;
                 const item = document.createElement('div');
-                item.className = 'flex items-center justify-between bg-blue-50 p-2 rounded-xl border border-blue-100 group hover:border-blue-200 transition-colors';
+                item.className = 'flex flex-col bg-blue-50 p-2 rounded-xl border border-blue-100 group hover:border-blue-200 transition-colors';
+
+                let subtitleInfo = '';
+                if (vidObj.subtitle) {
+                    subtitleInfo = `<div class="mt-1 text-[10px] text-blue-500 italic truncate ml-19">Legenda: ${vidObj.subtitle}</div>`;
+                }
+
                 item.innerHTML = `
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <div class="w-16 h-10 bg-gray-200 rounded-lg overflow-hidden shrink-0 shadow-sm border border-blue-100">
-                            <img src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" class="w-full h-full object-cover" loading="lazy">
+                    <div class="flex items-center justify-between w-full">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <div class="w-16 h-10 bg-gray-200 rounded-lg overflow-hidden shrink-0 shadow-sm border border-blue-100">
+                                <img src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" class="w-full h-full object-cover" loading="lazy">
+                            </div>
+                            <div class="flex flex-col overflow-hidden">
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">ID do Vídeo</span>
+                                <span class="text-xs font-mono text-blue-700 truncate">${vid}</span>
+                            </div>
                         </div>
-                        <div class="flex flex-col overflow-hidden">
-                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">ID do Vídeo</span>
-                            <span class="text-xs font-mono text-blue-700 truncate">${vid}</span>
-                        </div>
+                        <button onclick="removeRewardVideo(${index})" class="text-gray-400 hover:text-red-500 font-bold px-2 transition-colors">✕</button>
                     </div>
-                    <button onclick="removeRewardVideo(${index})" class="text-gray-400 hover:text-red-500 font-bold px-2 transition-colors">✕</button>
+                    ${subtitleInfo}
                 `;
                 container.appendChild(item);
             });
@@ -1694,22 +1794,33 @@
             let rawValue = input.value.trim();
             if (!rawValue) return;
 
-            const videoId = extractYouTubeId(rawValue);
-            // Validar se o ID tem 11 caracteres (padrão YouTube)
+            // Formato: ID | Legenda | palavra:emoji,palavra:emoji
+            const parts = rawValue.split('|').map(p => p.trim());
+            const videoId = extractYouTubeId(parts[0]);
+
             if (videoId.length !== 11) {
-                alert("ID do vídeo inválido. Certifique-se de copiar o link correto do YouTube.");
+                alert("ID do vídeo inválido.");
                 return;
             }
 
             let videos = getRewardVideos();
-
             if (videos.length >= 10) {
-                alert("Você já adicionou o limite de 10 vídeos.");
+                alert("Limite de 10 vídeos atingido.");
                 return;
             }
 
-            if (!videos.includes(videoId)) {
-                videos.push(videoId);
+            const videoObj = { id: videoId };
+            if (parts[1]) videoObj.subtitle = parts[1];
+            if (parts[2]) {
+                videoObj.mapping = {};
+                parts[2].split(',').forEach(pair => {
+                    const [word, emoji] = pair.split(':').map(s => s.trim());
+                    if (word && emoji) videoObj.mapping[word.toLowerCase()] = emoji;
+                });
+            }
+
+            if (!videos.find(v => v.id === videoId)) {
+                videos.push(videoObj);
                 localStorage.setItem('digita_reward_videos', JSON.stringify(videos));
                 renderRewardVideosConfig();
             } else {
@@ -1725,23 +1836,143 @@
             renderRewardVideosConfig();
         }
 
-        function showVideoReward() {
+        // --- YOUTUBE API ---
+        function onYouTubeIframeAPIReady() {
+            // A API está pronta, mas o player será criado sob demanda
+        }
+
+        async function showVideoReward() {
             let videos = getRewardVideos();
-            if (videos.length === 0) videos = ["ZHKRxjwKnXM"];
+            if (videos.length === 0) videos = [{ id: "ZHKRxjwKnXM" }];
 
             const randomIndex = Math.floor(Math.random() * videos.length);
-            const videoId = videos[randomIndex];
+            currentVideoData = videos[randomIndex];
+            const videoId = currentVideoData.id;
 
-            const iframe = document.getElementById('videoFrame');
-            // autoplay=1 para tocar ao abrir
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+            // Tentar carregar dados específicos do vídeo de arquivo JSON
+            try {
+                const response = await fetch(`data/${videoId}.json`);
+                if (response.ok) {
+                    const extraData = await response.json();
+                    // Mesclar dados (prioridade para o arquivo JSON específico)
+                    currentVideoData = { ...currentVideoData, ...extraData };
+                }
+            } catch (e) {
+                console.warn(`Could not load specific data for video ${videoId}:`, e);
+            }
+
+            // Limpar player antigo se existir
+            if (youtubePlayer) {
+                try { youtubePlayer.destroy(); } catch (e) { }
+                youtubePlayer = null;
+            }
+
+            // Criar novo player
+            youtubePlayer = new YT.Player('videoFrame', {
+                height: '100%',
+                width: '100%',
+                videoId: videoId,
+                playerVars: {
+                    'autoplay': 1,
+                    'rel': 0,
+                    'modestbranding': 1,
+                    'controls': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+
             showScreen('VIDEO');
         }
 
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                startSubtitleSync();
+            } else {
+                stopSubtitleSync();
+            }
+        }
+
+        function startSubtitleSync() {
+            stopSubtitleSync();
+            subtitleSyncInterval = setInterval(() => {
+                if (youtubePlayer && youtubePlayer.getCurrentTime) {
+                    const currentTime = youtubePlayer.getCurrentTime();
+                    updateTimedSubtitles(currentTime);
+                }
+            }, 100);
+        }
+
+        function stopSubtitleSync() {
+            if (subtitleSyncInterval) {
+                clearInterval(subtitleSyncInterval);
+                subtitleSyncInterval = null;
+            }
+        }
+
+        function updateTimedSubtitles(seconds) {
+            if (!currentVideoData || !currentVideoData.timedSubtitles) {
+                // Se for o formato antigo (estático), já foi renderizado uma vez
+                if (currentVideoData && currentVideoData.subtitle) {
+                    renderSubtitle(currentVideoData);
+                    currentVideoData.subtitle = null; // Evitar renderizar toda hora
+                }
+                return;
+            }
+
+            const activeSub = currentVideoData.timedSubtitles.find(s => seconds >= s.start && seconds <= s.end);
+
+            if (activeSub) {
+                renderSubtitle(activeSub);
+            } else {
+                document.getElementById('videoSubtitleContainer').classList.add('hidden');
+            }
+        }
+
+        function renderSubtitle(data) {
+            const container = document.getElementById('videoSubtitleContainer');
+            const box = document.getElementById('videoSubtitleBox');
+
+            if (!data.text && !data.subtitle) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            box.innerHTML = '';
+
+            const text = data.text || data.subtitle;
+            const words = text.split(/\s+/);
+            const mapping = data.mapping || {};
+
+            words.forEach(word => {
+                const cleanWord = word.replace(/[.,!?;:]/g, "").toLowerCase();
+                const emoji = mapping[cleanWord] || "";
+
+                const group = document.createElement('div');
+                group.className = 'subtitle-word-group';
+
+                group.innerHTML = `
+                    <div class="subtitle-emoji">${emoji}</div>
+                    <div class="subtitle-text">${word}</div>
+                `;
+                box.appendChild(group);
+            });
+        }
+
         function closeVideoReward() {
-            const iframe = document.getElementById('videoFrame');
-            iframe.src = ""; // Parar o vídeo
-            advanceLinearFlow(); // Continuar o fluxo
+            stopSubtitleSync();
+            if (youtubePlayer) {
+                try { youtubePlayer.stopVideo(); } catch (e) { }
+            }
+            document.getElementById('videoSubtitleContainer').classList.add('hidden');
+            advanceLinearFlow();
         }
 
         // Initial load via script tag (avoids CORS issues on local)

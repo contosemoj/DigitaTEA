@@ -1,0 +1,83 @@
+{
+  "id": "ZHKRxjwKnXM",
+  "name": "VENTO VENTANIA - MUNDO BITA",
+  "timedSubtitles": [
+    { 
+      "start": 10, "end": 15, 
+      "text": "VENTO VENTANIA ME LEVE PARA AS BORDAS DO CÉU", 
+      "mapping": { 
+        "vento": "🌬️🍃", "ventania": "🌪️🌬️", "me": "🙋‍♂️", "leve": "🎈", "para": "➡️", "as": "✨", "bordas": "🖼️", "do": "🔗", "céu": "☁️🌈" 
+      } 
+    },
+    { 
+      "start": 15, "end": 20, 
+      "text": "POIS VOU PUXAR AS BARBAS DE DEUS", 
+      "mapping": { 
+        "pois": "💡", "vou": "🚶", "puxar": "🎣", "as": "✨", "barbas": "🧔🏽‍♂️🧔🏼‍♂️", "de": "🔗", "deus": "✨🙏🕊️" 
+      } 
+    },
+    { 
+      "start": 20, "end": 25, 
+      "text": "VENTO VENTANIA ME LEVE PRA ONDE NASCE A CHUVA", 
+      "mapping": { 
+        "vento": "🌬️🍃", "ventania": "🌪️🌬️", "me": "🙋‍♂️", "leve": "🎈", "pra": "➡️", "onde": "📍", "nasce": "🌱", "a": "✨", "chuva": "🌧️⛈️" 
+      } 
+    },
+    { 
+      "start": 25, "end": 30, 
+      "text": "PRA LÁ DE ONDE O VENTO FAZ A CURVA", 
+      "mapping": { 
+        "pra": "➡️", "lá": "👉", "de": "🔗", "onde": "📍", "o": "✨", "vento": "🌬️🍃", "faz": "🛠️", "a": "✨", "curva": "↪️🌀" 
+      } 
+    },
+    { 
+      "start": 30, "end": 35, 
+      "text": "ME DEIXE CAVALGAR NOS SEUS DESATINOS", 
+      "mapping": { 
+        "me": "🙋‍♂️", "deixe": "🔓", "cavalgar": "🐎🏇", "nos": "🔗", "seus": "🫵", "desatinos": "🌪️🤪" 
+      } 
+    },
+    { 
+      "start": 35, "end": 40, 
+      "text": "NAS REVOADAS REDEMOINHOS", 
+      "mapping": { 
+        "nas": "🔗", "revoadas": "🕊️🐦", "redemoinhos": "🌀🌪️" 
+      } 
+    },
+    { 
+      "start": 40, "end": 45, 
+      "text": "VENTO VENTANIA ME LEVE SEM DESTINO", 
+      "mapping": { 
+        "vento": "🌬️🍃", "ventania": "🌪️🌬️", "me": "🙋‍♂️", "leve": "🎈", "sem": "❌", "destino": "📍🗺️" 
+      } 
+    },
+    { 
+      "start": 45, "end": 50, 
+      "text": "QUERO JUNTAR ME A VOCÊ", 
+      "mapping": { 
+        "quero": "❤️", "juntar": "🤝🔗", "me": "🙋‍♂️", "a": "✨", "você": "🫵" 
+      } 
+    },
+    { 
+      "start": 50, "end": 55, 
+      "text": "E CARREGAR OS BALÕES PRO MAR", 
+      "mapping": { 
+        "e": "🔗", "carregar": "📦", "os": "✨", "balões": "🎈🎈🎈", "pro": "➡️", "mar": "🌊🐳" 
+      } 
+    },
+    { 
+      "start": 55, "end": 60, 
+      "text": "QUERO ENROLAR AS PIPAS NOS FIOS", 
+      "mapping": { 
+        "quero": "❤️", "enrolar": "🧵", "as": "✨", "pipas": "🪁🪁", "nos": "🔗", "fios": "⚡�" 
+      } 
+    },
+    { 
+      "start": 60, "end": 65, 
+      "text": "MANDAR MEUS BEIJOS PELO AR", 
+      "mapping": { 
+        "mandar": "📤", "meus": "🙋‍♂️", "beijos": "💋😘💏", "pelo": "🔗", "ar": "🎐💨" 
+      } 
+    }
+  ]
+}
