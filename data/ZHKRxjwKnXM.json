@@ -2,82 +2,432 @@
   "id": "ZHKRxjwKnXM",
   "name": "VENTO VENTANIA - MUNDO BITA",
   "timedSubtitles": [
-    { 
-      "start": 10, "end": 15, 
-      "text": "VENTO VENTANIA ME LEVE PARA AS BORDAS DO CÉU", 
-      "mapping": { 
-        "vento": "🌬️🍃", "ventania": "🌪️🌬️", "me": "🙋‍♂️", "leve": "🎈", "para": "➡️", "as": "✨", "bordas": "🖼️", "do": "🔗", "céu": "☁️🌈" 
-      } 
+    {
+      "start": 9,
+      "end": 13,
+      "text": "VENTO VENTANIA ME LEVE PARA AS BORDAS DO CÉU",
+      "mapping": {
+        "vento": "🌬️🍃",
+        "ventania": "🌬️🌪️",
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "para": "➡️",
+        "as": "👇",
+        "bordas": "🔲🖼️",
+        "do": "🚩👉",
+        "céu": "🩵☁️🌈"
+      }
     },
-    { 
-      "start": 15, "end": 20, 
-      "text": "POIS VOU PUXAR AS BARBAS DE DEUS", 
-      "mapping": { 
-        "pois": "💡", "vou": "🚶", "puxar": "🎣", "as": "✨", "barbas": "🧔🏽‍♂️🧔🏼‍♂️", "de": "🔗", "deus": "✨🙏🕊️" 
-      } 
+    {
+      "start": 13,
+      "end": 17,
+      "text": "EU VOU PUXAR AS BARBAS DE DEUS",
+      "mapping": {
+        "eu": "🧑👈",
+        "vou": "➡️📍",
+        "puxar": "🎣",
+        "as": "👇",
+        "barbas": "🧔🏽‍♂️🧔🏼‍♂️",
+        "de": "🚩👉",
+        "deus": "✝️🙏✴️"
+      }
     },
-    { 
-      "start": 20, "end": 25, 
-      "text": "VENTO VENTANIA ME LEVE PRA ONDE NASCE A CHUVA", 
-      "mapping": { 
-        "vento": "🌬️🍃", "ventania": "🌪️🌬️", "me": "🙋‍♂️", "leve": "🎈", "pra": "➡️", "onde": "📍", "nasce": "🌱", "a": "✨", "chuva": "🌧️⛈️" 
-      } 
+    {
+      "start": 17,
+      "end": 21,
+      "text": "VENTO VENTANIA ME LEVE PRA ONDE NASCE A CHUVA",
+      "mapping": {
+        "vento": "🌬️🍃",
+        "ventania": "🌬️🌪️",
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "pra": "➡️",
+        "onde": "📍",
+        "nasce": "🤰🤱",
+        "a": "👇",
+        "chuva": "🌧️"
+      }
     },
-    { 
-      "start": 25, "end": 30, 
-      "text": "PRA LÁ DE ONDE O VENTO FAZ A CURVA", 
-      "mapping": { 
-        "pra": "➡️", "lá": "👉", "de": "🔗", "onde": "📍", "o": "✨", "vento": "🌬️🍃", "faz": "🛠️", "a": "✨", "curva": "↪️🌀" 
-      } 
+    {
+      "start": 21,
+      "end": 25,
+      "text": "PRA LÁ DE ONDE O VENTO FAZ A CURVA",
+      "mapping": {
+        "pra": "➡️",
+        "lá": "👉",
+        "de": "🚩👉",
+        "onde": "📍",
+        "o": "👇",
+        "vento": "🌬️🍃",
+        "faz": "👷🏗️",
+        "a": "👇",
+        "curva": "⤴️"
+      }
     },
-    { 
-      "start": 30, "end": 35, 
-      "text": "ME DEIXE CAVALGAR NOS SEUS DESATINOS", 
-      "mapping": { 
-        "me": "🙋‍♂️", "deixe": "🔓", "cavalgar": "🐎🏇", "nos": "🔗", "seus": "🫵", "desatinos": "🌪️🤪" 
-      } 
+    {
+      "start": 25,
+      "end": 29,
+      "text": "ME DEIXE CAVALGAR NOS SEUS DESATINOS",
+      "mapping": {
+        "me": "🧑👈",
+        "deixe": "🔓",
+        "cavalgar": "🐎🏇",
+        "nos": "📌👇​",
+        "seus": "🚩🫵",
+        "desatinos": "🌪️🤪"
+      }
     },
-    { 
-      "start": 35, "end": 40, 
-      "text": "NAS REVOADAS REDEMOINHOS", 
-      "mapping": { 
-        "nas": "🔗", "revoadas": "🕊️🐦", "redemoinhos": "🌀🌪️" 
-      } 
+    {
+      "start": 29,
+      "end": 33,
+      "text": "NAS REVOADAS REDEMOINHOS",
+      "mapping": {
+        "nas": "📌👇",
+        "revoadas": "🕊️🐦",
+        "redemoinhos": "🌀🌪️"
+      }
     },
-    { 
-      "start": 40, "end": 45, 
-      "text": "VENTO VENTANIA ME LEVE SEM DESTINO", 
-      "mapping": { 
-        "vento": "🌬️🍃", "ventania": "🌪️🌬️", "me": "🙋‍♂️", "leve": "🎈", "sem": "❌", "destino": "📍🗺️" 
-      } 
+    {
+      "start": 33,
+      "end": 37,
+      "text": "VENTO VENTANIA ME LEVE SEM DESTINO",
+      "mapping": {
+        "vento": "🌬️🍃",
+        "ventania": "🌬️🌪️",
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "sem": "❌",
+        "destino": "📍🗺️"
+      }
     },
-    { 
-      "start": 45, "end": 50, 
-      "text": "QUERO JUNTAR ME A VOCÊ", 
-      "mapping": { 
-        "quero": "❤️", "juntar": "🤝🔗", "me": "🙋‍♂️", "a": "✨", "você": "🫵" 
-      } 
+    {
+      "start": 37,
+      "end": 41,
+      "text": "QUERO JUNTAR ME A VOCÊ",
+      "mapping": {
+        "quero": "🫴",
+        "juntar": "🤝🔗",
+        "me": "🧑👈",
+        "a": "👇",
+        "você": "🫵"
+      }
     },
-    { 
-      "start": 50, "end": 55, 
-      "text": "E CARREGAR OS BALÕES PRO MAR", 
-      "mapping": { 
-        "e": "🔗", "carregar": "📦", "os": "✨", "balões": "🎈🎈🎈", "pro": "➡️", "mar": "🌊🐳" 
-      } 
+    {
+      "start": 41,
+      "end": 45,
+      "text": "E CARREGAR OS BALÕES PRO MAR",
+      "mapping": {
+        "e": "🔗",
+        "carregar": "🔃📦",
+        "os": "👇",
+        "balões": "🎈🎈🎈",
+        "pro": "➡️",
+        "mar": "🌊🩵"
+      }
     },
-    { 
-      "start": 55, "end": 60, 
-      "text": "QUERO ENROLAR AS PIPAS NOS FIOS", 
-      "mapping": { 
-        "quero": "❤️", "enrolar": "🧵", "as": "✨", "pipas": "🪁🪁", "nos": "🔗", "fios": "⚡�" 
-      } 
+    {
+      "start": 45,
+      "end": 49,
+      "text": "QUERO ENROLAR AS PIPAS NOS FIOS",
+      "mapping": {
+        "quero": "🫴",
+        "enrolar": "🔃🧵",
+        "as": "👇",
+        "pipas": "🪁🪁",
+        "nos": "📌👇",
+        "fios": "⚡🧵"
+      }
     },
-    { 
-      "start": 60, "end": 65, 
-      "text": "MANDAR MEUS BEIJOS PELO AR", 
-      "mapping": { 
-        "mandar": "📤", "meus": "🙋‍♂️", "beijos": "💋😘💏", "pelo": "🔗", "ar": "🎐💨" 
-      } 
+    {
+      "start": 49,
+      "end": 53,
+      "text": "MANDAR MEUS BEIJOS PELO AR",
+      "mapping": {
+        "mandar": "📤",
+        "meus": "🚩👈",
+        "beijos": "💋💋",
+        "pelo": "↔️🛣",
+        "ar": "🎐💨"
+      }
+    },
+    {
+      "start": 64,
+      "end": 68,
+      "text": "VENTO VENTANIA ME LEVE PRA QUALQUER LUGAR",
+      "mapping": {
+        "vento": "🌬️🍃",
+        "ventania": "🌬️🌪️",
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "pra": "➡️",
+        "qualquer": "🔀",
+        "lugar": "📍"
+      }
+    },
+    {
+      "start": 68,
+      "end": 72,
+      "text": "ME LEVE PARA QUALQUER CANTO DO MUNDO",
+      "mapping": {
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "para": "➡️",
+        "qualquer": "🔀",
+        "canto": "🏠📐",
+        "do": "🚩👉",
+        "mundo": "🌎🌍🌏"
+      }
+    },
+    {
+      "start": 72,
+      "end": 76,
+      "text": "ÁSIA EUROPA AMÉRICA",
+      "mapping": {
+        "ásia": "🌏🏯",
+        "europa": "🌍🏰",
+        "américa": "🌎"
+      }
+    },
+    {
+      "start": 76,
+      "end": 80,
+      "text": "VENTO VENTANIA ME LEVE PARA AS BORDAS DO CÉU",
+      "mapping": {
+        "vento": "🌬️🍃",
+        "ventania": "🌬️🌪️",
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "para": "➡️",
+        "as": "👇",
+        "bordas": "🔲🖼️",
+        "do": "🚩👉",
+        "céu": "🩵☁️🌈"
+      }
+    },
+    {
+      "start": 80,
+      "end": 84,
+      "text": "EU VOU PUXAR AS BARBAS DE DEUS",
+      "mapping": {
+        "eu": "🧑👈",
+        "vou": "➡️📍",
+        "puxar": "🎣",
+        "as": "👇",
+        "barbas": "🧔🏽‍♂️🧔🏼‍♂️",
+        "de": "🚩👉",
+        "deus": "✝️🙏✴️"
+      }
+    },
+    {
+      "start": 84,
+      "end": 88,
+      "text": "ME LEVE PARA ONDE NASCE A CHUVA",
+      "mapping": {
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "para": "➡️",
+        "onde": "📍",
+        "nasce": "🤰🤱",
+        "a": "👇",
+        "chuva": "🌧️"
+      }
+    },
+    {
+      "start": 88,
+      "end": 92,
+      "text": "VENTO VENTANIA ME LEVE PARA OS QUATRO CANTOS DO MUNDO",
+      "mapping": {
+        "vento": "🌬️🍃",
+        "ventania": "🌬️🌪️",
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "para": "➡️",
+        "os": "👇",
+        "quatro": "4️⃣",
+        "cantos": "🏠📐",
+        "do": "🚩👉",
+        "mundo": "🌎🌍🌏"
+      }
+    },
+    {
+      "start": 92,
+      "end": 96,
+      "text": "ME LEVE PRA QUALQUER LUGAR",
+      "mapping": {
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "pra": "➡️",
+        "qualquer": "🔀",
+        "lugar": "📍"
+      }
+    },
+    {
+      "start": 96,
+      "end": 100,
+      "text": "PRA LÁ DE ONDE O VENTO FAZ A CURVA",
+      "mapping": {
+        "pra": "➡️",
+        "lá": "👉",
+        "de": "🚩👉",
+        "onde": "📍",
+        "o": "👇",
+        "vento": "🌬️🍃",
+        "faz": "🏗️",
+        "a": "👇",
+        "curva": "⤴️"
+      }
+    },
+    {
+      "start": 100,
+      "end": 104,
+      "text": "ME DEIXE CAVALGAR NOS SEUS DESATINOS",
+      "mapping": {
+        "me": "🧑👈",
+        "deixe": "🔓🏃",
+        "cavalgar": "🐎🏇",
+        "nos": "📌👇",
+        "seus": "🚩🫵",
+        "desatinos": "🌪️🤪"
+      }
+    },
+    {
+      "start": 104,
+      "end": 108,
+      "text": "NAS REVOADAS REDEMOINHOS",
+      "mapping": {
+        "nas": "📌👇",
+        "revoadas": "🕊️🐦",
+        "redemoinhos": "🌀🌪️"
+      }
+    },
+    {
+      "start": 108,
+      "end": 112,
+      "text": "VENTO VENTANIA ME LEVE SEM DESTINO",
+      "mapping": {
+        "vento": "🌬️🍃",
+        "ventania": "🌬️🌪️",
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "sem": "❌",
+        "destino": "📍🗺️"
+      }
+    },
+    {
+      "start": 112,
+      "end": 116,
+      "text": "QUERO MOVER AS PÁS DOS MOINHOS",
+      "mapping": {
+        "quero": "🫴",
+        "mover": "⚙️➡️",
+        "as": "👇",
+        "pás": "🪏🪏",
+        "dos": "🚩👉",
+        "moinhos": "🌬️🏠"
+      }
+    },
+    {
+      "start": 116,
+      "end": 120,
+      "text": "E ABRANDAR O CALOR DO SOL",
+      "mapping": {
+        "e": "🔗",
+        "abrandar": "🪭📉",
+        "o": "👇",
+        "calor": "🥵",
+        "do": "🚩👉",
+        "sol": "☀️"
+      }
+    },
+    {
+      "start": 120,
+      "end": 124,
+      "text": "QUERO EMARANHAR O CABELO DA MENINA",
+      "mapping": {
+        "quero": "🫴",
+        "emaranhar": "🌪️🧶",
+        "o": "👇",
+        "cabelo": "🦰",
+        "da": "🚩👉",
+        "menina": "👧🏻"
+      }
+    },
+    {
+      "start": 124,
+      "end": 128,
+      "text": "MANDAR MEUS BEIJOS PELO AR",
+      "mapping": {
+        "mandar": "📤",
+        "meus": "🧑👈",
+        "beijos": "💋💋",
+        "pelo": "↔️🛣",
+        "ar": "🎐💨"
+      }
+    },
+    {
+      "start": 128,
+      "end": 132,
+      "text": "VENTO VENTANIA AGORA QUE EU ESTOU SOLTO NA VIDA",
+      "mapping": {
+        "vento": "🌬️🍃",
+        "ventania": "🌬️🌪️",
+        "agora": "👇🕘",
+        "que": "⁉️",
+        "eu": "🧑👈",
+        "estou": "👇📍",
+        "solto": "⛓️🔓",
+        "na": "📌👇",
+        "vida": "🌿💓"
+      }
+    },
+    {
+      "start": 132,
+      "end": 136,
+      "text": "ME LEVE PRA QUALQUER LUGAR",
+      "mapping": {
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "pra": "➡️",
+        "qualquer": "🔀",
+        "lugar": "📍"
+      }
+    },
+    {
+      "start": 136,
+      "end": 140,
+      "text": "ME LEVE MAS NÃO ME FAÇA VOLTAR",
+      "mapping": {
+        "me": "🧑👈",
+        "leve": "🧺➡️📍",
+        "mas": "🚧",
+        "não": "❌",
+        "faça": "👨‍🏭🏗️",
+        "voltar": "↩"
+      }
+    },
+    {
+      "start": 140,
+      "end": 144,
+      "text": "LÊ LÊ LÊ LÊ",
+      "mapping": {
+        "lê": "🎶"
+      }
+    },
+    {
+      "start": 144,
+      "end": 148,
+      "text": "LÊ LÊ LÊ LÊ",
+      "mapping": {
+        "lê": "🎶"
+      }
+    },
+    {
+      "start": 148,
+      "end": 155,
+      "text": "LÊ LÊ LÊ LÊ LÊ LÊ LÊ LÊ",
+      "mapping": {
+        "lê": "🎶"
+      }
     }
   ]
 }
