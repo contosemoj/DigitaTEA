@@ -1938,12 +1938,13 @@
                 videoContainer.prepend(simpleIframe);
             }
 
-            // No simple mode, render subtitle once statically if sync fails
-            if (currentVideoData && (currentVideoData.subtitle || currentVideoData.timedSubtitles)) {
-                const staticData = currentVideoData.timedSubtitles ? currentVideoData.timedSubtitles[0] : currentVideoData;
-                renderSubtitle(staticData);
+            // In simple mode, we don't sync timed subtitles to avoid confusion
+            // Only render if it's a static single subtitle
+            if (currentVideoData && currentVideoData.subtitle && !currentVideoData.timedSubtitles) {
+                renderSubtitle(currentVideoData);
             }
         }
+
 
 
         function onPlayerStateChange(event) {
