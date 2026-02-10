@@ -143,11 +143,11 @@
       "end": 76.6,
       "text": "MANDAR MEUS BEIJOS PELO AR",
       "mapping": {
-        "mandar": "📤",
+        "mandar": "📩",
         "meus": "🚩👈",
         "beijos": "💋💋",
         "pelo": "↔️🛣",
-        "ar": "🎐💨"
+        "ar": "🌬️"
       }
     },
     {
@@ -357,11 +357,11 @@
       "end": 183,
       "text": "MANDAR MEUS BEIJOS PELO AR",
       "mapping": {
-        "mandar": "📤",
+        "mandar": "📩",
         "meus": "🧑👈",
         "beijos": "💋💋",
         "pelo": "↔️🛣",
-        "ar": "🎐💨"
+        "ar": "🌬️"
       }
     },
     {
@@ -414,15 +414,15 @@
       }
     },
     {
-      "start": 203.5,
-      "end": 206,
+      "start": 206,
+      "end": 208,
       "text": "LÊ LÊ LÊ LÊ",
       "mapping": {
         "lê": "🎶"
       }
     },
     {
-      "start": 206,
+      "start": 208,
       "end": 211,
       "text": "LÊ LÊ LÊ LÊ LÊ LÊ LÊ LÊ",
       "mapping": {
