@@ -593,6 +593,7 @@
         let learnedLetters = new Set();
         let phaseCorrectAttempts = 0;
         let phaseTotalAttempts = 0;
+        let missedQuizItems = []; // Track missed quiz items for retry
 
         // --- SISTEMA DE PERSISTÊNCIA (SALVAR) ---
         function getSavedProgress() {
@@ -996,21 +997,43 @@
 
         function nextGameItem() {
             if (gameQueue.length === 0) {
-                if (isProgressiveMode && !isSecondPass) {
-                    isSecondPass = true;
-                    configHints = false;
-                    showIntermission();
+                // QUIZ LOGIC: If items were missed, reload them into the queue
+                if (gameMode === 'QUIZ' && missedQuizItems.length > 0) {
+                    // Refill queue with missed items
+                    gameQueue = [...missedQuizItems].sort(() => Math.random() - 0.5);
+                    missedQuizItems = []; // Clear missed list for the next pass
+
+                    // Optional: Show a toast/message "Vamos tentar de novo!"? 
+                    // For now, just continue seamlessly or maybe a small delay/sound could be good.
+                    // Let's just proceed to next item.
+                    currentItem = gameQueue.pop(); // Proceed immediately
+                } else {
+                    // Logic for other modes or Quiz finished
+                    if (isProgressiveMode && !isSecondPass) {
+                        isProgressiveMode = false; // Disable progressive for second pass
+                        isSecondPass = true;
+                        configHints = false;
+                        showIntermission();
+                        return;
+                    }
+                    checkEndPhase();
+                    isSecondPass = false;
                     return;
                 }
-                checkEndPhase();
-                isSecondPass = false;
-                return;
+            } else {
+                currentItem = gameQueue.pop();
             }
 
-            currentItem = gameQueue.pop();
+            // const total = currentLevelData.items.length; 
+            // Progress bar logic needs update for Quiz retry? 
+            // If retrying, progress might look weird if we strictly use total vs queue.
+            // Let's keep it simple for now: valid progress is based on initial total.
+
             const total = currentLevelData.items.length;
+            // If in retry mode (gameQueue refilled), progress bar might jump back. 
+            // That's acceptable for "retry" context or we can clamp it.
             const progress = ((total - gameQueue.length) / total) * 100;
-            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressBar').style.width = `${Math.min(100, Math.max(0, progress))}%`;
 
             const levelLetter = levels[currentLevel].title.replace("Letra ", "").trim();
 
@@ -1488,6 +1511,7 @@
         function startQuizGame() {
             flowState = 'GAME_QUIZ';
             document.getElementById('gameLevelDisplay').textContent = `Fase ${currentLevel} - Quiz`;
+            missedQuizItems = []; // Reset missed items
             prepareGameQueue();
             showScreen('GAME');
             setupGameUI();
@@ -1595,9 +1619,23 @@
                 document.getElementById('sndCorrect').play().catch(() => { });
                 setTimeout(roundWon, 500);
             } else {
+                // Incorrect logic updated:
+                // 1. Mark as incorrect visually
                 btn.classList.remove('border-blue-200', 'text-blue-600');
                 btn.classList.add('bg-red-100', 'border-red-500', 'text-red-700', 'animate__animated', 'animate__shakeX');
                 document.getElementById('sndLose').play().catch(() => { });
+
+                // 2. Add to missed items
+                missedQuizItems.push(currentItem);
+
+                // 3. Disable all buttons to prevent double clicking during delay
+                const allBtns = document.getElementById('quizOptions').querySelectorAll('button');
+                allBtns.forEach(b => b.disabled = true);
+
+                // 4. Wait 1s then move to next item
+                setTimeout(() => {
+                    nextGameItem();
+                }, 1000);
             }
             updateStatsUI();
         }
