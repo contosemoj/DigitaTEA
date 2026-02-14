@@ -1136,7 +1136,31 @@
                 container.appendChild(div);
             }
             updateActiveBox();
-            setTimeout(updateKeyboardHints, 50);
+
+            // Wait for word audio to finish before giving the hint (Visual + Audio)
+            // This prevents the letter sound from overlapping with the word pronunciation.
+            if (configHints) {
+                // Remove any previous listener to be safe
+                voicePlayer.onended = null;
+
+                // Set one-time listener
+                voicePlayer.onended = () => {
+                    updateKeyboardHints();
+                    voicePlayer.onended = null; // Clean up
+                };
+
+                // Fallback: If for some reason audio fails/network issue, show hint after 3s max
+                setTimeout(() => {
+                    if (voicePlayer.onended) {
+                        if (voicePlayer.paused) {
+                            updateKeyboardHints();
+                            voicePlayer.onended = null;
+                        }
+                    }
+                }, 3000);
+            } else {
+                setTimeout(updateKeyboardHints, 50);
+            }
         }
 
         function handleInput(char) {
@@ -1179,6 +1203,8 @@
                     box.classList.add('incorrect');
                     setTimeout(() => box.classList.remove('incorrect'), 400);
                 }
+                // Play audio of the correct letter that should have been pressed
+                playAudio(targetChar);
             }
             updateStatsUI();
         }
@@ -1356,6 +1382,11 @@
                     if (keyChar === targetChar) k.classList.add('hint-active');
                     else k.classList.add('hint-inactive');
                 });
+
+                // Play spoken hint for the target letter
+                // Debounce slightly to avoid double playing if function called rapidly?
+                // For now, direct call. 
+                playHint(targetChar);
             }
         }
 
@@ -1390,10 +1421,20 @@
         }
 
         const voicePlayer = new Audio();
+        const hintPlayer = new Audio(); // Separate player for hints to avoid cutting off main audio
 
         function playFile(filename) {
             voicePlayer.src = pathAudio + filename + ".mp3";
             voicePlayer.play().catch(() => { });
+        }
+
+        function playHint(text) {
+            const fn = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") + ".mp3";
+            hintPlayer.src = pathAudio + fn;
+            hintPlayer.volume = 0.6; // Slightly lower volume for hints? Or same. Let's keep it standard but separate.
+            // Actually, let's keep volume 1.0 but maybe slight delay if it overlaps too much with "Pop" sound?
+            // The user wants it "before".
+            hintPlayer.play().catch(() => { });
         }
 
         window.playCurrentAudio = () => {
