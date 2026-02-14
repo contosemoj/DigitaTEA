@@ -272,7 +272,7 @@
         "color": "bg-blue-50 border-blue-300 text-blue-800"
     },
     "19": {
-        "title": "🤷‍♀️❓ Letra N",
+        "title": "🤷‍♀️❓ N",
         "unlock": [],
         "syllables": [
             "NA",
@@ -285,7 +285,7 @@
         "type": "quiz"
     },
     "20": {
-        "title": "Letra N",
+        "title": "N",
         "unlock": [
             "N"
         ],
@@ -299,7 +299,7 @@
         "color": "bg-indigo-100 border-indigo-300 text-indigo-600"
     },
     "21": {
-        "title": "🤷‍♀️❓ Letra L",
+        "title": "🤷‍♀️❓ L",
         "unlock": [],
         "syllables": [
             "LA",
@@ -403,7 +403,7 @@
         "color": "bg-sky-100 border-sky-300 text-sky-600"
     },
     "29": {
-        "title": "🤷‍♀️❓ Apresentação",
+        "title": "🤷‍♀️❓ 🤝",
         "type": "quiz",
         "introTitle": "Apresentação",
         "unlock": [],
@@ -415,7 +415,7 @@
         "color": "bg-amber-100 border-amber-300 text-amber-800"
     },
     "30": {
-        "title": "Apresentação",
+        "title": "🤝",
         "type": "dialogue",
         "introTitle": "Apresentação",
         "unlock": [],
@@ -427,7 +427,7 @@
         "color": "bg-amber-100 border-amber-300 text-amber-800"
     },
     "31": {
-        "title": "🤷‍♀️❓ Letra R",
+        "title": "🤷‍♀️❓ R",
         "unlock": [],
         "syllables": [
             "RA",
@@ -440,7 +440,7 @@
         "type": "quiz"
     },
     "32": {
-        "title": "Letra R",
+        "title": "R",
         "unlock": [
             "R"
         ],
@@ -843,7 +843,7 @@
         "color": "bg-fuchsia-200 border-fuchsia-400 text-fuchsia-800"
     },
     "63": {
-        "title": "🤷‍♀️❓ Casa",
+        "title": "🤷‍♀️❓ 🏠",
         "type": "quiz",
         "introTitle": "Objetos de Casa",
         "unlock": [],
@@ -855,7 +855,7 @@
         "color": "bg-orange-50 border-orange-300 text-orange-800"
     },
     "64": {
-        "title": "Casa",
+        "title": "🏠",
         "type": "context",
         "introTitle": "Objetos de Casa",
         "unlock": [],
@@ -867,7 +867,7 @@
         "color": "bg-orange-50 border-orange-300 text-orange-800"
     },
     "65": {
-        "title": "🤷‍♀️❓ Sentimentos",
+        "title": "🤷‍♀️❓ 😀😥😡",
         "type": "quiz",
         "introTitle": "Como você está?",
         "unlock": [],
