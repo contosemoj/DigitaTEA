@@ -5,6 +5,12 @@ import sys
 import time
 
 try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+try:
     import google.generativeai as genai
 except ImportError:
     print("Error: google-generativeai not installed. Please run: pip install -U google-generativeai")

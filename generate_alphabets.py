@@ -4,6 +4,12 @@ import re
 
 # Try to import GenAI, but don't fail if missing
 try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+try:
     import google.generativeai as genai
     HAS_GENAI = True
 except ImportError:

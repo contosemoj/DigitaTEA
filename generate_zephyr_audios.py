@@ -4,8 +4,14 @@ import re
 import sys
 import time
 
-# To use this script, install the Google Generative AI library:
-# pip install -U google-generativeai
+# To use this script, install the Google Generative AI library and python-dotenv:
+# pip install -U google-generativeai python-dotenv
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass # python-dotenv not installed, will rely on system env vars
 
 try:
     import google.generativeai as genai
@@ -26,40 +32,20 @@ def normalize_filename(text):
     fn = re.sub(r'[^a-z0-9]', '', fn)
     return fn
 
-def get_required_audios(game_data_path):
-    with open(game_data_path, 'r', encoding='utf-8') as f:
-        content = f.read()
+def get_required_audios(levels_path):
+    with open(levels_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
 
-    match = re.search(r'window\.gameData\s*=\s*(\{.*\});', content, re.DOTALL)
-    if not match: match = re.search(r'window\.gameData\s*=\s*(\{.*\})', content, re.DOTALL)
-    if not match: raise ValueError("Could not find window.gameData")
-
-    data = json.loads(match.group(1))
     required = {}
 
     # 1. Levels
-    levels = data.get('levels', {})
-    for lvl in levels.values():
+    for lvl in data.values():
         if 'syllables' in lvl:
             for syl in lvl['syllables']:
                 fn = normalize_filename(syl)
                 if fn: required[fn] = syl
 
-    # 2. Database
-    db = data.get('database', {})
-    for obj in db.values():
-        if 'items' in obj:
-            for item in obj['items']:
-                if 'word' in item:
-                    fn = normalize_filename(item['word'])
-                    if fn: required[fn] = item['word']
-                if 'questionAudio' in item:
-                    q_fn = item['questionAudio']
-                    q_text = item.get('question', item.get('word', ''))
-                    q_text_clean = re.sub(r'[^\w\s\?\!\,\.\:\;áàãâéêíóõôúçÁÀÃÂÉÊÍÓÕÔÚÇ]', '', q_text)
-                    required[q_fn] = q_text_clean.strip()
-
-    # 3. System
+    # 2. System (Hardcoded for now as they might not be in levels.json)
     system = {
         'fimfase': 'Parabéns! Você completou a fase!',
         'erro': 'Ops! Tente de novo.',
@@ -78,7 +64,7 @@ def generate_audio(text, output_path, api_key):
     # We use gemini-1.5-flash which is fastest. 
     # The speech config allows us to specify the Zephyr voice.
     # Note: Prompt engineering helps 'narrating for children'
-    prompt = f"Fale de forma clara, amigável e pausada para uma criança: {text}"
+    prompt = f"Fale de forma muito empolgada, animada e feliz para uma criança: {text}"
     
     try:
         model = genai.GenerativeModel("gemini-1.5-flash")
@@ -123,10 +109,19 @@ def main():
     # Set this to True to regenerate ALL audios with the Zephyr voice
     OVERWRITE_EXISTING = True 
 
-    game_data_path = 'd:/DigitaTEA/gameData.js'
-    audio_dir = 'd:/DigitaTEA/audios'
+    levels_path = 'data/levels.json'
+    audio_dir = 'audios'
     
-    required = get_required_audios(game_data_path)
+    if not os.path.exists(audio_dir):
+        os.makedirs(audio_dir)
+
+    print(f"Reading levels from {levels_path}...")
+    try:
+        required = get_required_audios(levels_path)
+    except Exception as e:
+        print(f"Error reading levels: {e}")
+        return
+
     existing_files = [f.replace('.mp3', '') for f in os.listdir(audio_dir) if f.endswith('.mp3')]
     
     if OVERWRITE_EXISTING:
@@ -139,6 +134,9 @@ def main():
             return
         print(f"Generating {len(to_generate)} missing audios...")
 
+    # Sort to generate alphabetically/predictably
+    to_generate.sort(key=lambda x: x[0])
+
     for name, text in to_generate:
         path = os.path.join(audio_dir, name + ".mp3")
         
@@ -146,6 +144,7 @@ def main():
         if not OVERWRITE_EXISTING and os.path.exists(path):
             continue
             
+        print(f"Generating {name} ({text})...")
         success = generate_audio(text, path, api_key)
         if success:
             print(f"  Synthesized: {name}.mp3")
