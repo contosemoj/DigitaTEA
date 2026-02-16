@@ -524,11 +524,13 @@
             <div id="inputContainer" class="flex flex-wrap justify-center gap-2 mb-4 shrink-0 transition-all"></div>
 
             <div id="successOverlay"
-                class="hidden absolute inset-0 z-40 bg-white/95 flex flex-col items-center justify-start pt-32 animate__animated animate__fadeIn">
+                class="hidden absolute inset-0 z-40 bg-white/95 flex flex-col items-center justify-start pt-4 animate__animated animate__fadeIn">
                 <div id="feedbackMessage"
                     class="text-5xl md:text-6xl font-black text-green-500 mb-8 drop-shadow-sm animate__animated animate__pulse">
                     MUITO BEM! 🎉</div>
-                <button onclick="nextGameItem()"
+                <div id="syllableHighlight"
+                    class="hidden text-[12rem] md:text-[18rem] font-black text-purple-600 mb-8 animate__animated"></div>
+                <button id="btnNextItem" onclick="nextGameItem()"
                     class="bg-green-500 hover:bg-green-400 text-white text-3xl font-bold py-6 px-12 rounded-3xl shadow-[0_10px_0_rgb(21,128,61)] active:shadow-none active:translate-y-2 transition-all uppercase tracking-widest animate__animated animate__pulse animate__infinite">
                     PRÓXIMO ➔
                 </button>
@@ -860,26 +862,49 @@
 
                 html += `</div>`;
                 document.getElementById('presentationContent').innerHTML = html;
+                showScreen('PRESENTATION');
             }
-            // Lógica PADRÃO (Sílabas)
+            // Lógica PADRÃO (Sílabas) -> AGORA INTERATIVA
             else {
-                let title = currentLevel === 0 ? "As Vogais" : `Família do ${data.title.replace('Letra ', '')}`;
-                const syllables = data.syllables || [];
-                const fontSize = syllables.length > 5 ? 'text-4xl md:text-6xl' : 'text-5xl md:text-7xl';
-
-                let html = `<h2 class="text-5xl font-bold text-blue-500 mb-8 animate__animated animate__fadeInDown text-center">${title}</h2><div class="flex justify-center gap-4 flex-wrap mb-6">`;
-                syllables.forEach((syl, idx) => {
-                    html += `<div class="${fontSize} font-bold bg-white text-blue-500 border-4 border-blue-200 rounded-3xl px-6 py-4 shadow-lg animate__animated animate__zoomIn" style="animation-delay: ${idx * 100}ms">${syl}</div>`;
-                });
-                html += `</div>`;
-                document.getElementById('presentationContent').innerHTML = html;
+                startIntroSyllableGame();
             }
+        }
 
-            showScreen('PRESENTATION');
+        function startIntroSyllableGame() {
+            flowState = 'INTRO_SYLLABLES_GAME';
+            const data = levels[currentLevel];
+
+            // Configurar para modo de aprendizado forçado
+            configHints = true;
+            isProgressiveMode = false; // Dicas sempre visíveis
+
+            // Preparar fila com as sílabas
+            gameQueue = [...data.syllables].map(s => ({ word: s, emoji: "", image: "" }));
+            // Inverter para usar pop()
+            gameQueue.reverse();
+
+            document.getElementById('gameLevelDisplay').textContent = `Aprendendo: ${data.title}`;
+
+            // Hide presentation button to prevent accidental clicks during transition
+            const presentationBtn = document.getElementById('btnPresentationNext');
+            if (presentationBtn) presentationBtn.style.display = 'none';
+
+            showScreen('GAME');
+            setupGameUI();
+            renderKeyboard();
+            nextGameItem();
         }
 
         function startPresentationWords() {
             flowState = 'PRES';
+
+            // Restore presentation button visibility (may have been hidden during intro syllables)
+            const presentationBtn = document.getElementById('btnPresentationNext');
+            if (presentationBtn) {
+                presentationBtn.style.display = '';
+                presentationBtn.classList.remove('hidden');
+            }
+
             presentationQueue = [...currentLevelData.items];
             presentationIndex = 0;
             showNextPresentationWord();
@@ -898,6 +923,7 @@
             let html = `<div class="bg-white border-4 border-purple-200 rounded-3xl p-8 mb-6 shadow-sm w-full max-w-lg mx-auto">${mediaHtml}</div><div class="text-7xl font-bold text-gray-600 tracking-widest uppercase mb-4 animate__animated animate__fadeInUp">${item.word}</div>`;
             document.getElementById('presentationTitle').textContent = "PALAVRAS NOVAS";
             document.getElementById('presentationContent').innerHTML = html;
+            resetPresentationButton(); // Ensure button is configured correctly
             showScreen('PRESENTATION');
             playAudio(item.word);
         }
@@ -965,6 +991,13 @@
         function startWordGame() {
             flowState = 'GAME_WORD';
             const lvlData = levels[currentLevel];
+
+            // Restore user's help mode configuration (may have been overridden by intro syllable game)
+            const helpModeSelect = document.getElementById('helpModeSelect');
+            const helpMode = helpModeSelect ? helpModeSelect.value.trim() : 'NORMAL';
+            isProgressiveMode = (helpMode === 'LEARN');
+            configHints = (helpMode === 'HINTS' || helpMode === 'LEARN');
+
             let titleText = "";
             if (lvlData.type === 'context') {
                 titleText = `Fase ${currentLevel} - ${lvlData.title}`;
@@ -997,17 +1030,18 @@
 
         function nextGameItem() {
             if (gameQueue.length === 0) {
-                // QUIZ LOGIC: If items were missed, reload them into the queue
                 if (gameMode === 'QUIZ' && missedQuizItems.length > 0) {
                     // Refill queue with missed items
                     gameQueue = [...missedQuizItems].sort(() => Math.random() - 0.5);
                     missedQuizItems = []; // Clear missed list for the next pass
-
-                    // Optional: Show a toast/message "Vamos tentar de novo!"? 
-                    // For now, just continue seamlessly or maybe a small delay/sound could be good.
-                    // Let's just proceed to next item.
                     currentItem = gameQueue.pop(); // Proceed immediately
-                } else {
+                }
+                else if (flowState === 'INTRO_SYLLABLES_GAME') {
+                    // Acabou as sílabas da introdução -> vai para palavras
+                    startPresentationWords();
+                    return;
+                }
+                else {
                     // Logic for other modes or Quiz finished
                     if (isProgressiveMode && !isSecondPass) {
                         isProgressiveMode = false; // Disable progressive for second pass
@@ -1024,14 +1058,11 @@
                 currentItem = gameQueue.pop();
             }
 
-            // const total = currentLevelData.items.length; 
-            // Progress bar logic needs update for Quiz retry? 
-            // If retrying, progress might look weird if we strictly use total vs queue.
-            // Let's keep it simple for now: valid progress is based on initial total.
-
-            const total = currentLevelData.items.length;
-            // If in retry mode (gameQueue refilled), progress bar might jump back. 
-            // That's acceptable for "retry" context or we can clamp it.
+            // Progress bar calculation
+            // In INTRO_SYLLABLES_GAME, use syllables count; otherwise use items count
+            const total = flowState === 'INTRO_SYLLABLES_GAME'
+                ? levels[currentLevel].syllables.length
+                : currentLevelData.items.length;
             const progress = ((total - gameQueue.length) / total) * 100;
             document.getElementById('progressBar').style.width = `${Math.min(100, Math.max(0, progress))}%`;
 
@@ -1056,6 +1087,9 @@
                 } else {
                     document.getElementById('gameInstruction').textContent = "Digite sua resposta:";
                 }
+                targetIndices = Array.from({ length: currentItem.word.length }, (_, i) => i);
+            } else if (flowState === 'INTRO_SYLLABLES_GAME') {
+                document.getElementById('gameInstruction').textContent = "Vamos aprender! Digite:";
                 targetIndices = Array.from({ length: currentItem.word.length }, (_, i) => i);
             } else {
                 document.getElementById('gameInstruction').textContent = "Escreva a palavra:";
@@ -1249,6 +1283,38 @@
             updateStatsUI();
             fireConfetti();
             document.querySelectorAll('.key').forEach(k => k.classList.remove('hint-active', 'hint-inactive'));
+
+            if (flowState === 'INTRO_SYLLABLES_GAME') {
+                // Tocar áudio da sílaba
+                playAudio(currentItem.word);
+
+                // Feedback visual customizado: Sílaba GIANT
+                const feedbackMsg = document.getElementById('feedbackMessage');
+                const nextBtn = document.getElementById('btnNextItem');
+                const highlight = document.getElementById('syllableHighlight');
+
+                feedbackMsg.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+
+                highlight.textContent = currentItem.word;
+                highlight.classList.remove('hidden', 'animate__jackInTheBox');
+                void highlight.offsetWidth; // trigger reflow
+                highlight.classList.add('animate__jackInTheBox');
+
+                // Animação de sucesso rápida e próximo item
+                const boxes = document.querySelectorAll('.correct');
+                boxes.forEach(b => b.classList.add('animate__animated', 'animate__pulse'));
+
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    // Reset overlay for next time
+                    feedbackMsg.classList.remove('hidden');
+                    nextBtn.classList.remove('hidden');
+                    highlight.classList.add('hidden');
+                    nextGameItem();
+                }, 2000);
+                return;
+            }
         }
 
         function checkEndPhase() {
@@ -1312,12 +1378,13 @@
                 btn.onclick = advanceLinearFlow;
                 btn.classList.remove('bg-orange-500', 'shadow-[0_6px_0_rgb(249,115,22)]');
                 btn.classList.add('bg-green-500', 'shadow-[0_6px_0_rgb(21,128,61)]');
+                btn.classList.remove('hidden'); // Restore visibility
             }
         }
 
 
         function renderKeyboard() {
-            const layout = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+            const layout = ["QWERTYUIOP", "ASDFGHJKLÇ", "ZXCVBNM"];
             const container = document.getElementById('keyboardContainer');
             container.innerHTML = '';
             const rows = layout.map(r => r.split('')); // Convert layout to array of arrays
@@ -1377,15 +1444,24 @@
 
             if (tempIndex < currentItem.word.length) {
                 const targetChar = currentItem.word[tempIndex].normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                document.querySelectorAll('.key').forEach(k => {
-                    const keyChar = k.textContent.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                    if (keyChar === targetChar) k.classList.add('hint-active');
-                    else k.classList.add('hint-inactive');
-                });
+
+                // In INTRO_SYLLABLES_GAME mode, only highlight the correct key without disabling others
+                if (flowState === 'INTRO_SYLLABLES_GAME') {
+                    document.querySelectorAll('.key').forEach(k => {
+                        const keyChar = k.textContent.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        if (keyChar === targetChar) k.classList.add('hint-active');
+                        // Don't add hint-inactive in intro mode - keep all keys enabled
+                    });
+                } else {
+                    // Normal mode: highlight correct key and disable others
+                    document.querySelectorAll('.key').forEach(k => {
+                        const keyChar = k.textContent.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        if (keyChar === targetChar) k.classList.add('hint-active');
+                        else k.classList.add('hint-inactive');
+                    });
+                }
 
                 // Play spoken hint for the target letter
-                // Debounce slightly to avoid double playing if function called rapidly?
-                // For now, direct call. 
                 playHint(targetChar);
             }
         }
