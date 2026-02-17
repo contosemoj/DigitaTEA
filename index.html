@@ -70,6 +70,15 @@
         }
 
         /* Teclado e Botões */
+
+        @media (min-width: 768px) {
+            .key {
+                height: 75px;
+                max-width: 110px;
+                font-size: 2.2rem;
+            }
+        }
+
         .key {
             flex: 1;
             max-width: 90px;
@@ -538,7 +547,7 @@
         </div>
 
         <footer id="keyboardArea" class="shrink-0 bg-white border-t border-gray-200 pb-4 pt-2 px-1 shadow-lg z-20">
-            <div id="keyboardContainer" class="max-w-4xl mx-auto flex flex-col gap-2"></div>
+            <div id="keyboardContainer" class="max-w-4xl mx-auto flex flex-col gap-2 md:gap-4"></div>
         </footer>
     </div>
 
@@ -1391,7 +1400,7 @@
 
             rows.forEach(r => {
                 const rowDiv = document.createElement('div');
-                rowDiv.className = "flex justify-center gap-1 mb-1";
+                rowDiv.className = "flex justify-center gap-1 md:gap-3 mb-1 md:mb-2";
                 r.forEach(char => {
                     const btn = document.createElement('button');
                     btn.textContent = char;
