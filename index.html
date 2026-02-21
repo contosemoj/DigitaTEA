@@ -404,9 +404,9 @@
                         <span class="text-sm font-bold text-gray-500 mb-1">Dificuldade para passar:</span>
                         <select id="difficultySelect"
                             class="p-2 rounded-lg border border-blue-200 text-gray-600 font-bold bg-white text-sm">
-                            <option value="0" selected>Muito Fácil (Passa Sempre)</option>
+                            <option value="0">Muito Fácil (Passa Sempre)</option>
                             <option value="50">Fácil (> 50%)</option>
-                            <option value="70">Médio (> 70%)</option>
+                            <option value="70" selected> Médio (> 70%)</option>
                             <option value="80">Difícil (> 80%)</option>
                         </select>
                     </div>
@@ -591,7 +591,7 @@
         let configHints = false;
         let isProgressiveMode = false;
         let isSecondPass = false;
-        let difficultyThreshold = 70;
+        let difficultyThreshold = 80;
         let currentLevel = 0;
         let score = 0;
         let flowState = 'SETUP';
@@ -787,7 +787,7 @@
 
             // Restore Difficulty Setting
             const diffSelect = document.getElementById('difficultySelect');
-            difficultyThreshold = diffSelect ? parseInt(diffSelect.value) : 70;
+            difficultyThreshold = diffSelect ? parseInt(diffSelect.value) : 80;
 
             console.log(`initLevel ${lvl}: SelectedMode=${helpMode}, Hints=${configHints}, Progressive=${isProgressiveMode}, Diff=${difficultyThreshold}`);
 
