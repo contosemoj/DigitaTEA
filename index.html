@@ -631,19 +631,47 @@
         </div>
         <div class="flex-1 w-full max-w-4xl p-6 flex flex-col items-center overflow-y-auto">
             <div
-                class="w-full bg-white rounded-2xl p-6 mb-6 shadow-sm border border-blue-100 flex justify-around items-center">
+                class="w-full bg-white rounded-2xl p-6 mb-4 shadow-sm border border-blue-100 flex flex-wrap justify-around items-center gap-4">
                 <div class="text-center">
-                    <p class="text-sm text-gray-500 font-bold uppercase mb-1">Média de Acertos</p>
-                    <p id="statsAvgAccuracy" class="text-4xl font-black text-green-500">0%</p>
+                    <p class="text-xs sm:text-sm text-gray-500 font-bold uppercase mb-1">Média de Acertos</p>
+                    <p id="statsAvgAccuracy" class="text-3xl sm:text-4xl font-black text-green-500">0%</p>
                 </div>
-                <div class="h-12 w-px bg-gray-200"></div>
+                <div class="h-10 w-px bg-gray-200 hidden sm:block"></div>
                 <div class="text-center">
-                    <p class="text-sm text-gray-500 font-bold uppercase mb-1">Fases Jogadas</p>
-                    <p id="statsTotalPlayed" class="text-4xl font-black text-purple-500">0</p>
+                    <p class="text-xs sm:text-sm text-gray-500 font-bold uppercase mb-1">Fases Estudadas</p>
+                    <p id="statsTotalPlayed" class="text-3xl sm:text-4xl font-black text-purple-500">0</p>
+                </div>
+                <div class="h-10 w-px bg-gray-200 hidden md:block"></div>
+                <div class="text-center">
+                    <p class="text-xs sm:text-sm text-gray-500 font-bold uppercase mb-1">Total de Falhas</p>
+                    <p id="statsTotalFailures" class="text-3xl sm:text-4xl font-black text-red-400">0</p>
+                </div>
+                <div class="h-10 w-px bg-gray-200 hidden sm:block"></div>
+                <div class="text-center">
+                    <p class="text-xs sm:text-sm text-gray-500 font-bold uppercase mb-1">Estrelas (Pontos)</p>
+                    <p id="statsTotalScore" class="text-3xl sm:text-4xl font-black text-yellow-500">0</p>
                 </div>
             </div>
+
+            <div class="flex gap-2 w-full mb-4 justify-center flex-wrap">
+                <button onclick="updateStatsChart('hoje')" id="filter-hoje"
+                    class="stat-filter px-4 py-2 text-sm rounded-full font-bold bg-white text-gray-500 border border-gray-200 hover:bg-blue-50 transition-colors">Hoje</button>
+                <button onclick="updateStatsChart('semana')" id="filter-semana"
+                    class="stat-filter px-4 py-2 text-sm rounded-full font-bold bg-white text-gray-500 border border-gray-200 hover:bg-blue-50 transition-colors">Esta
+                    Semana</button>
+                <button onclick="updateStatsChart('mes')" id="filter-mes"
+                    class="stat-filter px-4 py-2 text-sm rounded-full font-bold bg-white text-gray-500 border border-gray-200 hover:bg-blue-50 transition-colors">Este
+                    Mês</button>
+                <button onclick="updateStatsChart('ano')" id="filter-ano"
+                    class="stat-filter px-4 py-2 text-sm rounded-full font-bold bg-white text-gray-500 border border-gray-200 hover:bg-blue-50 transition-colors">Este
+                    Ano</button>
+                <button onclick="updateStatsChart('tudo')" id="filter-tudo"
+                    class="stat-filter px-4 py-2 text-sm rounded-full font-bold bg-blue-500 text-white shadow-md border-transparent hover:bg-blue-600 transition-colors">Tudo</button>
+            </div>
+
             <div class="w-full flex-1 min-h-[400px] bg-white rounded-2xl p-4 shadow-sm border border-blue-100 relative">
-                <h2 class="text-lg font-bold text-gray-600 mb-4 text-center">Evolução nas Últimas Tentativas</h2>
+                <h2 id="statsChartTitle" class="text-lg font-bold text-gray-600 mb-4 text-center">Evolução do Desempenho
+                </h2>
                 <div class="relative w-full h-[300px]">
                     <canvas id="performanceChart"></canvas>
                 </div>
@@ -711,12 +739,19 @@
             return { maxLevel: parseInt(unlocked), records: records };
         }
 
-        function saveProgress(level, accuracy) {
+        function saveProgress(level, accuracy, totalAttempts = 0, failures = 0, phaseScore = 0) {
             const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
 
-            // Salvar histórico para gráficos
+            // Salvar histórico para gráficos (com novos campos)
             const historyList = JSON.parse(localStorage.getItem(prefix + 'digita_history') || '[]');
-            historyList.push({ date: new Date().toISOString(), level: level, accuracy: Math.round(accuracy) });
+            historyList.push({
+                date: new Date().toISOString(),
+                level: level,
+                accuracy: Math.round(accuracy),
+                attempts: totalAttempts,
+                failures: failures,
+                score: phaseScore
+            });
             localStorage.setItem(prefix + 'digita_history', JSON.stringify(historyList));
 
             // Prevent saving if in "Dicas Visuais" mode (Only Normal and Learn modes save records)
@@ -884,61 +919,193 @@
 
         // --- ESTATÍSTICAS ---
         let performanceChartInstance = null;
+        let currentStatsPeriod = 'tudo'; // default
 
         function showStatsModal() {
             showScreen('STATS');
+            updateStatsChart(currentStatsPeriod); // Auto-render baseado no último filtro (ou 'tudo')
+        }
+
+        function updateStatsChart(period) {
+            currentStatsPeriod = period;
+
+            // UI Button Updates
+            document.querySelectorAll('.stat-filter').forEach(btn => {
+                btn.classList.remove('bg-blue-500', 'text-white', 'shadow-md', 'border-transparent');
+                btn.classList.add('bg-white', 'text-gray-500', 'border-gray-200');
+            });
+            const activeBtn = document.getElementById('filter-' + period);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-white', 'text-gray-500', 'border-gray-200');
+                activeBtn.classList.add('bg-blue-500', 'text-white', 'shadow-md', 'border-transparent');
+            }
 
             const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
             const historyList = JSON.parse(localStorage.getItem(prefix + 'digita_history') || '[]');
+            const now = new Date();
 
-            // Calculate stats
-            if (historyList.length > 0) {
-                const totalAcc = historyList.reduce((sum, item) => sum + item.accuracy, 0);
-                document.getElementById('statsAvgAccuracy').innerText = Math.round(totalAcc / historyList.length) + '%';
-                document.getElementById('statsTotalPlayed').innerText = historyList.length;
-            } else {
-                document.getElementById('statsAvgAccuracy').innerText = '0%';
-                document.getElementById('statsTotalPlayed').innerText = '0';
+            // 1. Filtragem por tempo
+            let filteredHistory = historyList.filter(item => {
+                const d = new Date(item.date);
+                if (period === 'hoje') {
+                    return d.toDateString() === now.toDateString();
+                } else if (period === 'semana') {
+                    const diffTime = Math.abs(now - d);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays <= 7;
+                } else if (period === 'mes') {
+                    const diffTime = Math.abs(now - d);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays <= 30;
+                } else if (period === 'ano') {
+                    const diffTime = Math.abs(now - d);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays <= 365;
+                }
+                return true; // tudo
+            });
+
+            // Se "Tudo" tiver mais de 100 registros, mostra só os ultimos 100 para não travar (opcional)
+            if (period === 'tudo' && filteredHistory.length > 50) {
+                filteredHistory = filteredHistory.slice(-50);
             }
 
-            // Draw Chart
+            // Calculate Overall Stats on Screen based on Filtered List
+            let totalAccSum = 0;
+            let totalFailures = 0;
+            let totalScore = 0;
+
+            if (filteredHistory.length > 0) {
+                filteredHistory.forEach(item => {
+                    totalAccSum += item.accuracy;
+                    totalFailures += (item.failures || 0);
+                    totalScore += (item.score || 0);
+                });
+                document.getElementById('statsAvgAccuracy').innerText = Math.round(totalAccSum / filteredHistory.length) + '%';
+            } else {
+                document.getElementById('statsAvgAccuracy').innerText = '0%';
+            }
+            document.getElementById('statsTotalPlayed').innerText = filteredHistory.length;
+            document.getElementById('statsTotalFailures').innerText = totalFailures;
+            document.getElementById('statsTotalScore').innerText = totalScore;
+
+            // 2. Agregação
+            let aggData = [];
+
+            if (period === 'hoje' || filteredHistory.length < 15) {
+                // Granular: ponto por fase jogada
+                aggData = filteredHistory.map((h, i) => {
+                    const d = new Date(h.date);
+                    const timeStr = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+                    return {
+                        label: `F${h.level} (${timeStr})`,
+                        accuracy: h.accuracy,
+                        failures: h.failures || 0
+                    };
+                });
+                document.getElementById('statsChartTitle').textContent = "Desempenho por Tentativa";
+            } else {
+                // Agrupado por Dia ou Mês
+                const map = {};
+                filteredHistory.forEach(item => {
+                    const d = new Date(item.date);
+                    let key = "";
+                    if (period === 'ano') {
+                        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                        key = months[d.getMonth()] + '/' + String(d.getFullYear()).slice(-2);
+                    } else {
+                        // Dia/Mes
+                        key = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+                    }
+
+                    if (!map[key]) map[key] = { accSum: 0, count: 0, failSum: 0 };
+                    map[key].accSum += item.accuracy;
+                    map[key].count++;
+                    map[key].failSum += (item.failures || 0);
+                });
+
+                // Converter map de volta para Array
+                Object.keys(map).forEach(key => {
+                    aggData.push({
+                        label: key,
+                        accuracy: Math.round(map[key].accSum / map[key].count),
+                        failures: map[key].failSum
+                    });
+                });
+                document.getElementById('statsChartTitle').textContent = "Médias Agregadas do Período";
+            }
+
+            // Render Chart
+            renderChartFromData(aggData);
+        }
+
+        function renderChartFromData(aggData) {
             const ctx = document.getElementById('performanceChart').getContext('2d');
             if (performanceChartInstance) {
                 performanceChartInstance.destroy();
             }
 
-            // Limit to last 20 plays for better visualization
-            const recentHistory = historyList.slice(-20);
-            const labels = recentHistory.map((h, i) => `J${i + 1} (Fase ${h.level})`);
-            const data = recentHistory.map(h => h.accuracy);
+            const labels = aggData.map(d => d.label);
+            const accuracyData = aggData.map(d => d.accuracy);
+            const failuresData = aggData.map(d => d.failures);
 
             performanceChartInstance = new Chart(ctx, {
-                type: 'line',
+                type: 'line', // Tipo base
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Precisão (%)',
-                        data: data,
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#2563eb',
-                        pointHoverBackgroundColor: '#1e40af',
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        fill: true,
-                        tension: 0.4
-                    }]
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Total de Erros',
+                            data: failuresData,
+                            backgroundColor: 'rgba(239, 68, 68, 0.4)', // red-500
+                            borderColor: 'rgba(239, 68, 68, 0.8)',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            yAxisID: 'yFailures' // Associa ao eixo direito
+                        },
+                        {
+                            type: 'line',
+                            label: 'Média de Acertos (%)',
+                            data: accuracyData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)', // blue-500
+                            borderColor: '#3b82f6',
+                            borderWidth: 4,
+                            pointBackgroundColor: '#2563eb',
+                            pointHoverBackgroundColor: '#1e3a8a',
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            fill: true,
+                            tension: 0.3,
+                            yAxisID: 'yAccuracy'
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
                     scales: {
-                        y: {
+                        yAccuracy: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
                             beginAtZero: true,
                             max: 100,
-                            ticks: { callback: function (value) { return value + "%" }, font: { weight: 'bold' } },
+                            title: { display: true, text: 'Precisão (%)', font: { weight: 'bold' } },
+                            ticks: { callback: function (value) { return value + "%" } },
                             grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        yFailures: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            title: { display: true, text: 'Qtd Erros', font: { weight: 'bold', color: '#ef4444' } },
+                            grid: { drawOnChartArea: false } // Evita malhas sobrepostas
                         },
                         x: {
                             grid: { display: false },
@@ -946,26 +1113,33 @@
                         }
                     },
                     plugins: {
-                        legend: { display: false },
+                        legend: { position: 'bottom' },
                         tooltip: {
                             callbacks: {
-                                label: function (context) { return ` Precisão: ${context.parsed.y}%`; }
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + (context.dataset.yAxisID === 'yAccuracy' ? '%' : '');
+                                    }
+                                    return label;
+                                }
                             }
                         }
                     },
                     animation: {
-                        duration: 1500,
+                        duration: 1000,
                         easing: 'easeOutQuart'
                     }
                 }
             });
         }
 
+
         function closeStatsModal() {
             showScreen('SETUP');
         }
 
-        // --- SISTEMA DE PERFIS OFFLINE ---
         function showProfileModal() {
             renderProfilesGrid();
             renderNewProfileAvatars();
@@ -1657,7 +1831,9 @@
                     const nextLvl = levels[currentLevel + 1];
                     msg = nextLvl ? `Você desbloqueou: ${nextLvl.title}` : "Você terminou o jogo!";
                     nextState = 'END_PHASE';
-                    saveProgress(currentLevel, acc);
+
+                    const failures = phaseTotalAttempts - phaseCorrectAttempts;
+                    saveProgress(currentLevel, acc, phaseTotalAttempts, failures, score);
                 }
                 document.getElementById('presentationTitle').textContent = "PARABÉNS";
             }
@@ -2372,11 +2548,15 @@
                     height: '100%',
                     width: '100%',
                     videoId: videoId,
+                    host: 'https://www.youtube-nocookie.com',
                     playerVars: {
                         'autoplay': 1,
                         'rel': 0,
                         'modestbranding': 1,
                         'controls': 1,
+                        'iv_load_policy': 3,
+                        'playsinline': 1,
+                        'fs': 1,
                         'origin': window.location.origin
                     },
                     events: {
@@ -2405,8 +2585,8 @@
             const simpleIframe = document.createElement('iframe');
             simpleIframe.id = 'videoFrame';
             simpleIframe.className = 'w-full h-full';
-            simpleIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-            simpleIframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            simpleIframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&fs=1`;
+            simpleIframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
             simpleIframe.allowFullscreen = true;
 
             if (frame) {
