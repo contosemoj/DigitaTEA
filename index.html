@@ -14,7 +14,6 @@
     <link rel="manifest" href="manifest.json">
     <script src="sw-register.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -389,19 +388,16 @@
                 <p id="userGreeting" class="text-blue-100 text-sm">Selecione uma fase</p>
             </div>
             <div class="flex gap-2 items-center flex-wrap">
-                <!-- Botão Google Injetado Aqui -->
-                <div id="googleLoginBtn"
-                    class="bg-white rounded-lg overflow-hidden flex items-center justify-center min-w-[150px] min-h-[40px]">
-                </div>
-
-                <!-- Perfil (Escondido por padrão) -->
-                <div id="userProfile"
-                    class="hidden flex items-center gap-2 bg-blue-600 p-1 pr-3 rounded-full border border-blue-400">
-                    <img id="userAvatar" src="" class="w-8 h-8 rounded-full border-2 border-white object-cover">
-                    <span id="userNameDisplay" class="text-white text-sm font-bold truncate max-w-[100px]">Nome</span>
-                    <button onclick="logoutGoogle()" class="text-xs text-red-300 ml-1 font-bold hover:text-red-100 p-1"
-                        title="Sair do Google">✖</button>
-                </div>
+                <!-- Perfil Autônomo e Local -->
+                <button id="userProfileBtn" onclick="showProfileModal()"
+                    class="flex items-center gap-2 bg-blue-600 p-1 pr-3 rounded-full border border-blue-400 hover:bg-blue-700 transition">
+                    <div id="userAvatar"
+                        class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-lg bg-white">
+                        🧑</div>
+                    <span id="userNameDisplay"
+                        class="text-white text-sm font-bold truncate max-w-[100px]">Convidado</span>
+                    <span class="text-xs text-blue-200 ml-1">▼</span>
+                </button>
 
                 <!-- Botão de Estatísticas -->
                 <button onclick="showStatsModal()"
@@ -591,6 +587,38 @@
         </button>
     </div>
 
+    <!-- TELA DE SELEÇÃO DE PERFIL / JOGADOR -->
+    <div id="screenProfiles"
+        class="hidden absolute inset-0 z-[300] bg-blue-400/90 backdrop-blur-sm flex items-center justify-center p-4 animate__animated animate__fadeIn">
+        <div class="bg-white max-w-2xl w-full rounded-3xl overflow-hidden shadow-2xl p-6 flex flex-col">
+            <h2 class="text-3xl font-black text-blue-600 text-center mb-6 drop-shadow-sm">Quem está jogando? 🎮</h2>
+
+            <div id="profileGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6 max-h-[50vh] overflow-y-auto p-2">
+                <!-- Profiles injetados via JS -->
+            </div>
+
+            <div class="border-t-2 border-gray-100 pt-6 mt-auto">
+                <h3 class="text-md font-bold text-gray-400 mb-3 uppercase tracking-wider text-center">Criar Novo Jogador
+                </h3>
+                <div class="flex gap-2">
+                    <input type="text" id="newProfileName" placeholder="Nome do Jogador..." maxlength="12"
+                        class="flex-1 p-4 rounded-xl border-4 border-blue-100 text-lg font-bold text-gray-600 focus:border-blue-400 outline-none transition-colors">
+                    <button onclick="createNewProfile()"
+                        class="bg-green-500 hover:bg-green-600 text-white px-6 py-4 rounded-xl font-bold text-xl shadow-[0_4px_0_rgb(21,128,61)] active:shadow-none active:translate-y-1 transition-all">
+                        + CRIAR
+                    </button>
+                </div>
+                <div class="flex justify-center mt-4 gap-2 text-3xl" id="avatarSelector">
+                    <!-- Avatares clicáveis injetados via JS para selecionar na criação -->
+                </div>
+            </div>
+
+            <button onclick="closeProfileModal()" class="mt-6 text-gray-400 font-bold hover:text-gray-600 underline">
+                Manter o jogador atual
+            </button>
+        </div>
+    </div>
+
     <!-- TELA DE ESTATÍSTICAS -->
     <div id="screenStats" class="hidden absolute inset-0 z-[150] bg-blue-50 flex flex-col items-center">
         <div class="w-full bg-blue-500 p-4 shadow-md z-10 shrink-0 flex items-center justify-between">
@@ -663,18 +691,28 @@
         let missedQuizItems = []; // Track missed quiz items for retry
 
         // --- DADOS DO USUÁRIO ---
-        let currentUserEmail = 'guest';
+        let currentProfileId = 'guest'; // Padrão
+        const availableAvatars = ['🧑', '👧', '🦖', '🦄', '🦉', '🐶', '🦊', '🚀'];
+        let selectedNewAvatar = '🦖';
+
+        function getProfilesData() {
+            return JSON.parse(localStorage.getItem('digita_local_profiles') || '{}');
+        }
+
+        function saveProfilesData(data) {
+            localStorage.setItem('digita_local_profiles', JSON.stringify(data));
+        }
 
         // --- SISTEMA DE PERSISTÊNCIA (SALVAR) ---
         function getSavedProgress() {
-            const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+            const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
             const unlocked = localStorage.getItem(prefix + 'digita_max_level') || 0;
             const records = JSON.parse(localStorage.getItem(prefix + 'digita_records') || '{}');
             return { maxLevel: parseInt(unlocked), records: records };
         }
 
         function saveProgress(level, accuracy) {
-            const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+            const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
 
             // Salvar histórico para gráficos
             const historyList = JSON.parse(localStorage.getItem(prefix + 'digita_history') || '[]');
@@ -705,11 +743,15 @@
         }
 
         function resetProgress() {
-            if (confirm('Tem certeza que deseja apagar todo o progresso do perfil atual?')) {
-                const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+            if (confirm('Tem certeza que deseja apagar todo o progresso do jogador atual?')) {
+                const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
                 localStorage.removeItem(prefix + 'digita_max_level');
                 localStorage.removeItem(prefix + 'digita_records');
                 localStorage.removeItem(prefix + 'digita_history');
+
+                // Se o usuário quiser poder remover os vídeos...
+                // localStorage.removeItem(prefix + 'digita_reward_videos'); 
+
                 location.reload();
             }
         }
@@ -717,16 +759,15 @@
         // --- INICIALIZAÇÃO E MENU ---
         window.onload = async function () {
             try {
-                // Initialize Google Login
-                google.accounts.id.initialize({
-                    client_id: "847290940381-807s3g28d575qoh05r1ksah159oqbso8.apps.googleusercontent.com", // Placeholder (usar um real qdo em prod) ou não precisa em localhost as vezes
-                    callback: handleCredentialResponse,
-                    auto_select: true
-                });
-                google.accounts.id.renderButton(
-                    document.getElementById("googleLoginBtn"),
-                    { theme: "outline", size: "small", type: "standard", shape: "pill" }
-                );
+                // Restaurar Perfil Ativo Anterior se Houver
+                const lastId = localStorage.getItem('digita_last_profile');
+                if (lastId && getProfilesData()[lastId]) {
+                    activateProfile(lastId);
+                } else {
+                    // Force the profile modal to open if it's the first time
+                    showProfileModal();
+                    renderNewProfileAvatars();
+                }
 
                 const response = await fetch('data/levels.json');
                 if (!response.ok) throw new Error("Erro ao carregar levels.json");
@@ -818,6 +859,7 @@
             document.getElementById('screenVideo').classList.add('hidden');
             document.getElementById('screenStats').classList.add('hidden');
             document.getElementById('screenStats').classList.remove('flex');
+            document.getElementById('screenProfiles').classList.add('hidden');
 
             if (screenName === 'SETUP') document.getElementById('screenSetup').classList.remove('hidden');
             else if (screenName === 'PRESENTATION') document.getElementById('screenPresentation').classList.remove('hidden');
@@ -829,6 +871,9 @@
             else if (screenName === 'STATS') {
                 document.getElementById('screenStats').classList.remove('hidden');
                 document.getElementById('screenStats').classList.add('flex');
+            }
+            else if (screenName === 'PROFILES') {
+                document.getElementById('screenProfiles').classList.remove('hidden');
             }
 
             // Optimization: Stop confetti if leaving game screen (although confetti overlays everything, good practice)
@@ -843,7 +888,7 @@
         function showStatsModal() {
             showScreen('STATS');
 
-            const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+            const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
             const historyList = JSON.parse(localStorage.getItem(prefix + 'digita_history') || '[]');
 
             // Calculate stats
@@ -920,44 +965,102 @@
             showScreen('SETUP');
         }
 
-        // --- GOOGLE LOGIN ---
-        function handleCredentialResponse(response) {
-            try {
-                const data = jwtDecode(response.credential);
-                currentUserEmail = data.email;
+        // --- SISTEMA DE PERFIS OFFLINE ---
+        function showProfileModal() {
+            renderProfilesGrid();
+            renderNewProfileAvatars();
+            showScreen('PROFILES');
+        }
 
-                document.getElementById('googleLoginBtn').classList.add('hidden');
-                document.getElementById('userProfile').classList.remove('hidden');
-                document.getElementById('userNameDisplay').innerText = data.given_name || data.name.split(' ')[0];
-                document.getElementById('userAvatar').src = data.picture;
-                document.getElementById('userGreeting').innerText = `Bem-vindo, ${data.given_name || data.name.split(' ')[0]}`;
-
-                renderLevelGrid(); // Repinta tela com dados do usuário
-            } catch (e) {
-                console.error("Erro ao decodificar token Google", e);
+        function closeProfileModal() {
+            if (currentProfileId === 'guest' && Object.keys(getProfilesData()).length === 0) {
+                // Ninguém forçou criação de nada. Permite Guest.
             }
+            showScreen('SETUP');
         }
 
-        function logoutGoogle() {
-            currentUserEmail = 'guest';
+        function renderProfilesGrid() {
+            const grid = document.getElementById('profileGrid');
+            const data = getProfilesData();
+            grid.innerHTML = '';
 
-            document.getElementById('googleLoginBtn').classList.remove('hidden');
-            document.getElementById('userProfile').classList.add('hidden');
-            document.getElementById('userGreeting').innerText = 'Selecione uma fase';
+            // Opcional: Adicionar "Visitante" Sempre?
+            const guestBtn = document.createElement('button');
+            guestBtn.className = `flex flex-col items-center justify-center p-4 rounded-2xl border-4 transition-all ${currentProfileId === 'guest' ? 'border-blue-500 bg-blue-50 scale-105' : 'border-gray-100 bg-white hover:border-blue-200'}`;
+            guestBtn.onclick = () => activateProfile('guest');
+            guestBtn.innerHTML = `
+                <div class="text-4xl mb-2">👤</div>
+                <div class="font-bold text-gray-500 truncate w-full px-2 text-center">Visitante</div>
+            `;
+            grid.appendChild(guestBtn);
 
-            renderLevelGrid(); // Repinta tela com dados de visitante
-
-            // Limpa possivel seleção auto
-            google.accounts.id.disableAutoSelect();
+            Object.entries(data).forEach(([id, prof]) => {
+                const btn = document.createElement('button');
+                const isActive = (currentProfileId === id);
+                btn.className = `flex flex-col items-center justify-center p-4 rounded-2xl border-4 transition-all ${isActive ? 'border-green-500 bg-green-50 scale-105 shadow-md' : 'border-blue-100 bg-white hover:border-green-300'}`;
+                btn.onclick = () => activateProfile(id);
+                btn.innerHTML = `
+                    <div class="text-5xl mb-2">${prof.avatar}</div>
+                    <div class="font-black text-gray-700 truncate w-full px-2 text-center">${prof.name}</div>
+                `;
+                grid.appendChild(btn);
+            });
         }
 
-        function jwtDecode(token) {
-            let base64Url = token.split('.')[1];
-            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            let jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            return JSON.parse(jsonPayload);
+        function renderNewProfileAvatars() {
+            const container = document.getElementById('avatarSelector');
+            container.innerHTML = '';
+            availableAvatars.forEach(av => {
+                const div = document.createElement('div');
+                const isSel = (av === selectedNewAvatar);
+                div.className = `cursor-pointer w-12 h-12 flex items-center justify-center rounded-full border-4 transition-transform ${isSel ? 'border-green-500 scale-110 bg-green-100' : 'border-transparent bg-gray-100 opacity-60 hover:opacity-100'}`;
+                div.innerText = av;
+                div.onclick = () => {
+                    selectedNewAvatar = av;
+                    renderNewProfileAvatars(); // Repaint
+                };
+                container.appendChild(div);
+            });
+        }
+
+        function createNewProfile() {
+            const input = document.getElementById('newProfileName');
+            const name = input.value.trim();
+            if (!name) return alert("Digite um nome divertido para o jogador!");
+
+            const data = getProfilesData();
+            const id = 'player_' + Date.now();
+
+            data[id] = { name: name, avatar: selectedNewAvatar };
+            saveProfilesData(data);
+
+            input.value = '';
+            activateProfile(id); // Já ativa e volta tela setup
+        }
+
+        function activateProfile(id) {
+            const data = getProfilesData();
+            currentProfileId = id;
+            localStorage.setItem('digita_last_profile', id);
+
+            if (id === 'guest' || !data[id]) {
+                document.getElementById('userAvatar').innerText = '🧑';
+                document.getElementById('userNameDisplay').innerText = 'Visitante';
+                document.getElementById('userGreeting').innerText = `Menu Principal`;
+                currentProfileId = 'guest'; // Safety reset
+            } else {
+                const prof = data[id];
+                document.getElementById('userAvatar').innerText = prof.avatar;
+                document.getElementById('userNameDisplay').innerText = prof.name;
+                document.getElementById('userGreeting').innerText = `Oi, ${prof.name}!`;
+            }
+
+            renderLevelGrid(); // Repinta tela das cadeados baseados no progresso DESSE perifl
+
+            // Renderiza reward videos pq agora tem espaco global/local
+            renderRewardVideosConfig();
+
+            closeProfileModal();
         }
 
         async function initLevel(lvl) {
@@ -2100,7 +2203,7 @@
 
         function getRewardVideos() {
             // Unir dados do arquivo JSON com dados do localStorage (preferência para o arquivo se houver conflito de ID)
-            const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+            const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
             const raw = localStorage.getItem(prefix + 'digita_reward_videos') || '[]';
             let storedVideos = JSON.parse(raw).map(v => typeof v === 'string' ? { id: v } : v);
 
@@ -2190,7 +2293,7 @@
 
             if (!videos.find(v => v.id === videoId)) {
                 videos.push(videoObj);
-                const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+                const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
                 localStorage.setItem(prefix + 'digita_reward_videos', JSON.stringify(videos));
                 renderRewardVideosConfig();
             } else {
@@ -2202,7 +2305,7 @@
         function removeRewardVideo(index) {
             let videos = getRewardVideos();
             videos.splice(index, 1);
-            const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+            const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
             localStorage.setItem(prefix + 'digita_reward_videos', JSON.stringify(videos));
             renderRewardVideosConfig();
         }
