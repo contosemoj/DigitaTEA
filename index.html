@@ -14,6 +14,8 @@
     <link rel="manifest" href="manifest.json">
     <script src="sw-register.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body {
@@ -381,15 +383,37 @@
     <!-- TELA DE SETUP / SELEÇÃO DE FASES -->
     <div id="screenSetup" class="absolute inset-0 z-[100] bg-white flex flex-col">
         <!-- Cabeçalho -->
-        <div class="bg-blue-500 p-4 shadow-md z-10 shrink-0 flex justify-between items-center">
+        <div class="bg-blue-500 p-4 shadow-md z-10 shrink-0 flex flex-wrap justify-between items-center gap-2">
             <div>
                 <h1 class="text-3xl font-bold text-white">Digita TEA 🚀</h1>
-                <p class="text-blue-100 text-sm">Selecione uma fase</p>
+                <p id="userGreeting" class="text-blue-100 text-sm">Selecione uma fase</p>
             </div>
-            <button onclick="resetProgress()"
-                class="text-xs text-blue-200 bg-blue-600 px-2 py-1 rounded hover:bg-blue-700">
-                Limpar Dados
-            </button>
+            <div class="flex gap-2 items-center flex-wrap">
+                <!-- Botão Google Injetado Aqui -->
+                <div id="googleLoginBtn"
+                    class="bg-white rounded-lg overflow-hidden flex items-center justify-center min-w-[150px] min-h-[40px]">
+                </div>
+
+                <!-- Perfil (Escondido por padrão) -->
+                <div id="userProfile"
+                    class="hidden flex items-center gap-2 bg-blue-600 p-1 pr-3 rounded-full border border-blue-400">
+                    <img id="userAvatar" src="" class="w-8 h-8 rounded-full border-2 border-white object-cover">
+                    <span id="userNameDisplay" class="text-white text-sm font-bold truncate max-w-[100px]">Nome</span>
+                    <button onclick="logoutGoogle()" class="text-xs text-red-300 ml-1 font-bold hover:text-red-100 p-1"
+                        title="Sair do Google">✖</button>
+                </div>
+
+                <!-- Botão de Estatísticas -->
+                <button onclick="showStatsModal()"
+                    class="text-xs text-white bg-purple-500 border border-purple-400 px-3 py-2 rounded-lg hover:bg-purple-600 font-bold flex items-center gap-1 shadow-sm transition-colors">
+                    📊 Stats
+                </button>
+
+                <button onclick="resetProgress()"
+                    class="text-xs text-blue-200 bg-blue-600 px-3 py-2 border border-blue-400 rounded-lg hover:bg-blue-700 font-bold transition-colors">
+                    Limpar
+                </button>
+            </div>
         </div>
 
         <!-- Conteúdo Principal com Scroll -->
@@ -567,6 +591,38 @@
         </button>
     </div>
 
+    <!-- TELA DE ESTATÍSTICAS -->
+    <div id="screenStats" class="hidden absolute inset-0 z-[150] bg-blue-50 flex flex-col items-center">
+        <div class="w-full bg-blue-500 p-4 shadow-md z-10 shrink-0 flex items-center justify-between">
+            <button onclick="closeStatsModal()"
+                class="text-sm font-bold text-blue-500 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 transition-colors">
+                ⬅ VOLTAR
+            </button>
+            <h1 class="text-2xl font-bold text-white uppercase tracking-wider">Estatísticas do Aluno</h1>
+            <div class="w-20"></div>
+        </div>
+        <div class="flex-1 w-full max-w-4xl p-6 flex flex-col items-center overflow-y-auto">
+            <div
+                class="w-full bg-white rounded-2xl p-6 mb-6 shadow-sm border border-blue-100 flex justify-around items-center">
+                <div class="text-center">
+                    <p class="text-sm text-gray-500 font-bold uppercase mb-1">Média de Acertos</p>
+                    <p id="statsAvgAccuracy" class="text-4xl font-black text-green-500">0%</p>
+                </div>
+                <div class="h-12 w-px bg-gray-200"></div>
+                <div class="text-center">
+                    <p class="text-sm text-gray-500 font-bold uppercase mb-1">Fases Jogadas</p>
+                    <p id="statsTotalPlayed" class="text-4xl font-black text-purple-500">0</p>
+                </div>
+            </div>
+            <div class="w-full flex-1 min-h-[400px] bg-white rounded-2xl p-4 shadow-sm border border-blue-100 relative">
+                <h2 class="text-lg font-bold text-gray-600 mb-4 text-center">Evolução nas Últimas Tentativas</h2>
+                <div class="relative w-full h-[300px]">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Áudios -->
     <audio id="sndCorrect" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
     <audio id="sndWordWin" src="https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg"></audio>
@@ -606,25 +662,32 @@
         let phaseTotalAttempts = 0;
         let missedQuizItems = []; // Track missed quiz items for retry
 
+        // --- DADOS DO USUÁRIO ---
+        let currentUserEmail = 'guest';
+
         // --- SISTEMA DE PERSISTÊNCIA (SALVAR) ---
         function getSavedProgress() {
-            const unlocked = localStorage.getItem('digita_max_level') || 0;
-            const records = JSON.parse(localStorage.getItem('digita_records') || '{}');
+            const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+            const unlocked = localStorage.getItem(prefix + 'digita_max_level') || 0;
+            const records = JSON.parse(localStorage.getItem(prefix + 'digita_records') || '{}');
             return { maxLevel: parseInt(unlocked), records: records };
         }
 
         function saveProgress(level, accuracy) {
+            const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+
+            // Salvar histórico para gráficos
+            const historyList = JSON.parse(localStorage.getItem(prefix + 'digita_history') || '[]');
+            historyList.push({ date: new Date().toISOString(), level: level, accuracy: Math.round(accuracy) });
+            localStorage.setItem(prefix + 'digita_history', JSON.stringify(historyList));
+
             // Prevent saving if in "Dicas Visuais" mode (Only Normal and Learn modes save records)
             if (configHints && !isProgressiveMode) {
                 console.log("Progress (record) not saved: Visual Hints mode active.");
-                // We still might want to unlock next level? 
-                // User said "não pode deixar record". Usually hints mode allows proceeding but not rank.
-                // Let's allow unlocking but NOT updating the score record.
-
                 const progress = getSavedProgress();
                 if (level + 1 > progress.maxLevel) {
                     progress.maxLevel = level + 1;
-                    localStorage.setItem('digita_max_level', progress.maxLevel);
+                    localStorage.setItem(prefix + 'digita_max_level', progress.maxLevel);
                 }
                 return;
             }
@@ -632,18 +695,21 @@
             const progress = getSavedProgress();
             if (level + 1 > progress.maxLevel) {
                 progress.maxLevel = level + 1;
-                localStorage.setItem('digita_max_level', progress.maxLevel);
+                localStorage.setItem(prefix + 'digita_max_level', progress.maxLevel);
             }
             const currentRecord = progress.records[level] || 0;
             if (accuracy > currentRecord) {
                 progress.records[level] = Math.round(accuracy);
-                localStorage.setItem('digita_records', JSON.stringify(progress.records));
+                localStorage.setItem(prefix + 'digita_records', JSON.stringify(progress.records));
             }
         }
 
         function resetProgress() {
-            if (confirm('Tem certeza que deseja apagar todo o progresso?')) {
-                localStorage.clear();
+            if (confirm('Tem certeza que deseja apagar todo o progresso do perfil atual?')) {
+                const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+                localStorage.removeItem(prefix + 'digita_max_level');
+                localStorage.removeItem(prefix + 'digita_records');
+                localStorage.removeItem(prefix + 'digita_history');
                 location.reload();
             }
         }
@@ -651,6 +717,17 @@
         // --- INICIALIZAÇÃO E MENU ---
         window.onload = async function () {
             try {
+                // Initialize Google Login
+                google.accounts.id.initialize({
+                    client_id: "847290940381-807s3g28d575qoh05r1ksah159oqbso8.apps.googleusercontent.com", // Placeholder (usar um real qdo em prod) ou não precisa em localhost as vezes
+                    callback: handleCredentialResponse,
+                    auto_select: true
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById("googleLoginBtn"),
+                    { theme: "outline", size: "small", type: "standard", shape: "pill" }
+                );
+
                 const response = await fetch('data/levels.json');
                 if (!response.ok) throw new Error("Erro ao carregar levels.json");
                 levels = await response.json();
@@ -739,6 +816,8 @@
             document.getElementById('screenPresentation').classList.add('hidden');
             document.getElementById('screenGame').classList.add('hidden');
             document.getElementById('screenVideo').classList.add('hidden');
+            document.getElementById('screenStats').classList.add('hidden');
+            document.getElementById('screenStats').classList.remove('flex');
 
             if (screenName === 'SETUP') document.getElementById('screenSetup').classList.remove('hidden');
             else if (screenName === 'PRESENTATION') document.getElementById('screenPresentation').classList.remove('hidden');
@@ -747,11 +826,138 @@
                 document.getElementById('screenGame').classList.add('flex');
             }
             else if (screenName === 'VIDEO') document.getElementById('screenVideo').classList.remove('hidden');
+            else if (screenName === 'STATS') {
+                document.getElementById('screenStats').classList.remove('hidden');
+                document.getElementById('screenStats').classList.add('flex');
+            }
 
             // Optimization: Stop confetti if leaving game screen (although confetti overlays everything, good practice)
             if (screenName !== 'GAME') {
                 if (window.stopConfetti) window.stopConfetti();
             }
+        }
+
+        // --- ESTATÍSTICAS ---
+        let performanceChartInstance = null;
+
+        function showStatsModal() {
+            showScreen('STATS');
+
+            const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+            const historyList = JSON.parse(localStorage.getItem(prefix + 'digita_history') || '[]');
+
+            // Calculate stats
+            if (historyList.length > 0) {
+                const totalAcc = historyList.reduce((sum, item) => sum + item.accuracy, 0);
+                document.getElementById('statsAvgAccuracy').innerText = Math.round(totalAcc / historyList.length) + '%';
+                document.getElementById('statsTotalPlayed').innerText = historyList.length;
+            } else {
+                document.getElementById('statsAvgAccuracy').innerText = '0%';
+                document.getElementById('statsTotalPlayed').innerText = '0';
+            }
+
+            // Draw Chart
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            if (performanceChartInstance) {
+                performanceChartInstance.destroy();
+            }
+
+            // Limit to last 20 plays for better visualization
+            const recentHistory = historyList.slice(-20);
+            const labels = recentHistory.map((h, i) => `J${i + 1} (Fase ${h.level})`);
+            const data = recentHistory.map(h => h.accuracy);
+
+            performanceChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Precisão (%)',
+                        data: data,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#2563eb',
+                        pointHoverBackgroundColor: '#1e40af',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { callback: function (value) { return value + "%" }, font: { weight: 'bold' } },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { weight: 'bold' } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) { return ` Precisão: ${context.parsed.y}%`; }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        function closeStatsModal() {
+            showScreen('SETUP');
+        }
+
+        // --- GOOGLE LOGIN ---
+        function handleCredentialResponse(response) {
+            try {
+                const data = jwtDecode(response.credential);
+                currentUserEmail = data.email;
+
+                document.getElementById('googleLoginBtn').classList.add('hidden');
+                document.getElementById('userProfile').classList.remove('hidden');
+                document.getElementById('userNameDisplay').innerText = data.given_name || data.name.split(' ')[0];
+                document.getElementById('userAvatar').src = data.picture;
+                document.getElementById('userGreeting').innerText = `Bem-vindo, ${data.given_name || data.name.split(' ')[0]}`;
+
+                renderLevelGrid(); // Repinta tela com dados do usuário
+            } catch (e) {
+                console.error("Erro ao decodificar token Google", e);
+            }
+        }
+
+        function logoutGoogle() {
+            currentUserEmail = 'guest';
+
+            document.getElementById('googleLoginBtn').classList.remove('hidden');
+            document.getElementById('userProfile').classList.add('hidden');
+            document.getElementById('userGreeting').innerText = 'Selecione uma fase';
+
+            renderLevelGrid(); // Repinta tela com dados de visitante
+
+            // Limpa possivel seleção auto
+            google.accounts.id.disableAutoSelect();
+        }
+
+        function jwtDecode(token) {
+            let base64Url = token.split('.')[1];
+            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            let jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
         }
 
         async function initLevel(lvl) {
@@ -1894,7 +2100,8 @@
 
         function getRewardVideos() {
             // Unir dados do arquivo JSON com dados do localStorage (preferência para o arquivo se houver conflito de ID)
-            const raw = localStorage.getItem('digita_reward_videos') || '[]';
+            const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+            const raw = localStorage.getItem(prefix + 'digita_reward_videos') || '[]';
             let storedVideos = JSON.parse(raw).map(v => typeof v === 'string' ? { id: v } : v);
 
             // Combinar: vídeos do JSON + vídeos do localStorage que não estão no JSON
@@ -1983,7 +2190,8 @@
 
             if (!videos.find(v => v.id === videoId)) {
                 videos.push(videoObj);
-                localStorage.setItem('digita_reward_videos', JSON.stringify(videos));
+                const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+                localStorage.setItem(prefix + 'digita_reward_videos', JSON.stringify(videos));
                 renderRewardVideosConfig();
             } else {
                 alert("Este vídeo já foi adicionado.");
@@ -1994,7 +2202,8 @@
         function removeRewardVideo(index) {
             let videos = getRewardVideos();
             videos.splice(index, 1);
-            localStorage.setItem('digita_reward_videos', JSON.stringify(videos));
+            const prefix = currentUserEmail !== 'guest' ? currentUserEmail + '_' : '';
+            localStorage.setItem(prefix + 'digita_reward_videos', JSON.stringify(videos));
             renderRewardVideosConfig();
         }
 
@@ -2064,7 +2273,8 @@
                         'autoplay': 1,
                         'rel': 0,
                         'modestbranding': 1,
-                        'controls': 1
+                        'controls': 1,
+                        'origin': window.location.origin
                     },
                     events: {
                         'onReady': (event) => {
