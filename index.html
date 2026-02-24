@@ -13,8 +13,8 @@
     <link rel="icon" type="image/png" href="game_icon.png">
     <link rel="manifest" href="manifest.json">
     <script src="sw-register.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js"></script>
 
     <style>
         body {
@@ -443,25 +443,65 @@
                     </div>
                 </div>
 
-                <!-- Configuração de Vídeos de Prêmio -->
-                <div class="mt-6 border-t-2 border-blue-50 pt-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-bold text-gray-500">Vídeos de Prêmio (YouTube):</span>
-                        <span id="videoCountLabel" class="text-xs font-bold text-blue-400">0/10</span>
+                <!-- Adicionar Recompensa -->
+                <div class="mt-8 border-t-2 border-slate-100 pt-6">
+                    <h4 class="font-bold text-gray-500 mb-4 flex items-center gap-2">
+                        <span
+                            class="bg-gray-200 text-gray-600 rounded-full w-6 h-6 flex items-center justify-center text-sm">+</span>
+                        Adicionar Novo Vídeo de Prêmio
+                    </h4>
+                    <div class="flex flex-col gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-200">
+
+                        <!-- Abas de Tipo de Vídeo -->
+                        <div class="flex gap-2">
+                            <button id="tabLocalVideo" onclick="switchVideoTab('local')"
+                                class="flex-1 py-2 rounded-lg font-bold text-sm bg-blue-500 text-white shadow-md transition-colors">Arquivo
+                                Local (.mp4)</button>
+                            <button id="tabYouTubeVideo" onclick="switchVideoTab('youtube')"
+                                class="flex-1 py-2 rounded-lg font-bold text-sm bg-white text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors">Link
+                                do YouTube</button>
+                        </div>
+
+                        <!-- Formulário Local -->
+                        <div id="formLocalVideo" class="flex flex-col gap-3">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-600 mb-1">Escolha um Vídeo do
+                                    Dispositivo:</label>
+                                <input type="file" id="localVideoFile" accept="video/mp4"
+                                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors">
+                                <p class="text-xs text-orange-500 mt-1 font-bold">⚠️ O vídeo ficará salvo na memória do
+                                    navegador. Vídeos grandes podem demorar.</p>
+                            </div>
+                            <button onclick="addLocalRewardVideo()" id="btnSaveLocal"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-sm w-full">
+                                Salvar Arquivo Local
+                            </button>
+                        </div>
+
+                        <!-- Formulário YouTube -->
+                        <div id="formYouTubeVideo" class="hidden flex flex-col gap-3">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-600 mb-1">Link ou ID do YouTube:</label>
+                                <input type="text" id="newRewardId"
+                                    placeholder="Ex: https://youtu.be/ZHKRxjwKnXM ou ZHKRxjwKnXM"
+                                    class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-red-400 outline-none transition-colors">
+                            </div>
+                            <button onclick="addYouTubeRewardVideo()"
+                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-sm w-full">
+                                Adicionar do YouTube
+                            </button>
+                        </div>
+
+                        <div class="border-t border-gray-200 mt-2 pt-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-bold text-gray-500">Vídeos de Prêmio:</span>
+                                <span id="videoCountLabel" class="text-xs font-bold text-blue-400">0/10</span>
+                            </div>
+                            <div id="rewardVideosList" class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <!-- Lista de vídeos injetada aqui -->
+                            </div>
+                        </div>
                     </div>
-                    <div id="rewardVideosList" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-                        <!-- Lista de vídeos injetada aqui -->
-                    </div>
-                    <div class="flex gap-2">
-                        <input type="text" id="newVideoInput" placeholder="Cole o link ou ID do YouTube aqui..."
-                            class="flex-1 p-2 rounded-xl border-2 border-blue-100 text-sm focus:border-blue-300 outline-none transition-colors">
-                        <button onclick="addRewardVideo()"
-                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors shadow-sm">
-                            Adicionar
-                        </button>
-                    </div>
-                    <p class="text-[10px] text-gray-400 mt-2">Dica: Um vídeo será escolhido aleatoriamente ao completar
-                        uma fase.</p>
                 </div>
             </div>
 
@@ -575,10 +615,20 @@
     <div id="screenVideo"
         class="hidden absolute inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center p-4 animate__animated animate__fadeIn">
         <div
-            class="w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl relative border-4 border-white/20">
-            <div id="videoFrame" class="w-full h-full"></div>
-            <div id="videoSubtitleContainer" class="subtitle-container hidden">
-                <div id="videoSubtitleBox" class="subtitle-box"></div>
+            class="w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl relative border-4 border-white/20 flex items-center justify-center">
+
+            <!-- HTML5 Player para arquivos locais -->
+            <video id="videoFrame" class="hidden w-full h-full object-contain bg-black" controls autoplay
+                playsinline></video>
+
+            <!-- Div para a API do YouTube injetar o iframe -->
+            <div id="youtubePlayer" class="hidden w-full h-full bg-black"></div>
+
+            <div id="videoSubtitleContainer"
+                class="subtitle-container hidden absolute bottom-12 w-full flex justify-center pointer-events-none">
+                <div id="videoSubtitleBox"
+                    class="subtitle-box bg-black/70 text-white p-4 rounded-xl text-2xl font-bold flex flex-wrap justify-center items-center gap-2 shadow-lg backdrop-blur-sm border-2 border-white/20">
+                </div>
             </div>
         </div>
         <button onclick="closeVideoReward()"
@@ -693,10 +743,21 @@
         // --- DADOS DAS FASES ---
         let levels = {};
         let currentLevelData = []; // Only load current level data
-        let videoRewards = []; // External video rewards data
-        let youtubePlayer = null;
-        let subtitleSyncInterval = null;
         let currentVideoData = null;
+
+        // --- REWARD VIDEOS (LOCAL HTML5) ---
+
+        let rewardVideoIndices = [];
+        let currentRewardVideoIndex = 0;
+        let isConfiguringVideos = false; // Flag para saber se estamos no setup
+
+        // O arquivo JSON externo será o "arquivo oficial"
+        let videoRewards = [];
+
+        // Legendas e player HTML5
+        let currentVideoSubtitles = [];
+        let html5VideoPlayer = null;
+        let lastSubtitleIndex = -1;
 
         // --- VARIÁVEIS DE ESTADO ---
         let gameMode = 'SYLLABLES'; // 'SYLLABLES', 'DIALOGUE', 'QUIZ'
@@ -1854,7 +1915,7 @@
                 if (nextState === 'END_PHASE') {
                     // Adicionar botão de prêmio apenas no final da fase
                     actionBtn.textContent = "🎁 VER PRÊMIO";
-                    actionBtn.onclick = showVideoReward;
+                    actionBtn.onclick = playRewardVideo;
                 } else {
                     resetPresentationButton();
                 }
@@ -2160,7 +2221,7 @@
             const allWords = [];
             // Gather all possible words from current level AND maybe we need a fallback for distractors?
             // Since we don't have global 'database', we can only use 'currentLevelItems.items' easily.
-            // If we want cross-level distractors, we might need to fetch them or just stick to current level words + generic terms?
+            // If we want cross-level distractors, we might need to architecture differently. 
             // Or maybe 'levels.json' could contain a small list of common words for distractors?
             // For now, let's use only words from current level. If too few, we might fallback to generic "Opção".
 
@@ -2370,31 +2431,41 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
+        // Alternador de abas
+        function switchVideoTab(tab) {
+            document.getElementById('tabLocalVideo').classList.remove('bg-blue-500', 'text-white', 'bg-white', 'text-gray-500');
+            document.getElementById('tabYouTubeVideo').classList.remove('bg-blue-500', 'text-white', 'bg-white', 'text-gray-500');
+
+            if (tab === 'local') {
+                document.getElementById('tabLocalVideo').classList.add('bg-blue-500', 'text-white');
+                document.getElementById('tabYouTubeVideo').classList.add('bg-white', 'text-gray-500');
+                document.getElementById('formLocalVideo').classList.remove('hidden');
+                document.getElementById('formYouTubeVideo').classList.add('hidden');
+            } else {
+                document.getElementById('tabYouTubeVideo').classList.add('bg-blue-500', 'text-white');
+                document.getElementById('tabLocalVideo').classList.add('bg-white', 'text-gray-500');
+                document.getElementById('formYouTubeVideo').classList.remove('hidden');
+                document.getElementById('formLocalVideo').classList.add('hidden');
+            }
+        }
+
         // --- SISTEMA DE PRÊMIOS (VÍDEOS) ---
-        function extractYouTubeId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : url;
+        function populateRewardVideoIndices() {
+            rewardVideoIndices = Array.from({ length: getRewardVideos().length }, (_, i) => i);
+            // Shuffle the indices
+            for (let i = rewardVideoIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [rewardVideoIndices[i], rewardVideoIndices[j]] = [rewardVideoIndices[j], rewardVideoIndices[i]];
+            }
         }
 
         function getRewardVideos() {
             // Unir dados do arquivo JSON com dados do localStorage (preferência para o arquivo se houver conflito de ID)
             const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
             const raw = localStorage.getItem(prefix + 'digita_reward_videos') || '[]';
-            let storedVideos = JSON.parse(raw).map(v => typeof v === 'string' ? { id: v } : v);
+            let storedVideos = JSON.parse(raw).map(v => typeof v === 'string' ? { id: v, type: 'youtube' } : v);
 
-            // Combinar: vídeos do JSON + vídeos do localStorage que não estão no JSON
-            const combined = [...videoRewards];
-            storedVideos.forEach(sv => {
-                if (!combined.find(cv => cv.id === sv.id)) {
-                    combined.push(sv);
-                }
-            });
-
-            // Fallback se não houver nada
-            if (combined.length === 0) return [{ id: "ZHKRxjwKnXM" }];
-
-            return combined;
+            return storedVideos;
         }
 
         function renderRewardVideosConfig() {
@@ -2410,44 +2481,46 @@
 
             videos.forEach((vidObj, index) => {
                 const vid = vidObj.id;
+                const isLocal = vidObj.type === 'local';
                 const item = document.createElement('div');
                 item.className = 'flex flex-col bg-blue-50 p-2 rounded-xl border border-blue-100 group hover:border-blue-200 transition-colors';
 
-                let subtitleInfo = '';
-                if (vidObj.subtitle) {
-                    subtitleInfo = `<div class="mt-1 text-[10px] text-blue-500 italic truncate ml-19">Legenda: ${vidObj.subtitle}</div>`;
-                }
+                const thumbSrc = isLocal ? 'img/local_video_thumb.png' : `https://img.youtube.com/vi/${vid}/mqdefault.jpg`;
+                const thumbFallback = isLocal ? '<div class="w-full h-full bg-blue-200 flex items-center justify-center text-xl">📁</div>' : `<img src="${thumbSrc}" class="w-full h-full object-cover" loading="lazy">`;
 
                 item.innerHTML = `
                     <div class="flex items-center justify-between w-full">
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <div class="w-16 h-10 bg-gray-200 rounded-lg overflow-hidden shrink-0 shadow-sm border border-blue-100">
-                                <img src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" class="w-full h-full object-cover" loading="lazy">
+                            <div class="w-16 h-10 bg-gray-200 rounded-lg overflow-hidden shrink-0 shadow-sm border border-blue-100 relative">
+                                ${thumbFallback}
                             </div>
                             <div class="flex flex-col overflow-hidden">
-                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">ID do Vídeo</span>
-                                <span class="text-xs font-mono text-blue-700 truncate">${vid}</span>
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${isLocal ? 'Arqv. Local' : 'YouTube'}</span>
+                                <span class="text-xs font-mono text-blue-700 truncate">${vidObj.title || vid}</span>
                             </div>
                         </div>
                         <button onclick="removeRewardVideo(${index})" class="text-gray-400 hover:text-red-500 font-bold px-2 transition-colors">✕</button>
                     </div>
-                    ${subtitleInfo}
                 `;
                 container.appendChild(item);
             });
         }
 
-        function addRewardVideo() {
-            const input = document.getElementById('newVideoInput');
+        function extractYouTubeId(url) {
+            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+            const match = url.match(regex);
+            return match ? match[1] : url.trim(); // Se não bater o regex, assume que já colou o ID ou tentou
+        }
+
+        function addYouTubeRewardVideo() {
+            const input = document.getElementById('newRewardId');
             let rawValue = input.value.trim();
             if (!rawValue) return;
 
-            // Formato: ID | Legenda | palavra:emoji,palavra:emoji
-            const parts = rawValue.split('|').map(p => p.trim());
-            const videoId = extractYouTubeId(parts[0]);
+            const videoId = extractYouTubeId(rawValue);
 
             if (videoId.length !== 11) {
-                alert("ID do vídeo inválido.");
+                alert("Não foi possível identificar o ID do YouTube. Verifique o link.");
                 return;
             }
 
@@ -2457,18 +2530,8 @@
                 return;
             }
 
-            const videoObj = { id: videoId };
-            if (parts[1]) videoObj.subtitle = parts[1];
-            if (parts[2]) {
-                videoObj.mapping = {};
-                parts[2].split(',').forEach(pair => {
-                    const [word, emoji] = pair.split(':').map(s => s.trim());
-                    if (word && emoji) videoObj.mapping[word.toLowerCase()] = emoji;
-                });
-            }
-
             if (!videos.find(v => v.id === videoId)) {
-                videos.push(videoObj);
+                videos.push({ id: videoId, type: 'youtube' });
                 const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
                 localStorage.setItem(prefix + 'digita_reward_videos', JSON.stringify(videos));
                 renderRewardVideosConfig();
@@ -2478,214 +2541,274 @@
             input.value = '';
         }
 
-        function removeRewardVideo(index) {
+        async function addLocalRewardVideo() {
+            const fileInput = document.getElementById('localVideoFile');
+            if (fileInput.files.length === 0) return;
+
+            const file = fileInput.files[0];
+            const fileId = "local_" + Date.now(); // ID único
+
             let videos = getRewardVideos();
+            if (videos.length >= 10) {
+                alert("Limite de 10 vídeos atingido.");
+                return;
+            }
+
+            const btnSaveLocal = document.getElementById('btnSaveLocal');
+            btnSaveLocal.innerText = 'Salvando no Navegador...';
+            btnSaveLocal.disabled = true;
+
+            try {
+                // Salvar o arquivo no IndexedDB
+                await idbKeyval.set(fileId, file);
+
+                videos.push({ id: fileId, title: file.name, type: 'local' });
+                const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
+                localStorage.setItem(prefix + 'digita_reward_videos', JSON.stringify(videos));
+                renderRewardVideosConfig();
+
+                alert("Vídeo salvo com sucesso!");
+                fileInput.value = ''; // Reset
+            } catch (err) {
+                alert("Erro ao salvar vídeo no navegador: " + err.message);
+                console.error(err);
+            } finally {
+                btnSaveLocal.innerText = 'Salvar Arquivo Local';
+                btnSaveLocal.disabled = false;
+            }
+        }
+
+        async function removeRewardVideo(index) {
+            let videos = getRewardVideos();
+            const videoToRemove = videos[index];
+
+            if (videoToRemove.type === 'local') {
+                try {
+                    await idbKeyval.del(videoToRemove.id);
+                } catch (e) {
+                    console.error("Erro ao deletar do IDB", e);
+                }
+            }
+
             videos.splice(index, 1);
             const prefix = currentProfileId !== 'guest' ? currentProfileId + '_' : '';
             localStorage.setItem(prefix + 'digita_reward_videos', JSON.stringify(videos));
             renderRewardVideosConfig();
         }
 
-        // --- YOUTUBE API ---
-        function onYouTubeIframeAPIReady() {
-            // A API está pronta, mas o player será criado sob demanda
-        }
+        // --- YT API Global ---
+        let ytPlayerInstance = null;
+        let isYtApiReady = false;
 
-        async function showVideoReward() {
-            let videos = getRewardVideos();
-            if (videos.length === 0) videos = [{ id: "ZHKRxjwKnXM" }];
+        // Inicia YT API Assincronamente
+        if (typeof YT === 'undefined') {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-            const randomIndex = Math.floor(Math.random() * videos.length);
-            currentVideoData = videos[randomIndex];
-            const videoId = currentVideoData.id;
-
-            // Tentar carregar dados específicos do vídeo de arquivo JSON
-            try {
-                const response = await fetch(`data/${videoId}.json`);
-                if (response.ok) {
-                    const extraData = await response.json();
-                    currentVideoData = { ...currentVideoData, ...extraData };
-                }
-            } catch (e) {
-                console.warn(`Could not load specific data for video ${videoId}:`, e);
-            }
-
-            // Limpar player anterior se existir
-            if (youtubePlayer) {
-                try {
-                    youtubePlayer.destroy();
-                } catch (e) {
-                    console.warn("Error destroying previous player:", e);
-                }
-                youtubePlayer = null;
-            }
-
-            // Recriar o elemento videoFrame como div
-            const videoContainer = document.querySelector('#screenVideo .aspect-video');
-            let oldFrame = document.getElementById('videoFrame');
-            if (oldFrame) {
-                oldFrame.remove();
-            }
-
-            const newFrame = document.createElement('div');
-            newFrame.id = 'videoFrame';
-            newFrame.className = 'w-full h-full';
-            videoContainer.insertBefore(newFrame, videoContainer.firstChild);
-
-            // Mostrar a tela antes de criar o player
-            showScreen('VIDEO');
-
-            // Verificar se a API do YouTube está disponível
-            if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
-                console.warn("YouTube API not loaded, using fallback");
-                fallbackToSimpleIframe(videoId);
-                return;
-            }
-
-            // Criar o player do YouTube
-            try {
-                youtubePlayer = new YT.Player('videoFrame', {
+            window.onYouTubeIframeAPIReady = function () {
+                isYtApiReady = true;
+                ytPlayerInstance = new YT.Player('youtubePlayer', {
                     height: '100%',
                     width: '100%',
-                    videoId: videoId,
-                    host: 'https://www.youtube-nocookie.com',
                     playerVars: {
-                        'autoplay': 1,
+                        'autoplay': 0,
+                        'controls': 1,
                         'rel': 0,
                         'modestbranding': 1,
-                        'controls': 1,
-                        'iv_load_policy': 3,
-                        'playsinline': 1,
-                        'fs': 1,
-                        'origin': window.location.origin
+                        'fs': 0,
+                        'playsinline': 1
                     },
                     events: {
-                        'onReady': (event) => {
-                            console.log("YouTube player ready");
-                            event.target.playVideo();
-                        },
-                        'onStateChange': onPlayerStateChange,
-                        'onError': (e) => {
-                            console.error("YouTube Player Error:", e.data);
-                            fallbackToSimpleIframe(videoId);
-                        }
+                        'onStateChange': onYtPlayerStateChange
                     }
                 });
-            } catch (error) {
-                console.error("Error creating YouTube player:", error);
-                fallbackToSimpleIframe(videoId);
+            };
+        }
+
+        function onYtPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.ENDED) {
+                closeVideoReward();
             }
         }
 
-        function fallbackToSimpleIframe(videoId) {
-            const videoContainer = document.querySelector('#screenVideo .aspect-video');
-            let frame = document.getElementById('videoFrame');
-
-            // Substituir por um iframe simples se falhar ou API não disponível
-            const simpleIframe = document.createElement('iframe');
-            simpleIframe.id = 'videoFrame';
-            simpleIframe.className = 'w-full h-full';
-            simpleIframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&fs=1`;
-            simpleIframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-            simpleIframe.allowFullscreen = true;
-
-            if (frame) {
-                frame.replaceWith(simpleIframe);
-            } else {
-                videoContainer.prepend(simpleIframe);
-            }
-
-            // In simple mode, we don't sync timed subtitles to avoid confusion
-            // Only render if it's a static single subtitle
-            if (currentVideoData && currentVideoData.subtitle && !currentVideoData.timedSubtitles) {
-                renderSubtitle(currentVideoData);
-            }
-        }
-
-
-
-        function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.PLAYING) {
-                startSubtitleSync();
-            } else {
-                stopSubtitleSync();
-            }
-        }
-
-        function startSubtitleSync() {
-            stopSubtitleSync();
-            subtitleSyncInterval = setInterval(() => {
-                if (youtubePlayer && youtubePlayer.getCurrentTime) {
-                    const currentTime = youtubePlayer.getCurrentTime();
-                    updateTimedSubtitles(currentTime);
-                }
-            }, 100);
-        }
-
-        function stopSubtitleSync() {
-            if (subtitleSyncInterval) {
-                clearInterval(subtitleSyncInterval);
-                subtitleSyncInterval = null;
-            }
-        }
-
-        function updateTimedSubtitles(seconds) {
-            if (!currentVideoData || !currentVideoData.timedSubtitles) {
-                // Se for o formato antigo (estático), já foi renderizado uma vez
-                if (currentVideoData && currentVideoData.subtitle) {
-                    renderSubtitle(currentVideoData);
-                    currentVideoData.subtitle = null; // Evitar renderizar toda hora
-                }
+        async function playRewardVideo() {
+            let configVideos = getRewardVideos();
+            if (configVideos.length === 0) {
+                // Fallback, should not happen directly but just in case
+                console.log("Sem vídeos configurados. Ignorando prêmio.");
+                goToMenu();
                 return;
             }
 
-            const activeSub = currentVideoData.timedSubtitles.find(s => seconds >= s.start && seconds <= s.end);
+            setTimeout(async () => {
+                showScreen('VIDEO');
+                if (window.startConfetti) window.startConfetti();
 
-            if (activeSub) {
-                renderSubtitle(activeSub);
-            } else {
-                document.getElementById('videoSubtitleContainer').classList.add('hidden');
+                if (rewardVideoIndices.length === 0) populateRewardVideoIndices();
+
+                if (rewardVideoIndices.length > 0) {
+                    const videoObj = configVideos[rewardVideoIndices[currentRewardVideoIndex]];
+
+                    document.getElementById('videoFrame').classList.add('hidden');
+                    document.getElementById('youtubePlayer').classList.add('hidden');
+                    document.getElementById('videoSubtitleContainer').classList.add('hidden');
+
+                    if (videoObj.type === 'local') {
+                        console.log("Iniciando Local HTML5 Player:", videoObj.title);
+                        const videoEl = document.getElementById('videoFrame');
+                        videoEl.classList.remove('hidden');
+                        html5VideoPlayer = videoEl;
+
+                        try {
+                            const fileBlob = await idbKeyval.get(videoObj.id);
+                            if (fileBlob) {
+                                const url = URL.createObjectURL(fileBlob);
+                                videoEl.src = url;
+                                await videoEl.play();
+                            } else {
+                                alert("Arquivo não encontrado no navegador. Talvez tenha sido limpo.");
+                                closeVideoReward();
+                            }
+                        } catch (e) {
+                            console.error("Erro ao carregar video local", e);
+                            closeVideoReward();
+                        }
+
+                    } else {
+                        // YouTube
+                        console.log("Iniciando YouTube Iframe Player:", videoObj.id);
+                        document.getElementById('youtubePlayer').classList.remove('hidden');
+
+                        if (isYtApiReady && ytPlayerInstance && ytPlayerInstance.loadVideoById) {
+                            ytPlayerInstance.loadVideoById(videoObj.id);
+                        } else {
+                            console.log("Aguardando carregamento da API do YT...");
+                            // Retry se ainda não carregou
+                            const retryInterval = setInterval(() => {
+                                if (isYtApiReady && ytPlayerInstance && ytPlayerInstance.loadVideoById) {
+                                    clearInterval(retryInterval);
+                                    ytPlayerInstance.loadVideoById(videoObj.id);
+                                }
+                            }, 500);
+                        }
+                    }
+
+                    currentRewardVideoIndex++;
+                    if (currentRewardVideoIndex >= rewardVideoIndices.length) {
+                        populateRewardVideoIndices();
+                        currentRewardVideoIndex = 0;
+                    }
+                }
+            }, 500);
+        }
+
+        async function loadSubtitles(videoId) {
+            currentVideoSubtitles = [];
+            lastSubtitleIndex = -1;
+            document.getElementById('videoSubtitleContainer').classList.add('hidden');
+            document.getElementById('videoSubtitleBox').innerHTML = '';
+
+            try {
+                // Tenta carregar legendas do mesmo nome do video (.mp4 -> .json)
+                const res = await fetch(`data/videos/${videoId}.json`);
+                if (res.ok) {
+                    currentVideoSubtitles = await res.json();
+                    console.log("Legendas carregadas para", videoId);
+                } else {
+                    console.log("Nenhuma legenda encontrada para", videoId);
+                }
+            } catch (e) {
+                console.warn("Erro ao buscar legendas:", e);
             }
         }
 
-        function renderSubtitle(data) {
-            const container = document.getElementById('videoSubtitleContainer');
-            const box = document.getElementById('videoSubtitleBox');
+        function startSubtitleMonitorHtml5() {
+            if (!html5VideoPlayer) return;
 
-            if (!data.text && !data.subtitle) {
-                container.classList.add('hidden');
-                return;
-            }
+            // Usamos o evento ontimeupdate nativo do HTML5 para checar as legendas 
+            html5VideoPlayer.ontimeupdate = () => {
+                if (currentVideoSubtitles.length === 0) return;
 
-            container.classList.remove('hidden');
-            box.innerHTML = '';
+                const currentTime = html5VideoPlayer.currentTime;
 
-            const text = data.text || data.subtitle;
-            const words = text.split(/\s+/);
-            const mapping = data.mapping || {};
+                // Encontra a legenda que cobre o currentTime
+                const activeSubIndex = currentVideoSubtitles.findIndex(
+                    sub => currentTime >= sub.start && currentTime <= sub.end
+                );
 
-            words.forEach(word => {
-                const cleanWord = word.replace(/[.,!?;:]/g, "").toLowerCase();
-                const emoji = mapping[cleanWord] || "";
+                if (activeSubIndex !== lastSubtitleIndex) {
+                    lastSubtitleIndex = activeSubIndex;
+                    const container = document.getElementById('videoSubtitleContainer');
+                    const box = document.getElementById('videoSubtitleBox');
 
-                const group = document.createElement('div');
-                group.className = 'subtitle-word-group';
+                    if (activeSubIndex !== -1) {
+                        const sub = currentVideoSubtitles[activeSubIndex];
+                        let html = '';
+                        if (sub.emoji) html += `<span class="emoji-bounce text-4xl mr-3">${sub.emoji}</span>`;
+                        html += `<span>${sub.text}</span>`;
 
-                group.innerHTML = `
-                    <div class="subtitle-emoji">${emoji}</div>
-                    <div class="subtitle-text">${word}</div>
-                `;
-                box.appendChild(group);
-            });
+                        box.innerHTML = html;
+                        container.classList.remove('hidden');
+
+                        // Micro animação
+                        box.classList.remove('animate__animated', 'animate__headShake');
+                        void box.offsetWidth;
+                        box.classList.add('animate__animated', 'animate__headShake');
+                    } else {
+                        container.classList.add('hidden');
+                    }
+                }
+            };
+
+            // Quando video acabar ou fechar limpar
+            html5VideoPlayer.onended = () => {
+                closeVideoReward();
+            };
         }
 
         function closeVideoReward() {
-            stopSubtitleSync();
-            if (youtubePlayer) {
-                try { youtubePlayer.stopVideo(); } catch (e) { }
+            if (window.stopConfetti) window.stopConfetti();
+
+            if (html5VideoPlayer && !html5VideoPlayer.classList.contains('hidden')) {
+                html5VideoPlayer.pause();
+                URL.revokeObjectURL(html5VideoPlayer.src); // Free memory
+                html5VideoPlayer.src = "";
+                html5VideoPlayer.ontimeupdate = null;
             }
+
+            if (ytPlayerInstance && typeof ytPlayerInstance.stopVideo === 'function') {
+                ytPlayerInstance.stopVideo();
+            }
+
             document.getElementById('videoSubtitleContainer').classList.add('hidden');
-            advanceLinearFlow();
+
+            const videoContainer = document.getElementById('screenVideo');
+            if (videoContainer) videoContainer.classList.add('hidden');
+
+            showScreen('SETUP'); // Default volta pro setup. Se tem nextPhase/etc ele sobrescreve depois.
+
+            // Resume level if needed logic
+            if (flowState === 'ENDED') {
+                // ... logic is maintained outside here ...
+            }
+        }
+
+        // Se for fim de fase real, vamos voltar p/ main mode.
+        if (flowState === 'END_PHASE') {
+            showScreen('PRESENTATION');
+            document.getElementById('presentationContent').innerHTML = `
+                    <div class="bg-white border-4 border-green-200 rounded-full p-10 mb-6 shadow-sm inline-block"><span class="text-8xl">✅</span></div>
+                    <h2 class="text-4xl font-bold text-green-500 mb-4">Prêmio Finalizado!</h2>
+                `;
+            const actionBtn = document.getElementById('btnPresentationNext');
+            if (actionBtn) {
+                actionBtn.textContent = "CONTINUAR JOGANDO ➔";
+                actionBtn.onclick = advanceLinearFlow;
+            }
+        } else {
+            showScreen('SETUP');
         }
 
         // Initial load via script tag (avoids CORS issues on local)
