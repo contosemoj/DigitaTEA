@@ -688,15 +688,20 @@
                 </div>
                 <div class="h-10 w-px bg-gray-200 hidden sm:block"></div>
                 <div class="text-center">
+                    <p class="text-xs sm:text-sm text-gray-500 font-bold uppercase mb-1">Média de Tentativas</p>
+                    <p id="statsAvgAttempts" class="text-3xl sm:text-4xl font-black text-orange-500">0</p>
+                </div>
+                <div class="h-10 w-px bg-gray-200 hidden md:block"></div>
+                <div class="text-center">
                     <p class="text-xs sm:text-sm text-gray-500 font-bold uppercase mb-1">Fases Estudadas</p>
                     <p id="statsTotalPlayed" class="text-3xl sm:text-4xl font-black text-purple-500">0</p>
                 </div>
-                <div class="h-10 w-px bg-gray-200 hidden md:block"></div>
+                <div class="h-10 w-px bg-gray-200 hidden sm:block"></div>
                 <div class="text-center">
                     <p class="text-xs sm:text-sm text-gray-500 font-bold uppercase mb-1">Total de Falhas</p>
                     <p id="statsTotalFailures" class="text-3xl sm:text-4xl font-black text-red-400">0</p>
                 </div>
-                <div class="h-10 w-px bg-gray-200 hidden sm:block"></div>
+                <div class="h-10 w-px bg-gray-200 hidden md:block"></div>
                 <div class="text-center">
                     <p class="text-xs sm:text-sm text-gray-500 font-bold uppercase mb-1">Estrelas (Pontos)</p>
                     <p id="statsTotalScore" class="text-3xl sm:text-4xl font-black text-yellow-500">0</p>
@@ -1035,16 +1040,20 @@
             let totalAccSum = 0;
             let totalFailures = 0;
             let totalScore = 0;
+            let totalAttemptsSum = 0;
 
             if (filteredHistory.length > 0) {
                 filteredHistory.forEach(item => {
                     totalAccSum += item.accuracy;
                     totalFailures += (item.failures || 0);
                     totalScore += (item.score || 0);
+                    totalAttemptsSum += (item.attempts || 0);
                 });
                 document.getElementById('statsAvgAccuracy').innerText = Math.round(totalAccSum / filteredHistory.length) + '%';
+                document.getElementById('statsAvgAttempts').innerText = (totalAttemptsSum / filteredHistory.length).toFixed(1);
             } else {
                 document.getElementById('statsAvgAccuracy').innerText = '0%';
+                document.getElementById('statsAvgAttempts').innerText = '0';
             }
             document.getElementById('statsTotalPlayed').innerText = filteredHistory.length;
             document.getElementById('statsTotalFailures').innerText = totalFailures;
@@ -1061,7 +1070,8 @@
                     return {
                         label: `F${h.level} (${timeStr})`,
                         accuracy: h.accuracy,
-                        failures: h.failures || 0
+                        failures: h.failures || 0,
+                        attempts: h.attempts || 0
                     };
                 });
                 document.getElementById('statsChartTitle').textContent = "Desempenho por Tentativa";
@@ -1079,10 +1089,11 @@
                         key = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
                     }
 
-                    if (!map[key]) map[key] = { accSum: 0, count: 0, failSum: 0 };
+                    if (!map[key]) map[key] = { accSum: 0, count: 0, failSum: 0, attemptsSum: 0 };
                     map[key].accSum += item.accuracy;
                     map[key].count++;
                     map[key].failSum += (item.failures || 0);
+                    map[key].attemptsSum += (item.attempts || 0);
                 });
 
                 // Converter map de volta para Array
@@ -1090,7 +1101,8 @@
                     aggData.push({
                         label: key,
                         accuracy: Math.round(map[key].accSum / map[key].count),
-                        failures: map[key].failSum
+                        failures: map[key].failSum,
+                        attempts: Math.round(map[key].attemptsSum / map[key].count)
                     });
                 });
                 document.getElementById('statsChartTitle').textContent = "Médias Agregadas do Período";
@@ -1109,6 +1121,7 @@
             const labels = aggData.map(d => d.label);
             const accuracyData = aggData.map(d => d.accuracy);
             const failuresData = aggData.map(d => d.failures);
+            const attemptsData = aggData.map(d => d.attempts || 0);
 
             performanceChartInstance = new Chart(ctx, {
                 type: 'line', // Tipo base
@@ -1124,6 +1137,21 @@
                             borderWidth: 1,
                             borderRadius: 4,
                             yAxisID: 'yFailures' // Associa ao eixo direito
+                        },
+                        {
+                            type: 'line',
+                            label: 'Média de Tentativas',
+                            data: attemptsData,
+                            backgroundColor: 'rgba(249, 115, 22, 0.2)', // orange-500
+                            borderColor: '#f97316',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#ea580c',
+                            pointHoverBackgroundColor: '#c2410c',
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            fill: false,
+                            tension: 0.3,
+                            yAxisID: 'yFailures' // Compartilha o eixo de quantidade
                         },
                         {
                             type: 'line',
