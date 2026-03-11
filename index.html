@@ -372,6 +372,79 @@
             letter-spacing: 1px;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
+
+        /* --- DRAG AND DROP QUIZ --- */
+        .drop-zone {
+            width: 3.5rem;
+            height: 4.5rem;
+            border: 4px dashed #cbd5e1;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            background-color: rgba(255, 255, 255, 0.5);
+            margin: 0.25rem;
+        }
+
+        @media (min-width: 768px) {
+            .drop-zone {
+                width: 4.5rem;
+                height: 5.5rem;
+            }
+        }
+
+        .drop-zone.magnet-active {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            transform: scale(1.1);
+        }
+
+        .drop-zone.filled {
+            border: 4px solid #22c55e;
+            background-color: #86efac;
+            color: #14532d;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .draggable-letter {
+            width: 3.5rem;
+            height: 4.5rem;
+            background-color: white;
+            border: 4px solid #3b82f6;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #1e3a8a;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            position: relative;
+            z-index: 10;
+        }
+
+        @media (min-width: 768px) {
+            .draggable-letter {
+                width: 4.5rem;
+                height: 5.5rem;
+                font-size: 3rem;
+            }
+        }
+
+        .draggable-letter.dragging {
+            position: fixed !important;
+            z-index: 9999;
+            cursor: grabbing;
+            transform: scale(1.15) translate(-50%, -50%);
+            opacity: 0.95;
+            pointer-events: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s;
+        }
     </style>
 </head>
 
@@ -419,97 +492,109 @@
             <div class="bg-white rounded-xl p-4 mb-6 border border-blue-100 mx-auto max-w-2xl">
                 <div class="flex flex-wrap gap-4 justify-center md:justify-between items-center">
 
-                    <!-- Dificuldade -->
-                    <div class="flex flex-col">
-                        <span class="text-sm font-bold text-gray-500 mb-1">Dificuldade para passar:</span>
-                        <select id="difficultySelect"
-                            class="p-2 rounded-lg border border-blue-200 text-gray-600 font-bold bg-white text-sm">
-                            <option value="0">Muito Fácil (Passa Sempre)</option>
-                            <option value="50">Fácil (> 50%)</option>
-                            <option value="70" selected> Médio (> 70%)</option>
-                            <option value="80">Difícil (> 80%)</option>
-                        </select>
-                    </div>
+                    <!-- Separator -->
+                    <hr class="my-4 border-gray-200">
 
-                    <!-- Modo de Ajuda -->
-                    <div class="flex flex-col">
-                        <span class="text-sm font-bold text-gray-500 mb-1">Modo de Ajuda:</span>
-                        <select id="helpModeSelect"
-                            class="p-2 rounded-lg border border-green-200 text-green-700 font-bold bg-white text-sm">
-                            <option value="NORMAL">Normal (Sem Dicas)</option>
-                            <option value="HINTS">Dicas Visuais</option>
-                            <option value="LEARN" selected>Modo Aprender (Progressivo)</option>
-                        </select>
-                    </div>
+                    <p class="text-sm font-bold text-gray-500 mb-2">GERENCIAMENTO OFFLINE</p>
+                    <button onclick="downloadOfflineData()"
+                        class="w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                        <span class="text-xl">📡</span> Preparar para Modo Offline
+                    </button>
+                    <p id="offlineStatusText" class="text-xs text-gray-500 mt-2 text-center hidden">Baixando arquivos...
+                    </p>
+
+                    <!-- Separator -->
+                    <hr class="my-4 border-gray-200">
+
+                    <p class="text-sm font-bold text-gray-500 mb-2">SOBRE</p>Dificuldade para passar:</span>
+                    <select id="difficultySelect"
+                        class="p-2 rounded-lg border border-blue-200 text-gray-600 font-bold bg-white text-sm">
+                        <option value="0">Muito Fácil (Passa Sempre)</option>
+                        <option value="50">Fácil (> 50%)</option>
+                        <option value="70" selected> Médio (> 70%)</option>
+                        <option value="80">Difícil (> 80%)</option>
+                    </select>
                 </div>
 
-                <!-- Adicionar Recompensa -->
-                <div class="mt-8 border-t-2 border-slate-100 pt-6">
-                    <h4 class="font-bold text-gray-500 mb-4 flex items-center gap-2">
-                        <span
-                            class="bg-gray-200 text-gray-600 rounded-full w-6 h-6 flex items-center justify-center text-sm">+</span>
-                        Adicionar Novo Vídeo de Prêmio
-                    </h4>
-                    <div class="flex flex-col gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-200">
-
-                        <!-- Abas de Tipo de Vídeo -->
-                        <div class="flex gap-2">
-                            <button id="tabLocalVideo" onclick="switchVideoTab('local')"
-                                class="flex-1 py-2 rounded-lg font-bold text-sm bg-blue-500 text-white shadow-md transition-colors">Arquivo
-                                Local (.mp4)</button>
-                            <button id="tabYouTubeVideo" onclick="switchVideoTab('youtube')"
-                                class="flex-1 py-2 rounded-lg font-bold text-sm bg-white text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors">Link
-                                do YouTube</button>
-                        </div>
-
-                        <!-- Formulário Local -->
-                        <div id="formLocalVideo" class="flex flex-col gap-3">
-                            <div>
-                                <label class="block text-sm font-bold text-gray-600 mb-1">Escolha um Vídeo do
-                                    Dispositivo:</label>
-                                <input type="file" id="localVideoFile" accept="video/mp4"
-                                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors">
-                                <p class="text-xs text-orange-500 mt-1 font-bold">⚠️ O vídeo ficará salvo na memória do
-                                    navegador. Vídeos grandes podem demorar.</p>
-                            </div>
-                            <button onclick="addLocalRewardVideo()" id="btnSaveLocal"
-                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-sm w-full">
-                                Salvar Arquivo Local
-                            </button>
-                        </div>
-
-                        <!-- Formulário YouTube -->
-                        <div id="formYouTubeVideo" class="hidden flex flex-col gap-3">
-                            <div>
-                                <label class="block text-sm font-bold text-gray-600 mb-1">Link ou ID do YouTube:</label>
-                                <input type="text" id="newRewardId"
-                                    placeholder="Ex: https://youtu.be/ZHKRxjwKnXM ou ZHKRxjwKnXM"
-                                    class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-red-400 outline-none transition-colors">
-                            </div>
-                            <button onclick="addYouTubeRewardVideo()"
-                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-sm w-full">
-                                Adicionar do YouTube
-                            </button>
-                        </div>
-
-                        <div class="border-t border-gray-200 mt-2 pt-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm font-bold text-gray-500">Vídeos de Prêmio:</span>
-                                <span id="videoCountLabel" class="text-xs font-bold text-blue-400">0/10</span>
-                            </div>
-                            <div id="rewardVideosList" class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <!-- Lista de vídeos injetada aqui -->
-                            </div>
-                        </div>
-                    </div>
+                <!-- Modo de Ajuda -->
+                <div class="flex flex-col">
+                    <span class="text-sm font-bold text-gray-500 mb-1">Modo de Ajuda:</span>
+                    <select id="helpModeSelect"
+                        class="p-2 rounded-lg border border-green-200 text-green-700 font-bold bg-white text-sm">
+                        <option value="NORMAL">Normal (Sem Dicas)</option>
+                        <option value="HINTS">Dicas Visuais</option>
+                        <option value="LEARN" selected>Modo Aprender (Progressivo)</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Grid de Fases -->
-            <div id="levelsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
-                <!-- As fases serão geradas aqui via JavaScript -->
+            <!-- Adicionar Recompensa -->
+            <div class="mt-8 border-t-2 border-slate-100 pt-6">
+                <h4 class="font-bold text-gray-500 mb-4 flex items-center gap-2">
+                    <span
+                        class="bg-gray-200 text-gray-600 rounded-full w-6 h-6 flex items-center justify-center text-sm">+</span>
+                    Adicionar Novo Vídeo de Prêmio
+                </h4>
+                <div class="flex flex-col gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-200">
+
+                    <!-- Abas de Tipo de Vídeo -->
+                    <div class="flex gap-2">
+                        <button id="tabLocalVideo" onclick="switchVideoTab('local')"
+                            class="flex-1 py-2 rounded-lg font-bold text-sm bg-blue-500 text-white shadow-md transition-colors">Arquivo
+                            Local (.mp4)</button>
+                        <button id="tabYouTubeVideo" onclick="switchVideoTab('youtube')"
+                            class="flex-1 py-2 rounded-lg font-bold text-sm bg-white text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors">Link
+                            do YouTube</button>
+                    </div>
+
+                    <!-- Formulário Local -->
+                    <div id="formLocalVideo" class="flex flex-col gap-3">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-600 mb-1">Escolha um Vídeo do
+                                Dispositivo:</label>
+                            <input type="file" id="localVideoFile" accept="video/mp4"
+                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors">
+                            <p class="text-xs text-orange-500 mt-1 font-bold">⚠️ O vídeo ficará salvo na memória do
+                                navegador. Vídeos grandes podem demorar.</p>
+                        </div>
+                        <button onclick="addLocalRewardVideo()" id="btnSaveLocal"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-sm w-full">
+                            Salvar Arquivo Local
+                        </button>
+                    </div>
+
+                    <!-- Formulário YouTube -->
+                    <div id="formYouTubeVideo" class="hidden flex flex-col gap-3">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-600 mb-1">Link ou ID do YouTube:</label>
+                            <input type="text" id="newRewardId"
+                                placeholder="Ex: https://youtu.be/ZHKRxjwKnXM ou ZHKRxjwKnXM"
+                                class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-red-400 outline-none transition-colors">
+                        </div>
+                        <button onclick="addYouTubeRewardVideo()"
+                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-sm w-full">
+                            Adicionar do YouTube
+                        </button>
+                    </div>
+
+                    <div class="border-t border-gray-200 mt-2 pt-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-bold text-gray-500">Vídeos de Prêmio:</span>
+                            <span id="videoCountLabel" class="text-xs font-bold text-blue-400">0/10</span>
+                        </div>
+                        <div id="rewardVideosList" class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <!-- Lista de vídeos injetada aqui -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Grid de Fases -->
+        <div id="levelsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            <!-- As fases serão geradas aqui via JavaScript -->
+        </div>
+    </div>
     </div>
 
     <!-- TELA DE APRESENTAÇÃO / TRANSIÇÃO -->
@@ -564,11 +649,15 @@
 
             <!-- MODO QUIZ (NOVO) -->
             <div id="quizContainer" class="hidden w-full flex-col items-center justify-center flex-1">
-                <div class="mb-6 bg-white p-4 rounded-3xl border-4 border-purple-200 shadow-sm">
-                    <div id="quizImage" class="h-40 flex items-center justify-center text-8xl"></div>
+                <div class="mb-4 bg-white p-4 rounded-3xl border-4 border-purple-200 shadow-sm shrink-0">
+                    <div id="quizImage" class="h-32 flex items-center justify-center text-8xl"></div>
                 </div>
-                <div id="quizOptions" class="grid grid-cols-2 gap-4 w-full max-w-2xl px-4">
-                    <!-- Options injected here -->
+                <div id="quizDropZones" class="flex flex-wrap justify-center mb-8 px-2 w-full max-w-2xl shrink-0">
+                    <!-- Drop zones injected here -->
+                </div>
+                <div id="quizLettersPool"
+                    class="flex flex-wrap justify-center items-center gap-3 w-full max-w-2xl px-4 min-h-[100px] flex-1">
+                    <!-- Draggable letters injected here -->
                 </div>
             </div>
 
@@ -1384,8 +1473,8 @@
 
             if (typeLower === 'quiz') {
                 gameMode = 'QUIZ';
-                // Quiz forces specific settings overrides
-                configHints = false;
+                // Remove override of configHints so visual hints can be used if selected
+                // configHints = false;
                 isProgressiveMode = false;
             } else if (typeLower === 'dialogue' || typeLower === 'context') {
                 gameMode = 'DIALOGUE';
@@ -2218,20 +2307,23 @@
             nextGameItem();
         }
 
+        let activeDragLetter = null;
+        let lettersPlacedCorrectly = 0;
+
         function renderQuiz() {
-            const container = document.getElementById('quizOptions');
-            container.innerHTML = '';
+            const dropZonesContainer = document.getElementById('quizDropZones');
+            const lettersPool = document.getElementById('quizLettersPool');
+            dropZonesContainer.innerHTML = '';
+            lettersPool.innerHTML = '';
+            lettersPlacedCorrectly = 0;
 
-            // Image/Text Display
             const imgDiv = document.getElementById('quizImage');
-
-            // Explicit Image Cleanup
             const oldImg = imgDiv.querySelector('img');
             if (oldImg) {
                 oldImg.src = '';
                 oldImg.remove();
             }
-            imgDiv.innerHTML = ''; // Double ensure
+            imgDiv.innerHTML = '';
 
             if (currentItem.image) {
                 const newImg = document.createElement('img');
@@ -2242,101 +2334,196 @@
                 imgDiv.textContent = currentItem.emoji;
             }
 
-            // Distractors
-            let options = [currentItem.word];
-            // Get random words from other levels
-            let tries = 0;
-            const allWords = [];
-            // Gather all possible words from current level AND maybe we need a fallback for distractors?
-            // Since we don't have global 'database', we can only use 'currentLevelItems.items' easily.
-            // If we want cross-level distractors, we might need to architecture differently. 
-            // Or maybe 'levels.json' could contain a small list of common words for distractors?
-            // For now, let's use only words from current level. If too few, we might fallback to generic "Opção".
+            if (currentItem.question) document.getElementById('gameInstruction').textContent = currentItem.question;
+            else document.getElementById('gameInstruction').textContent = "Arraste as letras para escrever a resposta:";
 
-            // FIX: database is not available globally. 
-            // We can only use items from current level.
-            if (currentLevelData && currentLevelData.items) {
-                currentLevelData.items.forEach(i => allWords.push(i.word));
-            }
-            // If we really need more words, we'd need to architecture differently. 
-            // Limitation accepted for memory optimization.
+            const word = currentItem.word;
 
-            while (options.length < 4 && tries < 100) {
-                tries++;
-                if (allWords.length > 0) {
-                    const randWord = allWords[Math.floor(Math.random() * allWords.length)];
-                    if (!options.includes(randWord)) options.push(randWord);
-                } else {
-                    break; // No words to pull from
+            // Create drop zones
+            for (let i = 0; i < word.length; i++) {
+                const zone = document.createElement('div');
+                zone.className = "drop-zone text-3xl md:text-5xl font-bold uppercase";
+                const expectedChar = word[i].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+                zone.dataset.expectedChar = expectedChar;
+                zone.dataset.index = i;
+                zone.id = `drop-zone-${i}`;
+
+                if (configHints) {
+                    zone.textContent = expectedChar;
+                    zone.classList.add('text-gray-300');
                 }
+
+                dropZonesContainer.appendChild(zone);
             }
 
-            // Fallback if we still don't have 4 options (e.g. nearly empty database)
-            while (options.length < 4) {
-                options.push("Opção " + (options.length + 1));
+            // Scramble letters
+            let chars = word.split('');
+            for (let i = chars.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [chars[i], chars[j]] = [chars[j], chars[i]];
             }
-            options = options.sort(() => Math.random() - 0.5);
 
-            options.forEach(opt => {
-                const btn = document.createElement('button');
-                // Removed hover:bg-blue-50 to prevent sticky hover on touch devices (iPad) selecting wrong answers
-                btn.className = "bg-white border-4 border-blue-200 text-blue-600 text-2xl font-bold py-6 rounded-2xl shadow-sm active:scale-95 transition-all";
-                btn.textContent = opt;
-                btn.dataset.opt = opt;
-                btn.dataset.correct = (opt === currentItem.word).toString();
+            chars.forEach((char, idx) => {
+                const letterBox = document.createElement('div');
+                letterBox.className = "draggable-letter uppercase";
+                letterBox.textContent = char;
+                letterBox.dataset.char = char.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
 
-                // Avoid closure capturing 'btn'
-                btn.onclick = handleQuizBtnClick;
-
-                container.appendChild(btn);
+                setupDragEvents(letterBox);
+                lettersPool.appendChild(letterBox);
             });
 
-            if (currentItem.question) document.getElementById('gameInstruction').textContent = currentItem.question;
-            else document.getElementById('gameInstruction').textContent = "Qual é o nome correto?";
-
-            // Play audio immediately for association (before answer)
             setTimeout(() => {
                 playCurrentAudio();
             }, 300);
         }
 
-
-
-        function handleQuizBtnClick(e) {
-            const btn = e.currentTarget;
-            const isCorrect = btn.dataset.correct === 'true';
-            handleQuizSelection(btn, isCorrect);
+        function setupDragEvents(el) {
+            // Touch events
+            el.addEventListener('touchstart', handleDragStart, { passive: false });
+            el.addEventListener('touchmove', handleDragMove, { passive: false });
+            el.addEventListener('touchend', handleDragEnd, { passive: false });
+            // Mouse events
+            el.addEventListener('mousedown', handleDragStart);
         }
 
-        function handleQuizSelection(btn, isCorrect) {
-            if (document.getElementById('successOverlay').classList.contains('hidden') === false) return;
+        function handleDragStart(e) {
+            if (e.target.classList.contains('placed')) return;
+            if (e.type === 'touchstart') e.preventDefault(); // Prevent scrolling
 
-            phaseTotalAttempts++;
-            if (isCorrect) {
-                phaseCorrectAttempts++;
-                btn.classList.remove('border-blue-200', 'text-blue-600');
-                btn.classList.add('bg-green-100', 'border-green-500', 'text-green-700', 'animate__animated', 'animate__pulse');
-                document.getElementById('sndCorrect').play().catch(() => { });
-                setTimeout(roundWon, 500);
+            activeDragLetter = e.target;
+
+            // Move to body for fixed positioning covering everything
+            document.body.appendChild(activeDragLetter);
+
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+            activeDragLetter.style.left = clientX + 'px';
+            activeDragLetter.style.top = clientY + 'px';
+            activeDragLetter.classList.add('dragging');
+
+            if (activeDragLetter.dataset.char) {
+                playAudio(activeDragLetter.dataset.char);
+            }
+
+            if (e.type === 'mousedown') {
+                document.addEventListener('mousemove', handleDragGlobalMove);
+                document.addEventListener('mouseup', handleDragGlobalEnd);
+            }
+
+            checkMagnet(clientX, clientY);
+        }
+
+        function handleDragGlobalMove(e) {
+            if (!activeDragLetter) return;
+            e.preventDefault();
+            handleDragMoveCommon(e.clientX, e.clientY);
+        }
+
+        function handleDragMove(e) {
+            if (!activeDragLetter) return;
+            e.preventDefault(); // Prevent scroll while dragging
+            handleDragMoveCommon(e.touches[0].clientX, e.touches[0].clientY);
+        }
+
+        function handleDragMoveCommon(clientX, clientY) {
+            activeDragLetter.style.left = clientX + 'px';
+            activeDragLetter.style.top = clientY + 'px';
+            checkMagnet(clientX, clientY);
+        }
+
+        let currentMagnetZone = null;
+
+        function checkMagnet(x, y) {
+            const zones = document.querySelectorAll('.drop-zone:not(.filled)');
+            let closestZone = null;
+            let closestDistance = 1000;
+            const snapThreshold = 75; // px targeting distance
+
+            zones.forEach(zone => {
+                zone.classList.remove('magnet-active');
+                if (zone.dataset.expectedChar !== activeDragLetter.dataset.char) return;
+
+                const rect = zone.getBoundingClientRect();
+                const zoneCenterX = rect.left + rect.width / 2;
+                const zoneCenterY = rect.top + rect.height / 2;
+
+                const dist = Math.hypot(zoneCenterX - x, zoneCenterY - y);
+                if (dist < snapThreshold && dist < closestDistance) {
+                    closestDistance = dist;
+                    closestZone = zone;
+                }
+            });
+
+            if (closestZone) {
+                closestZone.classList.add('magnet-active');
+                currentMagnetZone = closestZone;
             } else {
-                // Incorrect logic updated:
-                // 1. Mark as incorrect visually
-                btn.classList.remove('border-blue-200', 'text-blue-600');
-                btn.classList.add('bg-red-100', 'border-red-500', 'text-red-700', 'animate__animated', 'animate__shakeX');
+                currentMagnetZone = null;
+            }
+        }
+
+        function handleDragGlobalEnd(e) {
+            document.removeEventListener('mousemove', handleDragGlobalMove);
+            document.removeEventListener('mouseup', handleDragGlobalEnd);
+            handleDragEndCore();
+        }
+
+        function handleDragEnd(e) {
+            handleDragEndCore();
+        }
+
+        function handleDragEndCore() {
+            if (!activeDragLetter) return;
+
+            activeDragLetter.classList.remove('dragging');
+            activeDragLetter.style.position = '';
+            activeDragLetter.style.left = '';
+            activeDragLetter.style.top = '';
+            activeDragLetter.style.transform = '';
+
+            const pool = document.getElementById('quizLettersPool');
+
+            if (currentMagnetZone) {
+                const zone = currentMagnetZone;
+                zone.classList.remove('magnet-active');
+                zone.classList.add('filled', 'animate__animated', 'animate__pulse');
+                zone.textContent = activeDragLetter.textContent;
+
+                document.getElementById('sndCorrect').currentTime = 0;
+                document.getElementById('sndCorrect').play().catch(() => { });
+
+                activeDragLetter.remove();
+
+                phaseTotalAttempts++;
+                phaseCorrectAttempts++;
+                lettersPlacedCorrectly++;
+
+                if (lettersPlacedCorrectly === currentItem.word.length) {
+                    setTimeout(() => {
+                        roundWon();
+                    }, 500);
+                }
+            } else {
+                // Return to pool on failure
+                phaseTotalAttempts++;
+                document.getElementById('sndLose').currentTime = 0;
                 document.getElementById('sndLose').play().catch(() => { });
 
-                // 2. Add to missed items
-                missedQuizItems.push(currentItem);
+                pool.appendChild(activeDragLetter);
+                activeDragLetter.classList.add('animate__animated', 'animate__shakeX');
 
-                // 3. Disable all buttons to prevent double clicking during delay
-                const allBtns = document.getElementById('quizOptions').querySelectorAll('button');
-                allBtns.forEach(b => b.disabled = true);
-
-                // 4. Wait 1s then move to next item
+                const letterRef = activeDragLetter;
                 setTimeout(() => {
-                    nextGameItem();
-                }, 1000);
+                    if (letterRef && letterRef.parentNode) {
+                        letterRef.classList.remove('animate__animated', 'animate__shakeX');
+                    }
+                }, 500);
             }
+
+            activeDragLetter = null;
+            currentMagnetZone = null;
             updateStatsUI();
         }
 
@@ -2843,6 +3030,42 @@
             }
         } catch (e) { console.error("Wrapper init failed", e); }
 
+        updateStatsUI();
+
+        // ==========================================
+        //         OFFLINE PRE-CACHING LOGIC
+        // ==========================================
+        function downloadOfflineData() {
+            if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) {
+                alert("O Serviço de Offline ainda não está ativo. Tente recarregar a página antes de usar esta opção.");
+                return;
+            }
+
+            const statusText = document.getElementById('offlineStatusText');
+            statusText.classList.remove('hidden');
+            statusText.textContent = "Iniciando download...";
+            statusText.className = "text-xs text-indigo-500 mt-2 text-center animate-pulse";
+
+            const messageChannel = new MessageChannel();
+            messageChannel.port1.onmessage = (event) => {
+                if (event.data.error) {
+                    console.error("Offline sync error", event.data.error);
+                    statusText.textContent = "Erro ao baixar arquivos. Tente novamente.";
+                    statusText.className = "text-xs text-red-500 mt-2 text-center";
+                } else if (event.data.status === 'progress') {
+                    const pct = Math.round((event.data.loaded / event.data.total) * 100);
+                    statusText.textContent = `Baixando arquivos... ${pct}% (${event.data.loaded}/${event.data.total})`;
+                } else if (event.data.status === 'done') {
+                    statusText.textContent = "✅ Download Completo! Você pode jogar 100% offline.";
+                    statusText.className = "text-xs text-green-600 mt-2 text-center font-bold";
+                }
+            };
+
+            // Send command to Service Worker
+            navigator.serviceWorker.controller.postMessage({
+                action: 'precacheAll'
+            }, [messageChannel.port2]);
+        }
     </script>
     <!-- <script src="gameData.js"></script> REMOVED: Loaded via fetch now -->
 </body>

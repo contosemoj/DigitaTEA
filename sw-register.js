@@ -1,48 +1,13 @@
-//// --- CRASH DETECTION & RECOVERY (HEARTBEAT) ---
-// If the app was closed without 'beforeunload' or 'pagehide', it might have crashed (OOM).
+//// --- CRASH DETECTION & RECOVERY ---
+// O antigo sistema apagava os caches. Isso foi removido para proteger o modo Offline em iPads.
 
 const CRASH_FLAG = 'digita_crash_detected';
-const SESSION_FLAG = 'digita_session_active';
 
-function clearAppCache() {
-    console.warn("CRASH RECOVERY: Unregistering SW and clearing caches.");
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-            for (let registration of registrations) {
-                registration.unregister();
-            }
-        });
-    }
-    if ('caches' in window) {
-        caches.keys().then(names => {
-            for (let name of names) {
-                caches.delete(name);
-            }
-        });
-    }
-}
-
-// Check if we crashed last time
-if (localStorage.getItem(CRASH_FLAG) === 'true' || localStorage.getItem(SESSION_FLAG) === 'true') {
-    clearAppCache();
-    // Reset flags
+// Check se a flag do app travado existe (apenas registra no console, não apaga mais o offline cache)
+if (localStorage.getItem(CRASH_FLAG) === 'true') {
+    console.warn("App Recovery: O aplicativo foi reiniciado após um possível fechamento inesperado.");
     localStorage.removeItem(CRASH_FLAG);
-    localStorage.removeItem(SESSION_FLAG);
-    console.log("System recovered from crash. Cache cleared.");
-    // Optional: Show message to user
-    alert("O aplicativo foi recuperado de um erro anterior.");
 }
-
-// Set session flag
-localStorage.setItem(SESSION_FLAG, 'true');
-
-// Clear session flag on clean exit
-window.addEventListener('pagehide', () => {
-    localStorage.removeItem(SESSION_FLAG);
-});
-window.addEventListener('beforeunload', () => {
-    localStorage.removeItem(SESSION_FLAG);
-});
 
 // --- SW REGISTRATION ---
 if ('serviceWorker' in navigator) {

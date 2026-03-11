@@ -86,7 +86,7 @@ self.addEventListener('fetch', event => {
     );
 });
 
-// Message handling for force update/clear
+// Message handling for force update/clear/precache
 self.addEventListener('message', event => {
     if (event.data && event.data.action === 'skipWaiting') {
         self.skipWaiting();
@@ -95,5 +95,38 @@ self.addEventListener('message', event => {
         caches.keys().then(keys => {
             keys.forEach(key => caches.delete(key));
         });
+    }
+    if (event.data && event.data.action === 'precacheAll') {
+        // Fetch the list and cache everything
+        const port = event.ports[0];
+        fetch('./data/cache_list.json')
+            .then(res => res.json())
+            .then(filesToCache => {
+                let loaded = 0;
+                const total = filesToCache.length;
+                
+                caches.open(CACHE_NAME).then(cache => {
+                    // Download sequentially or in small batches to avoid overwhelming the browser
+                    const cacheSequence = filesToCache.reduce((promise, file) => {
+                        return promise.then(() => {
+                            return cache.add(file).then(() => {
+                                loaded++;
+                                // Send progress back to UI
+                                if (port) port.postMessage({status: 'progress', loaded, total});
+                            }).catch(err => {
+                                console.error('Failed to cache:', file, err);
+                                // Continue even if one fails
+                            });
+                        });
+                    }, Promise.resolve());
+
+                    cacheSequence.then(() => {
+                        if (port) port.postMessage({status: 'done', total});
+                    });
+                });
+            })
+            .catch(err => {
+                if (port) port.postMessage({status: 'error', error: err.toString()});
+            });
     }
 });
