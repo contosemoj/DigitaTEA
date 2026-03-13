@@ -1,9 +1,12 @@
-const CACHE_NAME = 'digitatea-v1';
+const CACHE_NAME = 'digitatea-v2';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './game_icon.png',
-    './manifest.json',
+    './manifest.json'
+];
+
+const EXTERNAL_ASSETS = [
     'https://cdn.tailwindcss.com',
     'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css'
 ];
@@ -16,6 +19,16 @@ self.addEventListener('install', event => {
         caches.open(CACHE_NAME)
             .then(cache => {
                 console.log('Opened cache');
+                
+                // Fetch externals independently so they don't break the main offline installation on iOS Safari
+                EXTERNAL_ASSETS.forEach(url => {
+                    fetch(new Request(url, { mode: 'no-cors' }))
+                        .then(response => {
+                            if (response) cache.put(url, response);
+                        })
+                        .catch(err => console.error('Silent fail on external asset cache:', err));
+                });
+
                 return cache.addAll(ASSETS_TO_CACHE);
             })
     );
@@ -99,7 +112,7 @@ self.addEventListener('message', event => {
     if (event.data && event.data.action === 'precacheAll') {
         // Fetch the list and cache everything
         const port = event.ports[0];
-        fetch('./data/cache_list.json')
+        fetch('./data/cache_list.json', { cache: 'no-store' })
             .then(res => res.json())
             .then(filesToCache => {
                 let loaded = 0;
