@@ -2491,8 +2491,11 @@
                 zone.classList.add('filled', 'animate__animated', 'animate__pulse');
                 zone.textContent = activeDragLetter.textContent;
 
-                document.getElementById('sndCorrect').currentTime = 0;
-                document.getElementById('sndCorrect').play().catch(() => { });
+                const sndCorrect = document.getElementById('sndCorrect');
+                if (sndCorrect) {
+                    sndCorrect.currentTime = 0;
+                    sndCorrect.play().catch(() => { });
+                }
 
                 activeDragLetter.remove();
 
@@ -2508,8 +2511,11 @@
             } else {
                 // Return to pool on failure
                 phaseTotalAttempts++;
-                document.getElementById('sndLose').currentTime = 0;
-                document.getElementById('sndLose').play().catch(() => { });
+                const sndLose = document.getElementById('sndLose');
+                if (sndLose) {
+                    sndLose.currentTime = 0;
+                    sndLose.play().catch(() => { });
+                }
 
                 pool.appendChild(activeDragLetter);
                 activeDragLetter.classList.add('animate__animated', 'animate__shakeX');
