@@ -456,9 +456,14 @@
     <div id="screenSetup" class="absolute inset-0 z-[100] bg-white flex flex-col">
         <!-- Cabeçalho -->
         <div class="bg-blue-500 p-4 shadow-md z-10 shrink-0 flex flex-wrap justify-between items-center gap-2">
-            <div>
-                <h1 class="text-3xl font-bold text-white">Digita TEA 🚀</h1>
-                <p id="userGreeting" class="text-blue-100 text-sm">Selecione uma fase</p>
+            <div class="flex items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Digita TEA 🚀</h1>
+                    <p id="userGreeting" class="text-blue-100 text-sm">Selecione uma fase</p>
+                </div>
+                <button onclick="toggleConfig()" class="text-sm text-white bg-blue-600 border border-blue-400 px-3 py-2 rounded-lg hover:bg-blue-700 font-bold flex items-center gap-2 shadow-sm transition-colors">
+                    ⚙️ Configurações
+                </button>
             </div>
             <div class="flex gap-2 items-center flex-wrap">
                 <!-- Perfil Autônomo e Local -->
@@ -488,113 +493,132 @@
         <!-- Conteúdo Principal com Scroll -->
         <div class="flex-1 overflow-y-auto level-grid-scroll p-4 pb-24 bg-blue-50">
 
-            <!-- Painel de Configurações -->
-            <div class="bg-white rounded-xl p-4 mb-6 border border-blue-100 mx-auto max-w-2xl">
-                <div class="flex flex-wrap gap-4 justify-center md:justify-between items-center">
-
-                    <!-- Separator -->
-                    <hr class="my-4 border-gray-200">
-
-                    <p class="text-sm font-bold text-gray-500 mb-2">GERENCIAMENTO OFFLINE</p>
-                    <button onclick="downloadOfflineData()"
-                        class="w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors">
-                        <span class="text-xl">📡</span> Preparar para Modo Offline
-                    </button>
-                    <p id="offlineStatusText" class="text-xs text-gray-500 mt-2 text-center hidden">Baixando arquivos...
-                    </p>
-
-                    <!-- Separator -->
-                    <hr class="my-4 border-gray-200">
-
-                    <p class="text-sm font-bold text-gray-500 mb-2">SOBRE</p>Dificuldade para passar:</span>
-                    <select id="difficultySelect"
-                        class="p-2 rounded-lg border border-blue-200 text-gray-600 font-bold bg-white text-sm">
-                        <option value="0">Muito Fácil (Passa Sempre)</option>
-                        <option value="50" selected>Fácil (> 50%)</option>
-                        <option value="70"> Médio (> 70%)</option>
-                        <option value="80">Difícil (> 80%)</option>
-                    </select>
-                </div>
-
-                <!-- Modo de Ajuda -->
-                <div class="flex flex-col">
-                    <span class="text-sm font-bold text-gray-500 mb-1">Modo de Ajuda:</span>
-                    <select id="helpModeSelect"
-                        class="p-2 rounded-lg border border-green-200 text-green-700 font-bold bg-white text-sm">
-                        <option value="NORMAL">Normal (Sem Dicas)</option>
-                        <option value="HINTS">Dicas Visuais</option>
-                        <option value="LEARN" selected>Modo Aprender (Progressivo)</option>
-                    </select>
-                </div>
+            <!-- Grid de Fases -->
+            <div id="levelsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <!-- As fases serão geradas aqui via JavaScript -->
             </div>
-
-            <!-- Adicionar Recompensa -->
-            <div class="mt-8 border-t-2 border-slate-100 pt-6">
-                <h4 class="font-bold text-gray-500 mb-4 flex items-center gap-2">
-                    <span
-                        class="bg-gray-200 text-gray-600 rounded-full w-6 h-6 flex items-center justify-center text-sm">+</span>
-                    Adicionar Novo Vídeo de Prêmio
-                </h4>
-                <div class="flex flex-col gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-200">
-
-                    <!-- Abas de Tipo de Vídeo -->
-                    <div class="flex gap-2">
-                        <button id="tabLocalVideo" onclick="switchVideoTab('local')"
-                            class="flex-1 py-2 rounded-lg font-bold text-sm bg-blue-500 text-white shadow-md transition-colors">Arquivo
-                            Local (.mp4)</button>
-                        <button id="tabYouTubeVideo" onclick="switchVideoTab('youtube')"
-                            class="flex-1 py-2 rounded-lg font-bold text-sm bg-white text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors">Link
-                            do YouTube</button>
-                    </div>
-
-                    <!-- Formulário Local -->
-                    <div id="formLocalVideo" class="flex flex-col gap-3">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-600 mb-1">Escolha um Vídeo do
-                                Dispositivo:</label>
-                            <input type="file" id="localVideoFile" accept="video/mp4"
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors">
-                            <p class="text-xs text-orange-500 mt-1 font-bold">⚠️ O vídeo ficará salvo na memória do
-                                navegador. Vídeos grandes podem demorar.</p>
-                        </div>
-                        <button onclick="addLocalRewardVideo()" id="btnSaveLocal"
-                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-sm w-full">
-                            Salvar Arquivo Local
-                        </button>
-                    </div>
-
-                    <!-- Formulário YouTube -->
-                    <div id="formYouTubeVideo" class="hidden flex flex-col gap-3">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-600 mb-1">Link ou ID do YouTube:</label>
-                            <input type="text" id="newRewardId"
-                                placeholder="Ex: https://youtu.be/ZHKRxjwKnXM ou ZHKRxjwKnXM"
-                                class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-red-400 outline-none transition-colors">
-                        </div>
-                        <button onclick="addYouTubeRewardVideo()"
-                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-sm w-full">
-                            Adicionar do YouTube
-                        </button>
-                    </div>
-
-                    <div class="border-t border-gray-200 mt-2 pt-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-bold text-gray-500">Vídeos de Prêmio:</span>
-                            <span id="videoCountLabel" class="text-xs font-bold text-blue-400">0/10</span>
-                        </div>
-                        <div id="rewardVideosList" class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <!-- Lista de vídeos injetada aqui -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Grid de Fases -->
-        <div id="levelsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            <!-- As fases serão geradas aqui via JavaScript -->
         </div>
     </div>
+
+    <!-- TELA DE CONFIGURAÇÕES -->
+    <div id="screenSettings" class="hidden absolute inset-0 z-[150] bg-blue-50 flex flex-col items-center">
+        <div class="w-full bg-blue-500 p-4 shadow-md z-10 shrink-0 flex items-center justify-between">
+            <button onclick="showScreen('SETUP')"
+                class="text-sm font-bold text-blue-500 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 transition-colors">
+                ⬅ VOLTAR
+            </button>
+            <h1 class="text-2xl font-bold text-white uppercase tracking-wider">Configurações</h1>
+            <div class="w-20"></div>
+        </div>
+        
+        <div class="flex-1 w-full max-w-4xl p-6 flex flex-col items-center overflow-y-auto">
+            <div id="settingsPanel" class="w-full mb-8 animate__animated animate__fadeIn">
+                <div class="bg-white rounded-xl p-4 border border-blue-100 mx-auto max-w-2xl shadow-sm">
+                    <div class="flex flex-wrap gap-4 justify-center md:justify-between items-center">
+
+                        <!-- Separator -->
+                        <hr class="my-4 border-gray-200 w-full">
+
+                        <div class="w-full">
+                            <p class="text-sm font-bold text-gray-500 mb-2">GERENCIAMENTO OFFLINE</p>
+                            <button onclick="downloadOfflineData()"
+                                class="w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                                <span class="text-xl">📡</span> Preparar para Modo Offline
+                            </button>
+                            <p id="offlineStatusText" class="text-xs text-gray-500 mt-2 text-center hidden">Baixando arquivos...
+                            </p>
+                        </div>
+
+                        <!-- Separator -->
+                        <hr class="my-4 border-gray-200 w-full">
+
+                        <div class="w-full">
+                            <p class="text-sm font-bold text-gray-500 mb-2">SOBRE</p>
+                            <span class="text-sm font-bold text-gray-500 mb-1">Dificuldade para passar:</span>
+                            <select id="difficultySelect"
+                                class="p-2 rounded-lg border border-blue-200 text-gray-600 font-bold bg-white text-sm w-full mt-2">
+                                <option value="0">Muito Fácil (Passa Sempre)</option>
+                                <option value="50" selected>Fácil (> 50%)</option>
+                                <option value="70"> Médio (> 70%)</option>
+                                <option value="80">Difícil (> 80%)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Modo de Ajuda -->
+                    <div class="flex flex-col mt-4">
+                        <span class="text-sm font-bold text-gray-500 mb-1">Modo de Ajuda:</span>
+                        <select id="helpModeSelect"
+                            class="p-2 rounded-lg border border-green-200 text-green-700 font-bold bg-white text-sm w-full mt-2">
+                            <option value="NORMAL">Normal (Sem Dicas)</option>
+                            <option value="HINTS">Dicas Visuais</option>
+                            <option value="LEARN" selected>Modo Aprender (Progressivo)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Adicionar Recompensa -->
+                <div class="mt-8 border-t-2 border-slate-100 pt-6 max-w-2xl mx-auto">
+                    <h4 class="font-bold text-gray-500 mb-4 flex items-center gap-2">
+                        <span
+                            class="bg-gray-200 text-gray-600 rounded-full w-6 h-6 flex items-center justify-center text-sm">+</span>
+                        Adicionar Novo Vídeo de Prêmio
+                    </h4>
+                    <div class="flex flex-col gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-200 shadow-sm">
+
+                        <!-- Abas de Tipo de Vídeo -->
+                        <div class="flex gap-2">
+                            <button id="tabLocalVideo" onclick="switchVideoTab('local')"
+                                class="flex-1 py-2 rounded-lg font-bold text-sm bg-blue-500 text-white shadow-md transition-colors">Arquivo
+                                Local (.mp4)</button>
+                            <button id="tabYouTubeVideo" onclick="switchVideoTab('youtube')"
+                                class="flex-1 py-2 rounded-lg font-bold text-sm bg-white text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors">Link
+                                do YouTube</button>
+                        </div>
+
+                        <!-- Formulário Local -->
+                        <div id="formLocalVideo" class="flex flex-col gap-3">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-600 mb-1">Escolha um Vídeo do
+                                    Dispositivo:</label>
+                                <input type="file" id="localVideoFile" accept="video/mp4"
+                                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors">
+                                <p class="text-xs text-orange-500 mt-1 font-bold">⚠️ O vídeo ficará salvo na memória do
+                                    navegador. Vídeos grandes podem demorar.</p>
+                            </div>
+                            <button onclick="addLocalRewardVideo()" id="btnSaveLocal"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-sm w-full">
+                                Salvar Arquivo Local
+                            </button>
+                        </div>
+
+                        <!-- Formulário YouTube -->
+                        <div id="formYouTubeVideo" class="hidden flex flex-col gap-3">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-600 mb-1">Link ou ID do YouTube:</label>
+                                <input type="text" id="newRewardId"
+                                    placeholder="Ex: https://youtu.be/ZHKRxjwKnXM ou ZHKRxjwKnXM"
+                                    class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-red-400 outline-none transition-colors">
+                            </div>
+                            <button onclick="addYouTubeRewardVideo()"
+                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-sm w-full">
+                                Adicionar do YouTube
+                            </button>
+                        </div>
+
+                        <div class="border-t border-gray-200 mt-2 pt-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-bold text-gray-500">Vídeos de Prêmio:</span>
+                                <span id="videoCountLabel" class="text-xs font-bold text-blue-400">0/10</span>
+                            </div>
+                            <div id="rewardVideosList" class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <!-- Lista de vídeos injetada aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- TELA DE APRESENTAÇÃO / TRANSIÇÃO -->
@@ -1035,6 +1059,14 @@
             isProgressiveMode = false;
 
             // Show loading state if needed, but fetch is fast enough usually.
+            playLevel(lvl);
+        }
+
+        function toggleConfig() {
+            showScreen('SETTINGS');
+        }
+
+        function playLevel(lvl) {
             document.body.style.cursor = 'wait';
 
             initLevel(lvl).finally(() => {
@@ -1049,6 +1081,8 @@
             document.getElementById('screenVideo').classList.add('hidden');
             document.getElementById('screenStats').classList.add('hidden');
             document.getElementById('screenStats').classList.remove('flex');
+            document.getElementById('screenSettings').classList.add('hidden');
+            document.getElementById('screenSettings').classList.remove('flex');
             document.getElementById('screenProfiles').classList.add('hidden');
 
             if (screenName === 'SETUP') document.getElementById('screenSetup').classList.remove('hidden');
@@ -1061,6 +1095,10 @@
             else if (screenName === 'STATS') {
                 document.getElementById('screenStats').classList.remove('hidden');
                 document.getElementById('screenStats').classList.add('flex');
+            }
+            else if (screenName === 'SETTINGS') {
+                document.getElementById('screenSettings').classList.remove('hidden');
+                document.getElementById('screenSettings').classList.add('flex');
             }
             else if (screenName === 'PROFILES') {
                 document.getElementById('screenProfiles').classList.remove('hidden');
